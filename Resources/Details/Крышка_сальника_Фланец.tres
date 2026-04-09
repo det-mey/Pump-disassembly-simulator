@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://baejm50fi2d4x"]
+
+[ext_resource type="PackedScene" uid="uid://cwvfimywhpx4t" path="res://Scenes/Details/Крышка_сальника_Фланец.tscn" id="1_guofw"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_38qfs"]
+[ext_resource type="PackedScene" uid="uid://txho5af252ds" path="res://Scenes/Details pickup/Крышка_сальника_Фланец_предмет.tscn" id="3_38qfs"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_fcy4j"]
+
+[resource]
+script = ExtResource("4_fcy4j")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Крышка сальника (Фланец)"
+Description = "Нажимной элемент сальникового уплотнения. Служит для регулировки степени сжатия набивки. Снимается вдоль оси вала после откручивания крепежных гаек."
+Icon = ExtResource("2_38qfs")
+Weight = 0.8
+WorldPrefab = ExtResource("3_38qfs")
+HandPrefab = ExtResource("1_guofw")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

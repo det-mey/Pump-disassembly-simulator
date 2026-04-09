@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://dydfc87cm5aux"]
+
+[ext_resource type="PackedScene" uid="uid://dgnb8ukc718jl" path="res://Scenes/Details/Спиральный_корпус_Улитка.tscn" id="1_aygsr"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_edlcl"]
+[ext_resource type="PackedScene" uid="uid://bucxs8arku6mx" path="res://Scenes/Details pickup/Спиральный_корпус_Улитка_предмет.tscn" id="3_edlcl"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_pthej"]
+
+[resource]
+script = ExtResource("4_pthej")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Спиральный корпус (Улитка)"
+Description = "Корпус консольного центробежного насоса. Выполнен из чугуна. Имеет осевой входной патрубок и вертикальный напорный патрубок."
+Icon = ExtResource("2_edlcl")
+Weight = 55.0
+WorldPrefab = ExtResource("3_edlcl")
+HandPrefab = ExtResource("1_aygsr")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

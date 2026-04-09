@@ -1,0 +1,4797 @@
+================================================================================
+FILE: ./Scripts/Core/SimulatorState.cs
+================================================================================
+using Godot;
+using System;
+
+public enum SimulatorState
+{
+	Learning,
+	Exam,
+	Theory
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Core/AssessmentManager.cs
+================================================================================
+using Godot;
+using System;
+using System.Collections.Generic;
+
+public partial class AssessmentManager : Node
+{
+	public static AssessmentManager Instance { get; private set; }
+	public int ErrorCount { get; private set; } = 0;
+	public List<string> ErrorLog { get; private set; } = [];
+
+	public override void _EnterTree()
+	{
+		Instance = this;
+	}
+
+	public void RegisterError(string message)
+	{
+		ErrorCount++;
+		ErrorLog.Add(message);
+		GD.PrintErr($"[ОЦЕНКА] Ошибка: {message}. Всего ошибок: {ErrorCount}");
+	}
+
+	public void RegisterSuccess(string message)
+	{
+		GD.Print($"[ОЦЕНКА] Успех: {message}");
+	}
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Core/MachineManager.cs
+================================================================================
+using Godot;
+using System;
+using System.Collections.Generic;
+
+public partial class MachineManager : Node
+{
+	public static MachineManager Instance { get; private set; }
+	
+	[Export] public SimulatorState CurrentState { get; set; } = SimulatorState.Learning;
+	private Queue<string> _assemblySteps = new Queue<string>();
+
+	public override void _EnterTree()
+	{
+		Instance = this;
+	}
+
+	public override void _Ready()
+	{
+		LoadConfiguration();
+	}
+
+	private void LoadConfiguration()
+	{
+		_assemblySteps.Enqueue("Снять крышку корпуса");
+		_assemblySteps.Enqueue("Открутить крепежную гайку М16");
+		_assemblySteps.Enqueue("Извлечь изношенную прокладку");
+	}
+
+	public void CompleteStep(string stepName)
+	{
+		if (_assemblySteps.Count > 0 && _assemblySteps.Peek() == stepName)
+		{
+			_assemblySteps.Dequeue();
+			AssessmentManager.Instance.RegisterSuccess($"Правильный шаг: {stepName}");
+		}
+		else if (CurrentState == SimulatorState.Exam)
+		{
+			AssessmentManager.Instance.RegisterError($"Нарушение последовательности. Ожидалось: {_assemblySteps.Peek()}");
+		}
+	}
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Core/IInteractable.cs
+================================================================================
+using Godot;
+using System;
+
+public interface IInteractable
+{
+	void Interact(ItemData currentItem); // ЛКМ клик (Установка/Использование)
+	void InteractContinuous(ItemData currentItem, double delta); // ЛКМ удержание (Откручивание/Закручивание)
+	void InteractAlt(ItemData currentItem); // ПКМ клик (Подбор/Снятие)
+	string GetInteractPrompt();
+	bool CanInteractWith(ItemData item);
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Core/InventoryManager.cs
+================================================================================
+using Godot;
+using System;
+
+public partial class InventoryManager : Node
+{
+    public static InventoryManager Instance { get; private set; }
+
+    public const int TotalSlots = 20;
+    public const int HotbarSize = 5;
+    
+    public ItemData[] Items { get; private set; } = new ItemData[TotalSlots];
+    public bool[] IsNewItem { get; private set; } = new bool[TotalSlots];
+    
+    public int ActiveSlotIndex { get; private set; } = 0;
+
+    public event Action<int, ItemData> OnActiveSlotChanged;
+    public event Action OnInventoryUpdated;
+
+    public override void _EnterTree() => Instance = this;
+
+    public void SetActiveSlot(int index)
+    {
+        if (index < 0) index = HotbarSize - 1;
+        if (index >= HotbarSize) index = 0;
+        ActiveSlotIndex = index;
+		MarkItemSeen(ActiveSlotIndex); 
+        OnActiveSlotChanged?.Invoke(ActiveSlotIndex, Items[ActiveSlotIndex]);
+    }
+
+    public void NextSlot() => SetActiveSlot(ActiveSlotIndex + 1);
+    public void PrevSlot() => SetActiveSlot(ActiveSlotIndex - 1);
+    public ItemData GetActiveItem() => Items[ActiveSlotIndex];
+
+	public bool AddItem(ItemData item)
+    {
+        // Если попадает сразу в руки (активный слот) - НЕ ПОМЕЧАЕМ КАК НОВЫЙ
+        if (Items[ActiveSlotIndex] == null)
+        {
+            Items[ActiveSlotIndex] = item;
+            IsNewItem[ActiveSlotIndex] = false; // <--- ИСПРАВЛЕНИЕ
+            OnActiveSlotChanged?.Invoke(ActiveSlotIndex, item);
+            OnInventoryUpdated?.Invoke();
+            return true;
+        }
+
+        // Если падает в рюкзак - помечаем
+        for (int i = 0; i < TotalSlots; i++)
+        {
+            if (Items[i] == null)
+            {
+                Items[i] = item;
+                IsNewItem[i] = true;
+                OnInventoryUpdated?.Invoke();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void RemoveActiveItem()
+    {
+        Items[ActiveSlotIndex] = null;
+        IsNewItem[ActiveSlotIndex] = false;
+        SetActiveSlot(ActiveSlotIndex);
+        OnInventoryUpdated?.Invoke();
+    }
+
+    public void SwapItems(int fromIndex, int toIndex)
+    {
+        if (fromIndex == toIndex) return;
+
+        var tempItem = Items[fromIndex];
+        Items[fromIndex] = Items[toIndex];
+        Items[toIndex] = tempItem;
+
+        var tempNew = IsNewItem[fromIndex];
+        IsNewItem[fromIndex] = IsNewItem[toIndex];
+        IsNewItem[toIndex] = tempNew;
+
+        OnInventoryUpdated?.Invoke();
+        
+        if (fromIndex == ActiveSlotIndex || toIndex == ActiveSlotIndex)
+            OnActiveSlotChanged?.Invoke(ActiveSlotIndex, Items[ActiveSlotIndex]);
+    }
+
+    // Метод для снятия метки "Новый" при клике
+    public void MarkItemSeen(int index)
+    {
+        if (IsNewItem[index])
+        {
+            IsNewItem[index] = false;
+            OnInventoryUpdated?.Invoke();
+        }
+    }
+
+    public void ClearInventory()
+    {
+        for (int i = 0; i < TotalSlots; i++)
+        {
+            Items[i] = null;
+            IsNewItem[i] = false;
+        }
+        ActiveSlotIndex = 0;
+    }
+
+    public void RemoveItemAtIndex(int index)
+    {
+        if (index < 0 || index >= TotalSlots) return;
+        
+        Items[index] = null;
+        IsNewItem[index] = false;
+        
+        // Если мы выбросили то, что было в руках - обновляем визуал рук
+        if (index == ActiveSlotIndex)
+        {
+            SetActiveSlot(ActiveSlotIndex);
+        }
+        
+        // Оповещаем UI, чтобы иконка исчезла
+        OnInventoryUpdated?.Invoke();
+    }
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Core/Player.cs
+================================================================================
+using Godot;
+
+public partial class Player : CharacterBody3D
+{
+    [ExportGroup("Передвижение")][Export] public float WalkSpeed = 4.0f;
+    [Export] public float SprintSpeed = 7.0f;
+    [Export] public float CrouchSpeed = 2.0f;[Export] public float Acceleration = 8.0f;
+    [Export] public float Friction = 10.0f;
+    [Export] public float JumpVelocity = 4.5f;[ExportGroup("Камера и Взаимодействие")]
+    [Export] public float MouseSensitivity = 0.002f;
+    [Export] public float InteractRange = 2.0f;
+    [Export] public float BobFrequency = 2.5f;
+    [Export] public float BobAmplitude = 0.06f;
+
+    private float _gravity;
+    private Node3D _head;
+    private Camera3D _camera;
+    private Node3D _handPosition;
+    private RayCast3D _interactionRay;
+    private Tween _toolActionTween;
+    private AudioStreamPlayer _handAudioPlayer;
+    
+    private Node3D _currentHandMeshInstance;
+    private bool _isInventoryOpen = false;
+
+    // Переменные динамики
+    private float _originalHeadY;
+    private float _headbobTime = 0.0f;
+    private Vector3 _handDefaultPos;
+    private float _cameraTilt = 0.0f;
+
+    // Кэш оптимизации UI
+    private string _lastPromptText = "";
+    private string _lastTooltipName = "";
+    private string _lastTooltipDesc = "";
+    private string _lastTooltipStates = "";
+
+    public override void _Ready()
+    {
+        _gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
+
+        _head = GetNode<Node3D>("Head");
+        _camera = GetNode<Camera3D>("Head/Camera3D");
+        _handPosition = GetNode<Node3D>("Head/Camera3D/HandPosition");
+        _interactionRay = GetNode<RayCast3D>("Head/Camera3D/RayCast3D");
+
+        _handAudioPlayer = new AudioStreamPlayer { Bus = "Master" };
+        AddChild(_handAudioPlayer);
+
+        _interactionRay.TargetPosition = new Vector3(0, 0, -InteractRange);
+
+        _originalHeadY = _head.Position.Y;
+        _handDefaultPos = _handPosition.Position;
+
+        Input.MouseMode = Input.MouseModeEnum.Captured;
+
+        InventoryManager.Instance.OnActiveSlotChanged += UpdateHandVisual;
+        UpdateHandVisual(0, null);
+
+        Callable.From(() => InventoryManager.Instance.SetActiveSlot(0)).CallDeferred();
+    }
+
+    public override void _ExitTree()
+    {
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.OnActiveSlotChanged -= UpdateHandVisual;
+        }
+    }
+
+    private void SwitchSlotWithSound(int index) {
+        InventoryManager.Instance.SetActiveSlot(index);
+        if (UIManager.Instance?.SndHotbarSwitch != null) AudioManager.Instance?.PlayStream(UIManager.Instance.SndHotbarSwitch);
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        
+        if (@event.IsActionPressed("inventory_toggle"))
+        {
+            _isInventoryOpen = !_isInventoryOpen;
+            Input.MouseMode = _isInventoryOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
+            UIManager.Instance?.ToggleFullInventory(_isInventoryOpen);
+        }
+
+        if (_isInventoryOpen) return;
+
+        if (@event is InputEventMouseMotion mouseMotion && Input.MouseMode == Input.MouseModeEnum.Captured)
+        {
+            _head.RotateY(-mouseMotion.Relative.X * MouseSensitivity);
+            _camera.RotateX(-mouseMotion.Relative.Y * MouseSensitivity);
+
+            Vector3 cameraRot = _camera.Rotation;
+            cameraRot.X = Mathf.Clamp(cameraRot.X, Mathf.DegToRad(-80f), Mathf.DegToRad(80f));
+            _camera.Rotation = cameraRot;
+        }
+
+        if (@event.IsActionPressed("slot_next")) { InventoryManager.Instance.NextSlot(); SwitchSlotWithSound(InventoryManager.Instance.ActiveSlotIndex); }
+        if (@event.IsActionPressed("slot_prev")) { InventoryManager.Instance.PrevSlot(); SwitchSlotWithSound(InventoryManager.Instance.ActiveSlotIndex); }
+        for (int i = 0; i < 5; i++) 
+            if (@event.IsActionPressed($"slot_{i+1}")) SwitchSlotWithSound(i);
+
+        if (@event.IsActionPressed("drop_item")) 
+            DropItemFromIndex(InventoryManager.Instance.ActiveSlotIndex);
+
+        if (@event.IsActionPressed("debug_toggle"))
+        {
+            GameManager.Instance.ToggleGhosts();
+            UIManager.Instance?.UpdatePrompt("Режим призраков переключен", false);
+        }
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        ProcessHandAnimation(delta);
+
+        Vector3 currentVelocity = Velocity;
+        Vector2 inputDir = _isInventoryOpen ? Vector2.Zero : Input.GetVector("move_left", "move_right", "move_forward", "move_backward");
+
+        currentVelocity = ApplyGravityAndJump(currentVelocity, delta);
+        currentVelocity = ApplyMovement(currentVelocity, inputDir, delta);
+
+        Velocity = currentVelocity;
+        MoveAndSlide();
+
+        if (!_isInventoryOpen)
+        {
+            ApplyCameraDynamics(inputDir, delta);
+            HandleInteraction(delta);
+        }
+        else
+        {
+            ClearInteractionUI();
+        }
+    }
+
+    // --- МОДУЛИ ФИЗИКИ И КАМЕРЫ ---
+
+    private void ProcessHandAnimation(double delta)
+    {
+        _handPosition.Position = _handPosition.Position.Lerp(_handDefaultPos, 12f * (float)delta);
+    }
+
+    private Vector3 ApplyGravityAndJump(Vector3 velocity, double delta)
+    {
+        if (!IsOnFloor()) velocity.Y -= _gravity * (float)delta;
+
+        bool isCrouching = Input.IsActionPressed("crouch");
+        ItemData activeItem = InventoryManager.Instance.GetActiveItem();
+        float itemWeight = activeItem != null ? activeItem.Weight : 0.0f;
+        float jumpPenalty = Mathf.Clamp(itemWeight * 0.1f, 0.0f, 1.5f);
+
+        if (Input.IsActionJustPressed("jump") && IsOnFloor() && !_isInventoryOpen && !isCrouching)
+        {
+            velocity.Y = JumpVelocity - jumpPenalty;
+        }
+
+        return velocity;
+    }
+
+    private Vector3 ApplyMovement(Vector3 velocity, Vector2 inputDir, double delta)
+    {
+        if (_isInventoryOpen)
+        {
+            velocity.X = Mathf.Lerp(velocity.X, 0, Friction * (float)delta);
+            velocity.Z = Mathf.Lerp(velocity.Z, 0, Friction * (float)delta);
+            return velocity;
+        }
+
+        bool isCrouching = Input.IsActionPressed("crouch");
+        bool isSprinting = Input.IsActionPressed("sprint") && !isCrouching && IsOnFloor();
+        ItemData activeItem = InventoryManager.Instance.GetActiveItem();
+        float speedPenalty = activeItem != null ? Mathf.Clamp(activeItem.Weight * 0.1f, 0.0f, 2.0f) : 0.0f; 
+
+        float targetSpeed = isCrouching ? CrouchSpeed : (isSprinting ? SprintSpeed : WalkSpeed);
+        targetSpeed = Mathf.Max(1.0f, targetSpeed - speedPenalty);
+
+        Vector3 direction = (_head.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y)).Normalized();
+        
+        if (direction != Vector3.Zero)
+        {
+            velocity.X = Mathf.Lerp(velocity.X, direction.X * targetSpeed, Acceleration * (float)delta);
+            velocity.Z = Mathf.Lerp(velocity.Z, direction.Z * targetSpeed, Acceleration * (float)delta);
+        }
+        else
+        {
+            velocity.X = Mathf.Lerp(velocity.X, 0, Friction * (float)delta);
+            velocity.Z = Mathf.Lerp(velocity.Z, 0, Friction * (float)delta);
+        }
+
+        return velocity;
+    }
+
+    private void ApplyCameraDynamics(Vector2 inputDir, double delta)
+    {
+        bool isCrouching = Input.IsActionPressed("crouch");
+        bool isSprinting = Input.IsActionPressed("sprint") && !isCrouching && IsOnFloor();
+        ItemData activeItem = InventoryManager.Instance.GetActiveItem();
+        float itemWeight = activeItem != null ? activeItem.Weight : 0.0f;
+
+        // Sway (Наклон)
+        float targetTilt = -inputDir.X * 0.03f; 
+        _cameraTilt = Mathf.Lerp(_cameraTilt, targetTilt, 5f * (float)delta);
+        _camera.Rotation = new Vector3(_camera.Rotation.X, _camera.Rotation.Y, _cameraTilt);
+
+        // Crouch (Приседание)
+        float targetHeadY = isCrouching ? _originalHeadY - 0.6f : _originalHeadY;
+        _head.Position = new Vector3(_head.Position.X, Mathf.Lerp(_head.Position.Y, targetHeadY, 12f * (float)delta), _head.Position.Z);
+
+        // Head-Bobbing (Раскачивание)
+        float flatVelocity = new Vector2(Velocity.X, Velocity.Z).Length();
+        if (IsOnFloor() && flatVelocity > 0.5f)
+        {
+            float bobSpeedCoef = isSprinting ? 1.4f : (isCrouching ? 0.6f : 1.0f);
+            float weightFreqMod = itemWeight > 5 ? 0.8f : 1.0f; 
+            float weightAmpMod = itemWeight > 5 ? 1.3f : 1.0f;
+
+            _headbobTime += (float)delta * flatVelocity * bobSpeedCoef * weightFreqMod;
+            
+            float bobY = Mathf.Sin(_headbobTime * BobFrequency) * BobAmplitude * weightAmpMod;
+            float bobX = Mathf.Cos(_headbobTime * BobFrequency / 2) * (BobAmplitude/2) * weightAmpMod;
+            
+            _camera.Position = new Vector3(bobX, bobY, 0);
+        }
+        else
+        {
+            _headbobTime = 0;
+            _camera.Position = _camera.Position.Lerp(Vector3.Zero, 10f * (float)delta);
+        }
+    }
+
+    // --- МОДУЛИ ВЗАИМОДЕЙСТВИЯ ---
+
+    private void HandleInteraction(double delta)
+    {
+        if (!_interactionRay.IsColliding())
+        {
+            ClearInteractionUI();
+            UIManager.Instance?.UpdateCrosshairColor(new Color(1f, 1f, 1f, 0.5f));
+            return; // --- ИСПРАВЛЕНИЕ БАГА №1 (Надпись не останется) ---
+        }
+
+        var collider = _interactionRay.GetCollider();
+        if (collider is BasePart bpDisableCheck && !bpDisableCheck.IsInteractable)
+        {
+            ClearInteractionUI();
+            return;
+        }
+
+        if (collider is IInteractable interactable)
+        {
+            UpdateCrosshairAndPrompt(collider, interactable);
+            
+            // --- ИСПРАВЛЕНИЕ БАГА №4 (Скрытие тултипов) ---
+            if (GameManager.Instance?.CurrentMode == SimulatorMode.Learning)
+            {
+                UpdateTooltips(collider);
+            }
+            else
+            {
+                // В Экзамене/Тренировке тултипы всегда пустые
+                UIManager.Instance?.ShowWorldTooltip("", "", "");
+            }
+
+            ProcessInteractionInput(interactable, delta);
+        }
+        else
+        {
+            ClearInteractionUI();
+        }
+    }
+
+    private void UpdateCrosshairAndPrompt(GodotObject collider, IInteractable interactable)
+    {
+        Color targetColor = new Color(1f, 1f, 1f, 0.5f);
+
+        if (collider is Fastener fCheck)
+        {
+            if (fCheck.HasState(PartState.Rusted)) targetColor = new Color(1f, 0.2f, 0.2f, 0.8f);
+            else if (!fCheck.IsInstalled) targetColor = new Color(0.8f, 0.2f, 1f, 0.8f);
+            else if (fCheck.Type == InteractionType.Instant || fCheck.CurrentTorque <= 0.1f) targetColor = new Color(0.2f, 0.8f, 1f, 0.8f);
+            else targetColor = new Color(0.2f, 1f, 0.2f, 0.8f);
+        }
+        else if (collider is PickableItem)
+        {
+            targetColor = new Color(0.2f, 0.8f, 1f, 0.8f);
+        }
+        
+        UIManager.Instance?.UpdateCrosshairColor(targetColor);
+
+        string newPrompt = interactable.GetInteractPrompt();
+        if (newPrompt != _lastPromptText)
+        {
+            UIManager.Instance?.UpdatePrompt(newPrompt);
+            _lastPromptText = newPrompt;
+        }
+    }
+
+    private void UpdateTooltips(GodotObject collider)
+    {
+        string tooltipName = ""; 
+        string tooltipDesc = ""; 
+        string tooltipStates = "";
+
+        if (collider is BasePart bp)
+        {
+            if (bp.ShowTooltipName) tooltipName = bp.PartName;
+            if (bp.ShowTooltipDesc) tooltipDesc = bp.PartDescription;
+
+            if (bp.CurrentStates.Count > 0)
+            {
+                var stateList = new System.Collections.Generic.List<string>();
+                foreach (var s in bp.CurrentStates)
+                {
+                    string sName = s switch {
+                        PartState.Rusted => "РЖАВЧИНА",
+                        PartState.Oiled => "СМАЗАНО",
+                        PartState.Painted => "КРАСКА",
+                        PartState.Stripped => "СОРВАНА РЕЗЬБА",
+                        _ => s.ToString().ToUpper()
+                    };
+                    stateList.Add(sName);
+                }
+                tooltipStates = "СТАТУС: " + string.Join(" | ", stateList);
+            }
+
+            if (collider is Fastener f && f.IsInstalled && f.ShowTooltipDesc && f.Type == InteractionType.Continuous)
+            {
+                string torqueInfo = $"ЗАТЯЖКА: {f.CurrentTorque:F0}/{f.MaxTorque} Нм";
+                if (string.IsNullOrEmpty(tooltipStates)) tooltipStates = "СТАТУС: " + torqueInfo;
+                else tooltipStates += " | " + torqueInfo;
+            }
+        }
+        else if (collider is PickableItem p && p.ItemResource != null)
+        {
+            tooltipName = p.ItemResource.ItemName;
+            tooltipDesc = p.ItemResource.Description;
+        }
+
+        if (tooltipName != _lastTooltipName || tooltipDesc != _lastTooltipDesc || tooltipStates != _lastTooltipStates)
+        {
+            UIManager.Instance?.ShowWorldTooltip(tooltipName, tooltipDesc, tooltipStates);
+            _lastTooltipName = tooltipName; 
+            _lastTooltipDesc = tooltipDesc; 
+            _lastTooltipStates = tooltipStates;
+        }
+    }
+
+    private void ProcessInteractionInput(IInteractable interactable, double delta)
+    {
+        ItemData currentItem = InventoryManager.Instance.GetActiveItem();
+
+        // --- ИСПРАВЛЕНИЕ БАГА №3: ПРОВЕРКА CanInteractWith ПЕРЕД АНИМАЦИЕЙ ---
+        bool canWork = interactable.CanInteractWith(currentItem);
+
+        if (Input.IsActionJustPressed("interact")) 
+        {
+            interactable.Interact(currentItem);
+            if (currentItem != null && canWork) PlayToolActionAnimation(currentItem, false);
+        }
+        else if (Input.IsActionPressed("interact")) 
+        {
+            interactable.InteractContinuous(currentItem, delta);
+            // Анимация и звук сработают только если инструмент подходит!
+            if (currentItem != null && canWork) PlayToolActionAnimation(currentItem, true);
+        }
+        else if (Input.IsActionJustPressed("interact_alt")) 
+        {
+            interactable.InteractAlt(currentItem);
+        }
+        else 
+        {
+            UIManager.Instance?.HideTorqueUI();
+            if (_handAudioPlayer.Playing) _handAudioPlayer.Stop();
+        }
+    }
+
+    private void ClearInteractionUI()
+    {
+        // Принудительно сбрасываем всё, когда луч уходит
+        if (_lastPromptText != "")
+        {
+            UIManager.Instance?.UpdatePrompt(""); // Пустая строка сбросит lockTimer в UI
+            _lastPromptText = "";
+        }
+        _lastTooltipName = ""; _lastTooltipDesc = ""; _lastTooltipStates = "";
+        UIManager.Instance?.ShowWorldTooltip("", "", "");
+        UIManager.Instance?.HideTorqueUI();
+        if (_handAudioPlayer.Playing) _handAudioPlayer.Stop();
+    }
+
+    // --- УПРАВЛЕНИЕ ИНВЕНТАРЕМ В РУКАХ И ВЫБРОС ---
+
+    private void UpdateHandVisual(int slotIndex, ItemData item)
+    {
+        if (_currentHandMeshInstance != null)
+        {
+            _currentHandMeshInstance.QueueFree();
+            _currentHandMeshInstance = null;
+        }
+
+        if (item != null && item.HandPrefab != null)
+        {
+            if (item.EquipSound != null) 
+                AudioManager.Instance?.PlayStream(item.EquipSound, -2f, (float)GD.RandRange(0.95, 1.05));
+
+            Node3D handVisual = item.HandPrefab.Instantiate<Node3D>();
+            _handPosition.AddChild(handVisual);
+            _currentHandMeshInstance = handVisual;
+
+            DisablePhysicsRecursive(handVisual);
+
+            _handPosition.Position = _handDefaultPos + new Vector3(0, -0.5f, 0.5f);
+        }
+    }
+
+    private void DisablePhysicsRecursive(Node node)
+    {
+        if (node is RigidBody3D rb)
+        {
+            rb.Freeze = true; 
+            rb.FreezeMode = RigidBody3D.FreezeModeEnum.Kinematic;
+            rb.CollisionLayer = 0; rb.CollisionMask = 0;
+            rb.ProcessMode = ProcessModeEnum.Disabled;
+        }
+        if (node is StaticBody3D sb)
+        {
+            sb.CollisionLayer = 0; sb.CollisionMask = 0; sb.ProcessMode = ProcessModeEnum.Disabled;
+        }
+        if (node is CollisionShape3D shape) shape.Disabled = true;
+        foreach (Node child in node.GetChildren()) DisablePhysicsRecursive(child);
+    }
+
+    public void DropItemFromIndex(int index)
+    {
+        ItemData item = InventoryManager.Instance.Items[index];
+        if (item == null || item.WorldPrefab == null) return;
+
+        if (item.DropSound != null) 
+            AudioManager.Instance?.PlayStream(item.DropSound, -2f, (float)GD.RandRange(0.9, 1.1));
+
+        Node3D droppedNode = item.WorldPrefab.Instantiate<Node3D>();
+        if (droppedNode is PickableItem pickable) pickable.ItemResource = item;
+
+        GetTree().Root.GetNode("MainSimulator").AddChild(droppedNode);
+        
+        Vector3 throwDirection = -_camera.GlobalBasis.Z;
+        droppedNode.GlobalPosition = _camera.GlobalPosition + throwDirection * 0.7f;
+        
+        if (droppedNode is RigidBody3D rb)
+        {
+            rb.AddCollisionExceptionWith(this);
+            rb.CollisionLayer = 2; 
+            rb.CollisionMask = 1;  
+
+            rb.LinearVelocity = throwDirection * 4.0f + Velocity * 0.5f + Vector3.Up * 1.5f;
+            rb.AngularVelocity = new Vector3((float)GD.RandRange(-3, 3), (float)GD.RandRange(-3, 3), (float)GD.RandRange(-3, 3));
+
+            var timer = GetTree().CreateTimer(1.0f);
+            timer.Timeout += () => {
+                if (IsInstanceValid(rb) && IsInstanceValid(this))
+                {
+                    rb.RemoveCollisionExceptionWith(this);
+                    rb.CollisionMask |= (1 << 2); 
+                }
+            };
+        }
+
+        InventoryManager.Instance.RemoveItemAtIndex(index);
+    }
+
+    // АНИМАЦИЯ РАБОТЫ ИНСТРУМЕНТОМ
+    private void PlayToolActionAnimation(ItemData item, bool isContinuous)
+    {
+        if (_currentHandMeshInstance == null || item == null) return;
+        
+        // Для продолжительных действий (зажатая ЛКМ) блокируем наслоение анимаций
+        if (isContinuous && _toolActionTween != null && _toolActionTween.IsRunning()) return;
+
+        // 1. ПРОИГРЫВАЕМ УНИКАЛЬНЫЙ ЗВУК ИНСТРУМЕНТА
+        if (item.UseSound != null)
+        {
+            if (isContinuous)
+            {
+                // Играем звук только если он СЕЙЧАС не играет (чтобы не было эффекта "пулемета")
+                if (!_handAudioPlayer.Playing || _handAudioPlayer.Stream != item.UseSound)
+                {
+                    _handAudioPlayer.Stream = item.UseSound;
+                    _handAudioPlayer.PitchScale = (float)GD.RandRange(0.95, 1.05);
+                    _handAudioPlayer.Play();
+                }
+            }
+            else
+            {
+                // Одиночные действия (например, удар ломом) играются через глобальный менеджер
+                AudioManager.Instance?.PlayStream(item.UseSound, -2f, (float)GD.RandRange(0.95, 1.05));
+            }
+        }
+
+        // 2. ЗАПУСКАЕМ УНИКАЛЬНУЮ АНИМАЦИЮ
+
+        // Блокируем наслоение самих 3D-анимаций
+        if (isContinuous && _toolActionTween != null && _toolActionTween.IsRunning()) return;
+
+        _toolActionTween?.Kill();
+        _toolActionTween = CreateTween();
+        
+        Vector3 targetPos = item.AnimPosOffset;
+        Vector3 targetRot = new Vector3(
+            Mathf.DegToRad(item.AnimRotDegrees.X), 
+            Mathf.DegToRad(item.AnimRotDegrees.Y), 
+            Mathf.DegToRad(item.AnimRotDegrees.Z)
+        );
+
+        // Движение ТУДА (Применяем векторы из конфига)
+        _toolActionTween.Parallel().TweenProperty(_currentHandMeshInstance, "position", targetPos, item.AnimDuration)
+                       .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+        _toolActionTween.Parallel().TweenProperty(_currentHandMeshInstance, "rotation", targetRot, item.AnimDuration)
+                       .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+
+        // Движение ОБРАТНО (В нули)
+        _toolActionTween.Chain().TweenProperty(_currentHandMeshInstance, "position", Vector3.Zero, item.AnimDuration)
+                       .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.In);
+        _toolActionTween.Parallel().TweenProperty(_currentHandMeshInstance, "rotation", Vector3.Zero, item.AnimDuration)
+                       .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.In);
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/Core/PartStates.cs
+================================================================================
+using Godot;
+using System;
+
+// Глобальный список возможных состояний детали
+public enum PartState
+{
+	Normal,     // Обычное состояние
+	Rusted,     // Ржавая (нельзя открутить без WD-40)
+	Oiled,      // Смазанная (можно крутить)
+	Painted,    // Закрашена (надо отчистить краску)
+	Stripped    // Сорвана резьба (требуется спец инструмент)
+}
+
+// Тип взаимодействия с деталью
+public enum InteractionType
+{
+	Continuous, // Удержание (резьба, долгая операция)
+	Instant     // Одиночный клик (защелки, крышки, простые болты)
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Core/GameManager.cs
+================================================================================
+using Godot;
+using System;
+
+public enum SimulatorMode { Learning, Training, Exam }
+
+public partial class GameManager : Node
+{
+    public static GameManager Instance { get; private set; }
+
+    [Export] public bool ShowGhosts { get; set; } = true;
+    public StandardMaterial3D GhostMaterial { get; private set; }
+
+    public SimulatorMode CurrentMode { get; private set; } = SimulatorMode.Learning;
+    public ScenarioData CurrentScenario { get; private set; }
+
+    public override void _EnterTree()
+    {
+        if (Instance != null) { QueueFree(); return; }
+        Instance = this;
+        InitializeGhostMaterial();
+        
+        // ВАЖНО: GameManager работает даже во время паузы (для кнопок Рестарт/Выход)
+        ProcessMode = ProcessModeEnum.Always; 
+    }
+
+    public void ToggleGhosts()
+    {
+        ShowGhosts = !ShowGhosts;
+        GetTree().CallGroup("Fasteners", "UpdateVisuals");
+    }
+
+    private void InitializeGhostMaterial()
+    {
+        GhostMaterial = new StandardMaterial3D();
+        GhostMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+        GhostMaterial.AlbedoColor = new Color(0, 1, 0, 0.3f);
+        GhostMaterial.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
+        GhostMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
+    }
+
+    // Универсальный метод загрузки любой карты с любым режимом
+    public async void LoadScenario(ScenarioData scenario, SimulatorMode mode)
+    {
+        if (scenario == null) return;
+
+        // 1. Сначала СБРАСЫВАЕМ ИНТЕРФЕЙС
+        UIManager.Instance?.ResetUIForNewLevel();
+
+        CurrentScenario = scenario;
+        CurrentMode = mode;
+        ShowGhosts = (mode == SimulatorMode.Learning);
+
+        if (InventoryManager.Instance != null) InventoryManager.Instance.ClearInventory();
+        if (ActionLogger.Instance != null) ActionLogger.Instance.StartNewSession();
+
+        if (!string.IsNullOrEmpty(scenario.ScenePath))
+        {
+            GetTree().Paused = false; 
+            
+            Godot.Error err = GetTree().ChangeSceneToFile(scenario.ScenePath);
+            if (err != Godot.Error.Ok)
+            {
+                DeveloperConsole.Instance?.ToggleConsole(true);
+                DeveloperConsole.Instance?.LogError($"Ошибка загрузки сцены: {err}");
+                return;
+            }
+            
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            
+            SequenceManager.Instance?.LoadSequenceFromJson(scenario.SequenceJsonPath);
+            
+            // ВАЖНО: После загрузки сцены еще раз проверяем фокус мыши
+            Input.MouseMode = Input.MouseModeEnum.Captured;
+        }
+    }
+
+    public void RestartScenario()
+    {
+        if (CurrentScenario != null) 
+        {
+            if (!ValidateScenarioConfig(CurrentScenario)) return; 
+
+            // Сначала размораживаем игру, чтобы новая сцена могла начать процесс _Ready
+            GetTree().Paused = false; 
+            DeveloperConsole.Instance?.ToggleConsole(false);
+            
+            LoadScenario(CurrentScenario, CurrentMode);
+        }
+    }
+
+    public void LoadMainMenu()
+    {
+        GetTree().Paused = false; 
+        DeveloperConsole.Instance?.ToggleConsole(false); 
+
+        string menuPath = "res://Scenes/UI/MainMenu.tscn"; 
+
+        Godot.Error err = GetTree().ChangeSceneToFile(menuPath);
+        // Если движок не смог загрузить файл
+        if (err != Godot.Error.Ok)
+        {
+            DeveloperConsole.Instance?.ToggleConsole(true); // Принудительно открываем консоль
+            DeveloperConsole.Instance?.LogError($"[ДВИЖОК] Не удалось загрузить Главное Меню!");
+            DeveloperConsole.Instance?.LogError($"Код ошибки: {err}. Проверьте путь: {menuPath}");
+        }
+    }
+
+    // Рекурсивно собирает все PartId из загруженной в память сцены
+    private void FindAllPartIds(Node node, System.Collections.Generic.HashSet<string> ids)
+    {
+        if (node is BasePart bp && !string.IsNullOrEmpty(bp.PartId)) 
+        {
+            ids.Add(bp.PartId);
+        }
+        foreach (Node child in node.GetChildren()) 
+        {
+            FindAllPartIds(child, ids);
+        }
+    }
+
+    public bool ValidateScenarioConfig(ScenarioData scenario)
+    {
+        if (scenario == null) return false;
+
+        if (!string.IsNullOrEmpty(scenario.SequenceJsonPath) && FileAccess.FileExists(scenario.SequenceJsonPath))
+        {
+            var validIds = new System.Collections.Generic.HashSet<string>();
+            
+            // "Теневая" загрузка сцены для чтения деталей
+            if (!string.IsNullOrEmpty(scenario.ScenePath))
+            {
+                var packedScene = GD.Load<PackedScene>(scenario.ScenePath);
+                if (packedScene != null)
+                {
+                    Node tempRoot = packedScene.Instantiate();
+                    FindAllPartIds(tempRoot, validIds);
+                    tempRoot.QueueFree(); // Мгновенно удаляем из памяти
+                }
+            }
+
+            // Прогоняем валидатор
+            var errors = SequenceManager.ValidateSequenceJsonStrict(scenario.SequenceJsonPath, validIds);
+            
+            if (errors.Count > 0)
+            {
+                DeveloperConsole.Instance?.ToggleConsole(true); // Принудительно открываем консоль
+                DeveloperConsole.Instance?.LogError($"ОШИБКА ЗАПУСКА КАРТЫ: '{scenario.ScenarioName}'");
+                DeveloperConsole.Instance?.LogError("В JSON-сценарии найдены критические ошибки:");
+                foreach (var err in errors) DeveloperConsole.Instance?.LogError(err);
+                
+                return false; // Валидация провалена
+            }
+        }
+        
+        return true; // Сценарий чист
+    }
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Core/ToolType.cs
+================================================================================
+using Godot;
+using System;
+
+public enum ToolCategory
+{
+	Hand,           // Рука (для установки деталей)
+	Wrench,         // Гаечный ключ
+	Screwdriver,    // Отвертка
+	PowerDrill,     // Шуруповерт/Гайковерт
+	Crowbar,        // Лом (фомка)
+	Hammer,         // Молоток
+	Chemical,       // Химия (WD-40)
+	Measurement     // Измерительный инструмент (Микрометр/Штангенциркуль)
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Core/ScenarioData.cs
+================================================================================
+using Godot;
+using System;
+
+[Tool]
+[GlobalClass]
+public partial class ScenarioData : Resource
+{
+    [Export] public string ScenarioName { get; set; } = "Насос ЦНС-100";
+    [Export(PropertyHint.MultilineText)] public string Description { get; set; } = "Разборка и дефектовка центробежного насоса.";
+    [Export] public Texture2D PreviewImage { get; set; }
+    
+    // Путь к файлу сцены (.tscn), который нужно загрузить при выборе этого сценария
+    [Export(PropertyHint.File, "*.tscn")] public string ScenePath { get; set; }
+
+    [Export(PropertyHint.File, "*.json")] public string SequenceJsonPath { get; set; }
+    [Export] public float TimeLimitSeconds { get; set; } = 300.0f;  // 5 минут по умолчанию
+
+}
+
+
+================================================================================
+FILE: ./Scripts/Core/ActionLogger.cs
+================================================================================
+using Godot;
+using System;
+using System.Collections.Generic;
+
+public enum LogType { Action, Warning, Error, System, StepComplete, GroupComplete }
+
+public class ActionEntry
+{
+    public float Timestamp;
+    public LogType Type;
+    public string Message;
+    public string ToolUsed;
+    public string TargetPart;
+    public int PointsChange;
+    public string TechnicalDetails;
+
+    public override string ToString()
+    {
+        string timeStr = TimeSpan.FromMilliseconds(Timestamp).ToString(@"mm\:ss\.fff");
+        string pointsStr = PointsChange != 0 ? $" (Очки: {(PointsChange > 0 ? "+" : "")}{PointsChange})" : "";
+        return $"[{timeStr}] [{Type}] {Message}{pointsStr}";
+    }
+}
+
+public partial class ActionLogger : Node
+{
+    public static ActionLogger Instance { get; private set; }
+
+    public List<ActionEntry> FullSessionHistory { get; private set; } = new List<ActionEntry>();
+    public Dictionary<string, string> PartStates { get; private set; } = new Dictionary<string, string>();
+    
+    public int Score { get; private set; } = 0;
+    public int PenaltyPoints { get; private set; } = 0;
+    public float SessionStartTime { get; private set; }
+    public int TotalAttempts { get; private set; } = 0; // Каждое взаимодействие (даже ошибочное)
+    public int SuccessfulActions { get; private set; } = 0;
+    
+    private FileAccess _logFile;
+    private string _currentLogPath;
+
+    public override void _EnterTree()
+    {
+        Instance = this;
+        StartNewSession();
+    }
+
+    public void StartNewSession()
+    {
+        FullSessionHistory.Clear();
+        PartStates.Clear();
+        Score = 0;
+        PenaltyPoints = 0;
+        TotalAttempts = 0;
+        SuccessfulActions = 0;
+        SessionStartTime = Time.GetTicksMsec(); // Засекаем время старта
+
+        string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+        _currentLogPath = $"user://logs/session_{timestamp}.txt";
+        DirAccess.MakeDirRecursiveAbsolute("user://logs");
+        _logFile = FileAccess.Open(_currentLogPath, FileAccess.ModeFlags.Write);
+        
+        LogEvent(LogType.System, $"Запущено прохождение в режиме: {GameManager.Instance.CurrentMode}");
+    }
+
+    // Основной метод для записи ЛЮБОГО действия
+    public void LogEvent(LogType type, string message, string tool = "Руки", string target = "Нет", int points = 0, string tech = "")
+    {
+        if (type == LogType.Action || type == LogType.Warning || type == LogType.Error)
+            TotalAttempts++;
+
+        if (type == LogType.StepComplete || points > 0)
+            SuccessfulActions++;
+
+        var entry = new ActionEntry {
+            Timestamp = (float)Time.GetTicksMsec() - SessionStartTime,
+            Type = type, Message = message, ToolUsed = tool, TargetPart = target, PointsChange = points, TechnicalDetails = tech
+        };
+
+        FullSessionHistory.Add(entry);
+        if (points > 0) Score += points;
+        else if (points < 0) PenaltyPoints += Math.Abs(points);
+
+        _logFile?.StoreLine(entry.ToString());
+        _logFile?.Flush();
+    }
+
+    // Специальный метод для изменения состояния деталей (вызывается из Fastener)
+    public void UpdatePartState(string partId, string state, string partName)
+    {
+        if (string.IsNullOrEmpty(partId)) return;
+        PartStates[partId] = state;
+        
+        // Автоматически уведомляем менеджер последовательностей
+        SequenceManager.Instance?.EvaluateCurrentStep();
+    }
+
+    public string GetState(string partId)
+    {
+        return PartStates.ContainsKey(partId) ? PartStates[partId] : "Initial";
+    }
+
+    public void AddPenalty(string reason, int points, bool isAccident, bool notifyPlayer)
+    {
+        LogEvent(LogType.Error, $"ШТРАФ: {reason}", points: -points, tech: isAccident ? "АВАРИЯ" : "НАРУШЕНИЕ");
+        
+        if (notifyPlayer)
+        {
+            UIManager.Instance?.UpdatePrompt($"[{(isAccident ? "АВАРИЯ" : "ШТРАФ")}] {reason}", true);
+        }
+    }
+
+    // Генерация финального отчета для экрана итогов
+    public string GenerateFullReport()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("[center][font_size=24][b]ПРОТОКОЛ ВЫПОЛНЕНИЯ РАБОТ[/b][/font_size][/center]\n");
+        sb.Append($"[center][color=gray]Режим: {GetRussianMode(GameManager.Instance.CurrentMode)} | Дата: {DateTime.Now:dd.MM.yyyy HH:mm}[/color][/center]\n");
+        sb.Append("[color=gray]__________________________________________________________________________[/color]\n\n");
+
+        foreach (var entry in FullSessionHistory)
+        {
+            string timeStr = TimeSpan.FromMilliseconds(entry.Timestamp).ToString(@"mm\:ss");
+            string color = GetColorForType(entry.Type);
+            
+            sb.Append($"[color=gray][{timeStr}][/color] ");
+            sb.Append($"[color={color}][b]{GetIconForType(entry.Type)} {GetRussianType(entry.Type)}:[/b] {entry.Message}[/color]");
+            
+            if (entry.PointsChange != 0)
+            {
+                string pColor = entry.PointsChange > 0 ? "#55ff55" : "#ff5555";
+                sb.Append($" [color={pColor}][{(entry.PointsChange > 0 ? "+" : "")}{entry.PointsChange}][/color]");
+            }
+            sb.Append("\n\n");
+        }
+
+        sb.Append("[color=gray]__________________________________________________________________________[/color]\n\n");
+        sb.Append($"[b]ИТОГОВЫЙ СЧЕТ:[/b] [color=#55ff55]{Score}[/color] баллов\n");
+        sb.Append($"[b]ШТРАФНЫЕ ОЧКИ:[/b] [color=#ff5555]{PenaltyPoints}[/color]\n");
+        return sb.ToString();
+    }
+
+    private string GetColorForType(LogType type) => type switch {
+        LogType.Error => "#ff5555",          // Красный
+        LogType.Warning => "#ffcc00",        // Желтый
+        LogType.StepComplete => "#55ff55",   // Зеленый
+        LogType.GroupComplete => "#00ffff",  // Циан
+        LogType.Action => "#ffffff",         // Белый
+        LogType.System => "#aaaaaa",         // Серый
+        _ => "white"
+    };
+
+    private string GetIconForType(LogType type) => type switch {
+        LogType.Error => "✖",
+        LogType.Warning => "⚠",
+        LogType.StepComplete => "✔",
+        LogType.GroupComplete => "★",
+        LogType.Action => "•",
+        LogType.System => "⚙",
+        _ => ""
+    };
+
+    public string CalculateGrade()
+    {
+        // 1. Проверка на критические аварии
+        if (PenaltyPoints >= 50) return "1 (НЕУДОВЛЕТВОРИТЕЛЬНО)";
+
+        // 2. Расчет эффективности (точность действий)
+        float accuracy = TotalAttempts > 0 ? (float)SuccessfulActions / TotalAttempts : 0;
+        
+        // 3. Финальный коэффициент
+        int finalBalance = Score - PenaltyPoints;
+
+        if (finalBalance >= 80 && accuracy > 0.8f) return "5 (ОТЛИЧНО)";
+        if (finalBalance >= 60 && accuracy > 0.6f) return "4 (ХОРОШО)";
+        if (finalBalance >= 40) return "3 (УДОВЛЕТВОРИТЕЛЬНО)";
+        
+        return "2 (НИЖЕ СРЕДНЕГО)";
+    }
+
+    public override void _ExitTree()
+    {
+        _logFile?.Close();
+    }
+
+    public void LogSystemEvent(string eventType, string message)
+    {
+        LogEvent(LogType.System, $"{eventType}: {message}");
+    }
+
+    public void LogAction(string partId, string state, string details = "")
+    {
+        // Вызываем новый системный метод обновления состояния
+        UpdatePartState(partId, state, partId);
+        
+        // Записываем это как действие в историю
+        LogEvent(LogType.Action, $"Действие с деталью: {state}", target: partId, tech: details);
+    }
+
+    private string GetRussianType(LogType type) => type switch {
+        LogType.Action => "ДЕЙСТВИЕ",
+        LogType.Warning => "ПРЕДУПРЕЖДЕНИЕ",
+        LogType.Error => "ОШИБКА",
+        LogType.System => "СИСТЕМА",
+        LogType.StepComplete => "ЭТАП ВЫПОЛНЕН",
+        LogType.GroupComplete => "ГРУППА ЗАВЕРШЕНА",
+        _ => "ИНФО"
+    };
+
+    private string GetRussianMode(SimulatorMode mode) => mode switch {
+        SimulatorMode.Learning => "Обучение",
+        SimulatorMode.Training => "Тренировка",
+        SimulatorMode.Exam => "Экзамен",
+        _ => "Неизвестно"
+    };
+
+    public string GenerateHtmlReport()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.Append("<!DOCTYPE html><html><head><meta charset='UTF-8'><style>");
+        sb.Append("body { font-family: sans-serif; padding: 20px; background: #fff; color: #000; }");
+        sb.Append(".paper { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 40px; }");
+        sb.Append("h1 { text-align: center; text-transform: uppercase; border-bottom: 2px solid #000; }");
+        sb.Append(".entry { margin: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }");
+        sb.Append(".time { color: #666; font-family: monospace; padding-right: 10px; }");
+        sb.Append(".Error { color: #d00; font-weight: bold; } .StepComplete { color: #080; font-weight: bold; }");
+        sb.Append("@media print { .no-print { display: none; } body { padding: 0; } .paper { border: none; } }");
+        sb.Append("</style></head><body>");
+        sb.Append("<div class='paper'>");
+        sb.Append("<h1>Протокол выполнения работ</h1>");
+        sb.Append($"<p><b>Сценарий:</b> {GameManager.Instance.CurrentScenario.ScenarioName}<br>");
+        sb.Append($"<b>Режим:</b> {GetRussianMode(GameManager.Instance.CurrentMode)}<br>");
+        sb.Append($"<b>Дата:</b> {DateTime.Now:dd.MM.yyyy HH:mm}</p><hr>");
+
+        foreach (var entry in FullSessionHistory)
+        {
+            string timeStr = TimeSpan.FromMilliseconds(entry.Timestamp).ToString(@"mm\:ss");
+            sb.Append($"<div class='entry'><span class='time'>[{timeStr}]</span> <span class='{entry.Type}'><b>{GetRussianType(entry.Type)}:</b></span> {entry.Message}</div>");
+        }
+
+        sb.Append($"<hr><h2>ИТОГОВАЯ ОЦЕНКА: {CalculateGrade()}</h2>");
+        sb.Append($"<p>Баллы: {Score} | Штрафы: {PenaltyPoints}</p>");
+        sb.Append("</div>");
+        // Скрипт автоматического вызова печати
+        sb.Append("<script>window.onload = function() { window.print(); }</script>");
+        sb.Append("</body></html>");
+        return sb.ToString();
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/Core/SequenceManager.cs
+================================================================================
+using Godot;
+using System;
+using System.Collections.Generic;
+
+public partial class SequenceManager : Node
+{
+    public static SequenceManager Instance { get; private set; }
+
+    private Godot.Collections.Array _groups;
+    private int _currentGroupIndex = 0;
+    private int _currentStepInGroupIndex = 0;
+    private Godot.Collections.Array _steps;
+    private int _currentStepIndex = 0;
+    private string _currentStepName = "";
+    private Godot.Collections.Array _penalties;
+    private double _timeUpdateAccumulator = 0;
+
+    public override void _EnterTree() => Instance = this;
+
+    public override void _Process(double delta)
+    {
+        // Не обновляем время, если игра на паузе или сценарий завершен
+        if (GetTree().Paused || _groups == null || _currentGroupIndex >= _groups.Count) return;
+
+        _timeUpdateAccumulator += delta;
+        if (_timeUpdateAccumulator >= 1.0) // Обновляем раз в секунду для экономии ресурсов
+        {
+            _timeUpdateAccumulator = 0;
+            RefreshCurrentTaskDisplay();
+        }
+    }
+
+    private void RefreshCurrentTaskDisplay()
+    {
+        if (_groups == null || _currentGroupIndex >= _groups.Count) return;
+
+        var currentGroup = _groups[_currentGroupIndex].AsGodotDictionary();
+        var steps = currentGroup["steps"].AsGodotArray();
+        if (_currentStepInGroupIndex >= steps.Count) return;
+
+        var currentStep = steps[_currentStepInGroupIndex].AsGodotDictionary();
+        UpdateUI(currentGroup, currentStep, steps.Count);
+    }
+
+    public void LoadSequenceFromJson(string jsonPath)
+    {
+        _groups = new Godot.Collections.Array();
+        _currentGroupIndex = 0;
+        _currentStepInGroupIndex = 0;
+
+        if (string.IsNullOrEmpty(jsonPath) || !FileAccess.FileExists(jsonPath)) 
+        {
+            UIManager.Instance?.UpdateTaskUI(0, 0, "Свободный режим", "");
+            return;
+        }
+
+        using var file = FileAccess.Open(jsonPath, FileAccess.ModeFlags.Read);
+        var json = new Json();
+        if (json.Parse(file.GetAsText()) == Error.Ok)
+        {
+            var data = json.Data.AsGodotDictionary();
+            _groups = data.ContainsKey("groups") ? data["groups"].AsGodotArray() : new Godot.Collections.Array();
+            
+            // Инициализация стартовых состояний и зависимостей из setup
+            ApplyScenarioSetup(data);
+            EvaluateCurrentStep(); 
+        }
+    }
+
+    // МЕТОД ВАЛИДАЦИИ
+    public static System.Collections.Generic.List<string> ValidateSequenceJsonStrict(string jsonPath, System.Collections.Generic.HashSet<string> validIds)
+    {
+        var errors = new System.Collections.Generic.List<string>();
+        if (string.IsNullOrEmpty(jsonPath) || !FileAccess.FileExists(jsonPath)) return errors;
+
+        using var file = FileAccess.Open(jsonPath, FileAccess.ModeFlags.Read);
+        var json = new Json();
+        if (json.Parse(file.GetAsText()) != Error.Ok)
+        {
+            errors.Add($"Синтаксическая ошибка в строке {json.GetErrorLine()}: {json.GetErrorMessage()}");
+            return errors; 
+        }
+
+        var data = json.Data.AsGodotDictionary();
+        
+        // ПРОВЕРКА ГРУПП
+        if (!data.ContainsKey("groups"))
+        {
+            errors.Add("Критическая ошибка: В корневом объекте JSON отсутствует массив 'groups'!");
+            return errors;
+        }
+
+        // Локальная функция проверки ID
+        void CheckTargets(Godot.Collections.Dictionary dict, string context)
+        {
+            if (dict.ContainsKey("target"))
+            {
+                string target = dict["target"].AsString();
+                if (!validIds.Contains(target)) errors.Add($"Неизвестный ID детали '{target}' в {context}!");
+            }
+            if (dict.ContainsKey("sub"))
+            {
+                var sub = dict["sub"];
+                if (sub.VariantType == Variant.Type.Dictionary) CheckTargets(sub.AsGodotDictionary(), context);
+                else if (sub.VariantType == Variant.Type.Array)
+                {
+                    foreach (var s in sub.AsGodotArray()) CheckTargets(s.AsGodotDictionary(), context);
+                }
+            }
+        }
+
+        // 1. Проверка структуры групп и шагов
+        var groups = data["groups"].AsGodotArray();
+        if (groups.Count == 0) errors.Add("Массив 'groups' пуст. Сценарию нечего выполнять.");
+
+        for (int i = 0; i < groups.Count; i++)
+        {
+            var group = groups[i].AsGodotDictionary();
+            string gName = group.ContainsKey("name") ? group["name"].AsString() : $"Группа {i}";
+            
+            if (!group.ContainsKey("steps"))
+            {
+                errors.Add($"В группе '{gName}' отсутствует массив 'steps'!");
+                continue;
+            }
+
+            var steps = group["steps"].AsGodotArray();
+            for (int j = 0; j < steps.Count; j++)
+            {
+                var step = steps[j].AsGodotDictionary();
+                string sName = step.TryGetValue("name", out Variant n) ? n.AsString() : $"Шаг {j}";
+                
+                if (step.ContainsKey("condition"))
+                    CheckTargets(step["condition"].AsGodotDictionary(), $"Группе '{gName}' -> Шаге '{sName}'");
+                else
+                    errors.Add($"В Шаге '{sName}' (Группа: {gName}) отсутствует условие 'condition'!");
+            }
+        }
+
+        // 2. Проверка штрафов
+        if (data.ContainsKey("penalties"))
+        {
+            var penalties = data["penalties"].AsGodotArray();
+            foreach (var penVar in penalties)
+            {
+                var pen = penVar.AsGodotDictionary();
+                if (pen.ContainsKey("on_action"))
+                {
+                    string actionStr = pen["on_action"].AsString();
+                    int lastUnderscore = actionStr.LastIndexOf('_');
+                    if (lastUnderscore != -1)
+                    {
+                        string partId = actionStr.Substring(0, lastUnderscore);
+                        if (!validIds.Contains(partId)) errors.Add($"Неизвестный ID детали '{partId}' в штрафе on_action: '{actionStr}'!");
+                    }
+                    else errors.Add($"Неверный формат on_action: '{actionStr}'. Ожидается 'ID_Действие'.");
+                }
+                if (pen.ContainsKey("condition")) CheckTargets(pen["condition"].AsGodotDictionary(), "блоке Штрафов");
+            }
+        }
+
+        // 3. Проверка стартового setup (random_states, dependencies)
+        if (data.ContainsKey("setup"))
+        {
+            var setup = data["setup"].AsGodotDictionary();
+            if (setup.ContainsKey("random_states"))
+            {
+                foreach(var rsVar in setup["random_states"].AsGodotArray())
+                {
+                    var rs = rsVar.AsGodotDictionary();
+                    if (rs.ContainsKey("target") && !validIds.Contains(rs["target"].AsString()))
+                        errors.Add($"Неизвестный ID '{rs["target"].AsString()}' в setup -> random_states!");
+                }
+            }
+            if (setup.ContainsKey("dependencies"))
+            {
+                foreach(var depVar in setup["dependencies"].AsGodotArray())
+                {
+                    var d = depVar.AsGodotDictionary();
+                    if (!d.ContainsKey("target")) continue;
+                    string t = d["target"].AsString();
+                    if (!validIds.Contains(t)) errors.Add($"Неизвестный ID '{t}' в dependencies!");
+                    
+                    if (d.ContainsKey("requires")) foreach(var req in d["requires"].AsGodotArray())
+                        if (!validIds.Contains(req.AsString())) errors.Add($"Неизвестный ID '{req.AsString()}' в requires для '{t}'!");
+                    
+                    if (d.ContainsKey("blocks")) foreach(var blk in d["blocks"].AsGodotArray())
+                        if (!validIds.Contains(blk.AsString())) errors.Add($"Неизвестный ID '{blk.AsString()}' в blocks для '{t}'!");
+                }
+            }
+        }
+
+        return errors;
+    }
+
+    public void EvaluateCurrentStep()
+    {
+        if (_groups == null || _currentGroupIndex >= _groups.Count) return;
+
+        var currentGroup = _groups[_currentGroupIndex].AsGodotDictionary();
+        var steps = currentGroup["steps"].AsGodotArray();
+        bool isStrict = currentGroup.TryGetValue("strict", out Variant s) && s.AsBool();
+
+        if (_currentStepInGroupIndex >= steps.Count)
+        {
+            CompleteGroup(currentGroup);
+            return;
+        }
+
+        var currentStep = steps[_currentStepInGroupIndex].AsGodotDictionary();
+        UpdateUI(currentGroup, currentStep, steps.Count);
+
+        // Проверка условия
+        if (EvaluateConditionRecursive(currentStep["condition"].AsGodotDictionary()))
+        {
+            ProcessStepSuccess(currentGroup, currentStep);
+        }
+        
+        // В случае Strict режима, если игрок выполнил любой другой шаг из этой группы раньше времени
+        if (isStrict)
+        {
+            CheckStrictOrderViolation(steps);
+        }
+    }
+
+    private void CheckStrictOrderViolation(Godot.Collections.Array steps)
+    {
+        for (int i = _currentStepInGroupIndex + 1; i < steps.Count; i++)
+        {
+            var step = steps[i].AsGodotDictionary();
+            if (EvaluateConditionRecursive(step["condition"].AsGodotDictionary()))
+            {
+                // Игрок выполнил шаг 'i', хотя мы ждали шаг '_currentStepInGroupIndex'
+                var groupName = _groups[_currentGroupIndex].AsGodotDictionary()["name"].AsString();
+                var penaltyPoints = _groups[_currentGroupIndex].AsGodotDictionary().TryGetValue("penalty_points", out Variant p) ? p.AsInt32() : 10;
+                var isAccident = _groups[_currentGroupIndex].AsGodotDictionary().TryGetValue("is_accident", out Variant a) && a.AsBool();
+                var notify = _groups[_currentGroupIndex].AsGodotDictionary().TryGetValue("notify", out Variant n) && n.AsBool();
+
+                ActionLogger.Instance.AddPenalty($"Нарушена строгая последовательность в группе '{groupName}'", penaltyPoints, isAccident, notify);
+                
+                // Чтобы не стопорить игру, "подтягиваем" индекс (игрок как бы перепрыгнул шаг)
+                _currentStepInGroupIndex = i;
+            }
+        }
+    }
+
+    private void ProcessStepSuccess(Godot.Collections.Dictionary group, Godot.Collections.Dictionary step)
+    {
+        string stepName = step["name"].AsString();
+        int points = step.TryGetValue("points", out Variant p) ? p.AsInt32() : 0;
+        
+        ActionLogger.Instance.LogEvent(LogType.StepComplete, $"Выполнен шаг: {stepName}", points: points);
+        
+        _currentStepInGroupIndex++;
+        EvaluateCurrentStep(); // Проверяем следующий
+    }
+
+    private void CompleteGroup(Godot.Collections.Dictionary group)
+    {
+        string groupName = group.TryGetValue("name", out Variant n) ? n.AsString() : "Группа";
+        ActionLogger.Instance.LogEvent(LogType.GroupComplete, $"ЗАВЕРШЕНА ГРУППА: {groupName}");
+        
+        _currentGroupIndex++;
+        _currentStepInGroupIndex = 0;
+        
+        if (_currentGroupIndex < _groups.Count)
+        {
+            EvaluateCurrentStep();
+        }
+        else
+        {
+            // --- ВСЁ ВЫПОЛНЕНО ---
+            ActionLogger.Instance.LogEvent(LogType.System, "СЦЕНАРИЙ ПОЛНОСТЬЮ ЗАВЕРШЕН");
+            
+            // Задержка 2 секунды перед показом результатов
+            GetTree().CreateTimer(2.0f).Timeout += () => {
+                ResultsUI.Instance?.ShowResults();
+            };
+        }
+    }
+
+    private void UpdateUI(Godot.Collections.Dictionary group, Godot.Collections.Dictionary step, int totalStepsInGroup)
+    {
+        string gName = group["name"].AsString();
+        string sName = step["name"].AsString();
+        string sDesc = step.TryGetValue("description", out Variant d) ? d.AsString() : "";
+        
+        // Считаем оставшееся время
+        float elapsed = (Time.GetTicksMsec() - ActionLogger.Instance.SessionStartTime) / 1000f;
+        float remaining = GameManager.Instance.CurrentScenario.TimeLimitSeconds - elapsed;
+
+        if (remaining <= 0 && GameManager.Instance.CurrentMode == SimulatorMode.Exam)
+        {
+            ActionLogger.Instance.AddPenalty("Время на выполнение задачи истекло!", 100, true, true);
+            ResultsUI.Instance?.ShowResults(); // Принудительный конец
+        }
+
+        string timeStr = remaining > 0 ? $" | Время: {(int)remaining / 60}:{(int)remaining % 60:D2}" : " | ВРЕМЯ ИСТЕКЛО";
+        UIManager.Instance?.UpdateTaskUI(_currentStepInGroupIndex, totalStepsInGroup, $"{gName}: {sName}{timeStr}", sDesc);
+    }
+
+    // РЕКУРСИВНЫЙ АНАЛИЗАТОР ЛОГИКИ (AND, OR, NOT, STATE)
+    private bool EvaluateConditionRecursive(Godot.Collections.Dictionary cond)
+    {
+        string op = cond.ContainsKey("op") ? cond["op"].AsString().ToUpper() : "STATE";
+
+        if (op == "STATE")
+        {
+            string targetId = cond["target"].AsString();
+            string expectedState = cond["state"].AsString();
+            return ActionLogger.Instance.GetState(targetId) == expectedState;
+        }
+        else if (op == "AND")
+        {
+            var subConditions = cond["sub"].AsGodotArray();
+            foreach (var sub in subConditions)
+                if (!EvaluateConditionRecursive(sub.AsGodotDictionary())) return false;
+            return true;
+        }
+        else if (op == "OR")
+        {
+            var subConditions = cond["sub"].AsGodotArray();
+            foreach (var sub in subConditions)
+                if (EvaluateConditionRecursive(sub.AsGodotDictionary())) return true;
+            return false;
+        }
+        else if (op == "NOT")
+        {
+            var sub = cond["sub"].AsGodotDictionary();
+            return !EvaluateConditionRecursive(sub);
+        }
+        return false;
+    }
+
+    public void BroadcastCurrentStepUI()
+    {
+        if (_steps == null || _steps.Count == 0) 
+        {
+            // --- ИСПРАВЛЕНИЕ: Передаем 0, 0 для скрытия панели ---
+            UIManager.Instance?.UpdateTaskUI(0, 0, "Свободный режим", "Сценарий не задан");
+            return;
+        }
+        
+        if (_currentStepIndex < _steps.Count)
+        {
+            var currentStep = _steps[_currentStepIndex].AsGodotDictionary();
+            string stepName = currentStep.TryGetValue("name", out Variant nameVar) ? nameVar.AsString() : "Шаг " + (_currentStepIndex + 1);
+            string stepDesc = currentStep.TryGetValue("description", out Variant descVar) ? descVar.AsString() : "";
+            
+            UIManager.Instance?.UpdateTaskUI(_currentStepIndex, _steps.Count, stepName, stepDesc);
+        }
+        else
+        {
+            UIManager.Instance?.UpdateTaskUI(_steps.Count, _steps.Count, "ЗАДАЧА ВЫПОЛНЕНА!", "Все шаги завершены.");
+        }
+    }
+
+    // --- НОВОЕ: МЕТОД ИНИЦИАЛИЗАЦИИ СЦЕНАРИЯ ---
+    private void ApplyScenarioSetup(Godot.Collections.Dictionary data)
+    {
+        if (!data.ContainsKey("setup")) return;
+        var setup = data["setup"].AsGodotDictionary();
+        
+        var allParts = GetTree().GetNodesInGroup("AllParts");
+        var partsDict = new System.Collections.Generic.Dictionary<string, BasePart>();
+        foreach(BasePart part in allParts)
+            if (!string.IsNullOrEmpty(part.PartId)) partsDict[part.PartId] = part;
+
+        // 1. УЛУЧШЕННЫЕ СЛУЧАЙНЫЕ СОСТОЯНИЯ
+        if (setup.ContainsKey("random_states"))
+        {
+            foreach(var rsVar in setup["random_states"].AsGodotArray())
+            {
+                var rs = rsVar.AsGodotDictionary();
+                string target = rs["target"].AsString();
+                
+                if (partsDict.TryGetValue(target, out BasePart bp))
+                {
+                    int chance = rs.ContainsKey("chance") ? rs["chance"].AsInt32() : 100;
+                    if (GD.RandRange(1, 100) <= chance)
+                    {
+                        string stateStr = rs["state"].AsString();
+                        if (Enum.TryParse(stateStr, out PartState pState)) bp.AddState(pState);
+
+                        // --- НОВОЕ: Случайный износ для дефектовки ---
+                        if (rs.ContainsKey("wear_range") && bp is Fastener f)
+                        {
+                            var range = rs["wear_range"].AsVector2(); // Задать в JSON как [min, max]
+                            f.CurrentWear = (float)GD.RandRange(range.X, range.Y);
+                            f.IsDefective = Mathf.Abs(f.CurrentWear - f.NominalWear) > 0.5f;
+                        }
+                        
+                        if (bp is Fastener fast) fast.UpdateVisuals();
+                    }
+                }
+            }
+        }
+
+        // 2. Инъекция физических зависимостей из JSON прямо в детали
+        if (setup.ContainsKey("dependencies"))
+        {
+            foreach(var depVar in setup["dependencies"].AsGodotArray())
+            {
+                var dep = depVar.AsGodotDictionary();
+                string target = dep["target"].AsString();
+                
+                if (partsDict.TryGetValue(target, out BasePart bp) && bp is Fastener targetFastener)
+                {
+                    // То, без чего нельзя установить
+                    if (dep.ContainsKey("requires"))
+                    {
+                        foreach(var reqVar in dep["requires"].AsGodotArray())
+                        {
+                            if (partsDict.TryGetValue(reqVar.AsString(), out BasePart reqPart) && reqPart is Fastener reqFastener)
+                                targetFastener.RequiredParts.Add(reqFastener);
+                        }
+                    }
+                    // То, что мешает снять
+                    if (dep.ContainsKey("blocks"))
+                    {
+                        foreach(var blkVar in dep["blocks"].AsGodotArray())
+                        {
+                            if (partsDict.TryGetValue(blkVar.AsString(), out BasePart blkPart) && blkPart is Fastener blkFastener)
+                                targetFastener.BlockingParts.Add(blkFastener);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Включение минимальных подсказок для экзамена/тренировки из JSON
+        if (setup.ContainsKey("exam_prompts"))
+        {
+            foreach (var idVar in setup["exam_prompts"].AsGodotArray())
+            {
+                string targetId = idVar.AsString();
+                if (partsDict.TryGetValue(targetId, out BasePart bp))
+                {
+                    bp.AllowMinimalPromptInExam = true;
+                }
+            }
+        }
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/Core/DeveloperConsole.cs
+================================================================================
+using Godot;
+
+public partial class DeveloperConsole : CanvasLayer
+{
+    public static DeveloperConsole Instance { get; private set; }
+
+    private Panel _bgPanel;
+    private RichTextLabel _output;
+    private LineEdit _input;
+    private bool _isOpen = false;
+	private Input.MouseModeEnum _previousMouseMode;
+
+	public override void _EnterTree()
+    {
+        Instance = this;
+        Layer = 100;
+
+        System.AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        {
+            LogError($"[СИСТЕМНЫЙ СБОЙ] {args.ExceptionObject}");
+        };
+
+        _bgPanel = new Panel();
+        _bgPanel.SetAnchorsPreset(Control.LayoutPreset.TopWide);
+        _bgPanel.CustomMinimumSize = new Vector2(0, 350);
+        var style = new StyleBoxFlat { BgColor = new Color(0.05f, 0.05f, 0.05f, 0.95f), BorderWidthBottom = 2, BorderColor = Colors.Green };
+        _bgPanel.AddThemeStyleboxOverride("panel", style);
+
+        var vbox = new VBoxContainer();
+        vbox.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        vbox.AddThemeConstantOverride("margin_left", 10);
+        vbox.AddThemeConstantOverride("margin_right", 10);
+        _bgPanel.AddChild(vbox);
+
+        _output = new RichTextLabel();
+        _output.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        _output.BbcodeEnabled = true;
+        _output.ScrollFollowing = true;
+        _output.AddThemeFontOverride("normal_font", ThemeDB.FallbackFont);
+        
+        _output.SelectionEnabled = true; 
+
+        vbox.AddChild(_output);
+
+        _input = new LineEdit();
+        _input.PlaceholderText = "Введите команду (например: clear, help)...";
+        _input.TextSubmitted += OnCommandSubmitted;
+        vbox.AddChild(_input);
+
+        AddChild(_bgPanel);
+        _bgPanel.Visible = false;
+        
+        Log("Тренажер инициализирован. Консоль разработчика активна.", "green");
+    }
+    public override void _Input(InputEvent @event)
+    {
+        if (@event is InputEventKey keyEvent && keyEvent.Pressed)
+        {
+            // Открытие/Закрытие (~)
+            if (keyEvent.Keycode == Key.Quoteleft) 
+            {
+                ToggleConsole();
+                GetViewport().SetInputAsHandled();
+            }
+            // Закрытие на ESC
+            else if (_isOpen && keyEvent.Keycode == Key.Escape)
+            {
+                ToggleConsole(false);
+                GetViewport().SetInputAsHandled();
+            }
+        }
+    }
+
+    public void ToggleConsole(bool? forceState = null)
+    {
+        bool nextState = forceState ?? !_isOpen;
+        if (_isOpen == nextState) return;
+
+        _isOpen = nextState;
+        _bgPanel.Visible = _isOpen;
+        
+        if (_isOpen)
+        {
+            _previousMouseMode = Input.MouseMode;
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+            _input.GrabFocus();
+            if (UIManager.Instance != null) UIManager.Instance.ToggleFullInventory(false); 
+        }
+        else
+        {
+            _input.ReleaseFocus();
+
+            // Проверяем, на какой сцене мы находимся
+            if (GetTree().CurrentScene != null && GetTree().CurrentScene.Name == "MainMenu")
+            {
+                Input.MouseMode = Input.MouseModeEnum.Visible; // В меню всегда видна
+            }
+            else
+            {
+                Input.MouseMode = _previousMouseMode; // В игре возвращаем как было
+            }
+        }
+    }
+
+    public void Log(string message, string color = "white")
+    {
+        string timestamp = System.DateTime.Now.ToString("HH:mm:ss");
+
+        if (_output != null) 
+        {
+            _output.Text += $"[color=gray][{timestamp}][/color] [color={color}]{message}[/color]\n";
+        }
+        
+        GD.Print($"[Console] [{timestamp}] {message}");
+    }
+
+    public void LogError(string error)
+    {
+        Log($"[ERROR] {error}", "red");
+        if (!_isOpen) ToggleConsole(true);
+    }
+
+    private void OnCommandSubmitted(string text)
+    {
+        _input.Clear();
+        Log($"> {text}", "gray");
+        
+        if (text.ToLower() == "clear") _output.Text = "";
+        else if (text.ToLower() == "help") Log("Доступные команды: clear, help, restart, menu", "yellow");
+        else if (text.ToLower() == "restart") GameManager.Instance?.RestartScenario();
+        else if (text.ToLower() == "menu") GameManager.Instance?.LoadMainMenu();
+        else Log("Неизвестная команда.", "red");
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/Core/SettingsManager.cs
+================================================================================
+using Godot;
+
+public enum PlatformMode { Desktop, VR }
+
+public partial class SettingsManager : Node
+{
+    public static SettingsManager Instance { get; private set; }
+
+    public PlatformMode CurrentPlatform { get; set; } = PlatformMode.Desktop;
+    public bool IsFullscreen { get; set; } = false;
+    public float UiScale { get; set; } = 1.0f;
+    public Vector2I Resolution { get; set; }
+    public bool VSync { get; set; } = true;
+    public int Msaa3D { get; set; } = 2;
+    public float MasterVolume { get; set; } = 0.8f;
+    public float MouseSensitivity { get; set; } = 0.002f;
+    public bool ShowFPS { get; set; } = false;
+
+    private string GetConfigPath()
+    {
+        // Если мы в редакторе -> папка проекта. Если в скомпилированной игре -> папка рядом с .exe
+        string baseDir = OS.HasFeature("editor") ? "res://" : OS.GetExecutablePath().GetBaseDir() + "/";
+        string configDir = baseDir + "Config";
+        DirAccess.MakeDirRecursiveAbsolute(configDir); // Создаем папку Config, если ее нет
+        return configDir + "/game_settings.json";
+    }
+
+    public override void _EnterTree()
+    {
+        Instance = this;
+        int currentScreen = DisplayServer.WindowGetCurrentScreen();
+        Resolution = DisplayServer.ScreenGetSize(currentScreen);
+        LoadSettings();
+    }
+
+    public void SaveSettings()
+    {
+        var dict = new Godot.Collections.Dictionary
+        {
+            { "fullscreen", IsFullscreen },
+            { "ui_scale", UiScale },
+            { "res_x", Resolution.X },
+            { "res_y", Resolution.Y },
+            { "vsync", VSync },
+            { "msaa", Msaa3D },
+            { "volume", MasterVolume },
+            { "mouse_sens", MouseSensitivity },
+            { "show_fps", ShowFPS } // Сохраняем параметр
+        };
+        
+        using var file = FileAccess.Open(GetConfigPath(), FileAccess.ModeFlags.Write);
+        file.StoreString(Json.Stringify(dict));
+        
+        ApplySettings();
+    }
+
+    public void LoadSettings()
+    {
+        string path = GetConfigPath();
+        if (FileAccess.FileExists(path))
+        {
+            using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            var json = new Json();
+            if (json.Parse(file.GetAsText()) == Error.Ok)
+            {
+                var data = json.Data.AsGodotDictionary();
+                IsFullscreen = data.ContainsKey("fullscreen") ? data["fullscreen"].AsBool() : false;
+                UiScale = data.ContainsKey("ui_scale") ? (float)data["ui_scale"].AsDouble() : 1.0f;
+                if (data.ContainsKey("res_x")) Resolution = new Vector2I(data["res_x"].AsInt32(), data["res_y"].AsInt32());
+                VSync = data.ContainsKey("vsync") ? data["vsync"].AsBool() : true;
+                Msaa3D = data.ContainsKey("msaa") ? data["msaa"].AsInt32() : 2;
+                MasterVolume = data.ContainsKey("volume") ? (float)data["volume"].AsDouble() : 1.0f;
+                MouseSensitivity = data.ContainsKey("mouse_sens") ? (float)data["mouse_sens"].AsDouble() : 0.002f;
+                ShowFPS = data.ContainsKey("show_fps") ? data["show_fps"].AsBool() : true; // Грузим параметр
+            }
+        }
+        ApplySettings();
+    }
+
+	public void ApplySettings()
+    {
+        // 1. ПОЛНЫЙ СБРОС СОСТОЯНИЯ (Для Linux/Windows)
+        // Сначала всегда переводим в оконный режим и убираем любые флаги
+        DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
+        DisplayServer.WindowSetFlag(DisplayServer.WindowFlags.Borderless, false);
+
+        // 2. ПРИМЕНЕНИЕ РАЗМЕРА В ОКОННОМ РЕЖИМЕ
+        // Это гарантирует, что ОС зафиксирует нужные пропорции
+        DisplayServer.WindowSetSize(Resolution);
+
+        if (IsFullscreen)
+        {
+            // Включаем эксклюзивный полноэкранный режим
+            DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
+        }
+        else
+        {
+            // Если режим оконный - центрируем строго по центру текущего экрана
+            int screen = DisplayServer.WindowGetCurrentScreen();
+            Vector2I screenSize = DisplayServer.ScreenGetSize(screen);
+            DisplayServer.WindowSetPosition(screenSize / 2 - Resolution / 2);
+        }
+
+        // 3. ГРАФИЧЕСКИЕ ПАРАМЕТРЫ
+        DisplayServer.WindowSetVsyncMode(VSync ? DisplayServer.VSyncMode.Enabled : DisplayServer.VSyncMode.Disabled);
+        
+        // MSAA применяется к главному вьюпорту
+        GetTree().Root.Msaa3D = (Viewport.Msaa)Msaa3D;
+
+        // 4. СИНХРОНИЗАЦИЯ РАЗМЕРОВ ДВИЖКА
+        // Принудительно обновляем размер корневого окна, чтобы UI не поплыл
+        GetTree().Root.Size = Resolution;
+        GetTree().Root.ContentScaleFactor = UiScale;
+
+        // 5. ЗВУК
+        int masterBus = AudioServer.GetBusIndex("Master");
+        AudioServer.SetBusVolumeDb(masterBus, Mathf.LinearToDb(MasterVolume));
+        
+        GD.Print($"[SETTINGS] Применено: {Resolution.X}x{Resolution.Y}, FS: {IsFullscreen}, Scale: {UiScale}");
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/Core/AudioManager.cs
+================================================================================
+using Godot;
+
+public partial class AudioManager : Node
+{
+    public static AudioManager Instance { get; private set; }
+
+    public override void _EnterTree()
+    {
+        Instance = this;
+    }
+
+    // Воспроизведение 2D звука (UI, системные щелчки, работа в руках)
+    public void PlaySound(string resourcePath, float volumeDb = 0f, float pitch = 1f)
+    {
+        if (!FileAccess.FileExists(resourcePath)) return;
+        
+        var stream = GD.Load<AudioStream>(resourcePath);
+        if (stream == null) return;
+
+        var player = new AudioStreamPlayer { Stream = stream, VolumeDb = volumeDb, PitchScale = pitch };
+        
+        // Привязываем к нашей главной шине звука (чтобы ползунок настроек работал)
+        player.Bus = "Master"; 
+        AddChild(player);
+        
+        player.Finished += player.QueueFree; // Самоуничтожение после окончания звука
+        player.Play();
+    }
+
+    // Воспроизведение 3D звука (Падение предметов, аварии в мире)
+    public void PlaySound3D(string resourcePath, Vector3 globalPosition, float volumeDb = 0f, float pitch = 1f)
+    {
+        if (!FileAccess.FileExists(resourcePath)) return;
+
+        var stream = GD.Load<AudioStream>(resourcePath);
+        if (stream == null) return;
+
+        var player = new AudioStreamPlayer3D { 
+            Stream = stream, 
+            GlobalPosition = globalPosition, 
+            VolumeDb = volumeDb, 
+            PitchScale = pitch, 
+            MaxDistance = 15f,
+            Bus = "Master"
+        };
+        GetTree().Root.AddChild(player);
+        
+        player.Finished += player.QueueFree;
+        player.Play();
+    }
+
+	// Воспроизведение напрямую из ресурса AudioStream
+    public void PlayStream(AudioStream stream, float volumeDb = 0f, float pitch = 1f)
+    {
+        if (stream == null) return;
+
+        var player = new AudioStreamPlayer { 
+            Stream = stream, 
+            VolumeDb = volumeDb, 
+            PitchScale = pitch,
+            Bus = "Master" 
+        };
+        
+        AddChild(player);
+        player.Finished += player.QueueFree; 
+        player.Play();
+    }
+
+    public void PlayStream3D(AudioStream stream, Vector3 globalPosition, float volumeDb = 0f, float pitch = 1f)
+    {
+        if (stream == null) return;
+
+        var player = new AudioStreamPlayer3D { 
+            Stream = stream, 
+            GlobalPosition = globalPosition, 
+            VolumeDb = volumeDb, 
+            PitchScale = pitch, 
+            MaxDistance = 15f,
+            Bus = "Master"
+        };
+        
+        GetTree().Root.AddChild(player);
+        player.Finished += player.QueueFree;
+        player.Play();
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/Core/ProgressManager.cs
+================================================================================
+using Godot;
+using System.Collections.Generic;
+
+public partial class ProgressManager : Node
+{
+    public static ProgressManager Instance { get; private set; }
+    private const string SAVE_PATH = "user://Config/progress.json";
+
+    // Словарь: [ScenarioName] = BestGrade (например: "Насос ЦНС" = "A")
+    private Dictionary<string, string> _bestGrades = new Dictionary<string, string>();
+    private Dictionary<string, int> _bestScores = new Dictionary<string, int>();
+
+    public override void _EnterTree()
+    {
+        Instance = this;
+        LoadProgress();
+    }
+
+    public void SaveResult(string scenarioName, int score, string grade)
+    {
+        // Сохраняем, если результат лучше предыдущего
+        if (!_bestScores.ContainsKey(scenarioName) || score > _bestScores[scenarioName])
+        {
+            _bestScores[scenarioName] = score;
+            _bestGrades[scenarioName] = grade;
+            
+            var data = new Godot.Collections.Dictionary();
+            foreach (var pair in _bestScores)
+            {
+                data[pair.Key] = new Godot.Collections.Dictionary { 
+                    { "score", pair.Value }, 
+                    { "grade", _bestGrades[pair.Key] } 
+                };
+            }
+
+            using var file = FileAccess.Open(SAVE_PATH, FileAccess.ModeFlags.Write);
+            file.StoreString(Json.Stringify(data));
+        }
+    }
+
+    private void LoadProgress()
+    {
+        if (!FileAccess.FileExists(SAVE_PATH)) return;
+        using var file = FileAccess.Open(SAVE_PATH, FileAccess.ModeFlags.Read);
+        var json = new Json();
+        if (json.Parse(file.GetAsText()) == Error.Ok)
+        {
+            var data = json.Data.AsGodotDictionary();
+            foreach (var key in data.Keys)
+            {
+                var entry = data[key].AsGodotDictionary();
+                _bestScores[key.AsString()] = entry["score"].AsInt32();
+                _bestGrades[key.AsString()] = entry["grade"].AsString();
+            }
+        }
+    }
+
+    public string GetBestGrade(string scenarioName) => _bestGrades.ContainsKey(scenarioName) ? _bestGrades[scenarioName] : "-";
+}
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/ToolData.cs
+================================================================================
+using Godot;
+using System;
+
+[Tool]
+[GlobalClass]
+public partial class ToolData : ItemData
+{
+    [Export] public ToolCategory Category { get; set; } = ToolCategory.Wrench;
+    [Export] public float Size { get; set; } = 16.0f; // Размер (мм, номер биты и т.д.)
+    
+    // Множитель скорости (1.0 = обычная, 5.0 = шуруповерт)
+    [Export] public float Efficiency { get; set; } = 1.0f; 
+}
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/PickableItem.cs
+================================================================================
+using Godot;
+
+[GlobalClass]
+public partial class PickableItem : RigidBody3D, IInteractable
+{
+    [Export] public ItemData ItemResource { get; set; }
+
+    public override void _Ready()
+    {
+        CollisionLayer = 2; 
+        CollisionMask = 1; 
+        
+        ContactMonitor = true;
+        MaxContactsReported = 1;
+    }
+
+    public void Interact(ItemData currentItem) { }
+    public void InteractContinuous(ItemData currentItem, double delta) { }
+    public bool CanInteractWith(ItemData item)
+    {
+        return false;
+    }
+
+    public void InteractAlt(ItemData currentItem)
+    {
+        if (ItemResource == null) return;
+
+        if (ItemResource.PickupSound != null) 
+            AudioManager.Instance?.PlayStream(ItemResource.PickupSound, -2f, (float)GD.RandRange(0.95, 1.05));
+
+        if (InventoryManager.Instance.AddItem(ItemResource))
+        {
+            UIManager.Instance?.AnimateItemPickup(ItemResource.Icon);
+            
+            foreach (var child in GetChildren())
+            {
+                if (child is Node3D node3D) node3D.Visible = false;
+            }
+            
+            CollisionLayer = 0; 
+            GetTree().CreateTimer(0.6f).Timeout += QueueFree; 
+        }
+        else
+        {
+            UIManager.Instance?.UpdatePrompt("Инвентарь полон!", true);
+        }
+    }
+
+    public string GetInteractPrompt()
+    {
+        return ItemResource != null ? $"[ПКМ] Подобрать: {ItemResource.ItemName}" : "";
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/BasePart.cs
+================================================================================
+using Godot;
+
+[Tool] // Атрибут Tool позволяет скрипту работать прямо в редакторе!
+[GlobalClass]
+public partial class BasePart : StaticBody3D, IInteractable
+{
+    [ExportGroup("Настройки UI и Взаимодействия")]
+    [Export] public bool IsInteractable { get; set; } = true;       // Можно ли вообще кликать?
+    [Export] public bool ShowTooltipName { get; set; } = true;      // Показывать ли имя при наведении?
+    [Export] public bool ShowTooltipDesc { get; set; } = true;      // Показывать ли описание?
+    [Export] public bool ShowInteractPrompt { get; set; } = true;   // Показывать ли подсказку [ЛКМ/ПКМ]?
+    [Export] public bool AllowMinimalPromptInExam { get; set; } = false; // Разрешить ли короткую подсказку в режиме экзамена
+
+    [ExportGroup("Базовые параметры")]
+    [Export] public string PartId { get; set; } = "part_unique_id";
+    [Export] public string PartName { get; set; } = ""; // Оставляем пустым, заполнится из ресурса
+    [Export(PropertyHint.MultilineText)] public string PartDescription { get; set; } = "";
+    [ExportGroup("Состояния (Атрибуты)")]
+    [Export] public Godot.Collections.Array<PartState> CurrentStates { get; set; } = new Godot.Collections.Array<PartState>();
+
+    public virtual void Interact(ItemData currentItem) { HandleChemicals(currentItem); }
+    public virtual void InteractContinuous(ItemData currentItem, double delta) { }
+    public virtual void InteractAlt(ItemData currentItem) { }
+    public virtual bool CanInteractWith(ItemData item)
+    {
+        // По умолчанию базовая деталь реагирует только на химию
+        if (item is ChemicalData) return true;
+        return false;
+    }
+    
+    public virtual string GetInteractPrompt() => ShowInteractPrompt ? PartName : "";
+
+    public bool HasState(PartState state) => CurrentStates.Contains(state);
+
+    public override void _Ready()
+    {
+        AddToGroup("AllParts"); 
+    }
+
+    public void AddState(PartState state)
+    {
+        if (!CurrentStates.Contains(state)) { CurrentStates.Add(state); OnStateChanged(); }
+    }
+
+    public void RemoveState(PartState state)
+    {
+        if (CurrentStates.Contains(state)) { CurrentStates.Remove(state); OnStateChanged(); }
+    }
+
+    protected bool HandleChemicals(ItemData item)
+    {
+        if (item is ChemicalData chem)
+        {
+            // Логируем попытку применения химии
+            ActionLogger.Instance.LogEvent(LogType.Action, 
+                $"Попытка применить {chem.ItemName} к {PartName}", 
+                tool: chem.ItemName, target: PartName);
+
+            bool effectApplied = false;
+            foreach (var stateToRemove in chem.RemovesStates)
+            {
+                if (HasState(stateToRemove)) { RemoveState(stateToRemove); effectApplied = true; }
+            }
+
+            if (effectApplied)
+            {
+                foreach (var stateToAdd in chem.AddsStates) AddState(stateToAdd);
+                SpawnParticles(chem.ParticleColor); 
+                
+                // --- Тихий режим для тренировки/экзамена ---
+                if (GameManager.Instance.CurrentMode == SimulatorMode.Learning)
+                {
+                    UIManager.Instance?.UpdatePrompt($"Применено: {chem.ItemName}", false);
+                }
+
+                if (this is Fastener f) f.UpdateVisuals();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void SpawnParticles(Color color)
+    {
+        if (Engine.IsEditorHint()) return; 
+        
+        var particles = new CpuParticles3D { Emitting = true, OneShot = true, Amount = 40, Lifetime = 0.4f, Explosiveness = 0.9f, Spread = 20f, InitialVelocityMin = 2f, InitialVelocityMax = 5f };
+        var mat = new StandardMaterial3D { AlbedoColor = color, EmissionEnabled = true, Emission = color * 2.0f };
+        particles.MaterialOverride = mat;
+        particles.Mesh = new SphereMesh { Radius = 0.02f, Height = 0.04f };
+
+        GetTree().Root.AddChild(particles);
+        var cam = GetViewport().GetCamera3D();
+        if (cam != null)
+        {
+            particles.GlobalPosition = cam.GlobalPosition - cam.GlobalBasis.Z * 0.5f;
+            particles.LookAt(GlobalPosition);
+        }
+        GetTree().CreateTimer(1.0f).Timeout += () => particles.QueueFree();
+    }
+
+    protected virtual void OnStateChanged() { }
+}
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/PartItemData.cs
+================================================================================
+using Godot;
+using System;
+
+[Tool]
+[GlobalClass]
+public partial class PartItemData : ItemData
+{
+	[Export] public float Size { get; set; } = 16.0f;
+	[Export] public float RequiredTorque { get; set; } = 120.0f;
+    [Export] public bool IsNewConsumable { get; set; } = true;
+	
+	[ExportGroup("Звуки Детали")]
+    [Export] public AudioStream InstallSound { get; set; } // Звук установки в слот
+    [Export] public AudioStream RemoveSound { get; set; }  // Звук извлечения
+    [Export] public AudioStream TorqueSound { get; set; }  // Звук трещотки/щелчка при закручивании
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/ItemData.cs
+================================================================================
+using Godot;
+using System;
+
+[Tool]
+[GlobalClass]
+public partial class ItemData : Resource
+{
+    [Export] public string ItemName { get; set; } = "Предмет";
+    [Export(PropertyHint.MultilineText)] public string Description { get; set; } = "Описание отсутствует.";
+    [Export] public Texture2D Icon { get; set; }
+    
+    [Export] public float Weight { get; set; } = 1.0f;
+    
+    [Export] public PackedScene WorldPrefab { get; set; }
+    [Export] public PackedScene HandPrefab { get; set; }
+    
+    [ExportGroup("Анимация")]
+    // Вектор смещения (Например, Z: -0.2 — толчок вперед)
+    [Export] public Vector3 AnimPosOffset { get; set; } = new Vector3(0, 0, -0.1f); 
+    // Вектор вращения в градусах (Например, Z: 30 — поворот кисти ключом)
+    [Export] public Vector3 AnimRotDegrees { get; set; } = new Vector3(0, 0, 0);
+    [Export] public float AnimDuration { get; set; } = 0.15f; // Длительность одного движения
+
+    [ExportGroup("Аудио")]
+    [Export] public AudioStream UseSound { get; set; } // Звук работы (вжик шуруповерта, пшик WD-40)
+    [Export] public AudioStream EquipSound { get; set; }  // Звук взятия в руки (например, шорох одежды)
+    [Export] public AudioStream DropSound { get; set; }   // Звук выбрасывания
+    [Export] public AudioStream PickupSound { get; set; } // Звук подбора с пола
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/ChemicalData.cs
+================================================================================
+using Godot;
+using System;
+
+[Tool]
+[GlobalClass]
+public partial class ChemicalData : ItemData
+{
+	[ExportGroup("Эффекты химии")]
+	[Export] public Godot.Collections.Array<PartState> RemovesStates { get; set; } = new Godot.Collections.Array<PartState>();
+	[Export] public Godot.Collections.Array<PartState> AddsStates { get; set; } = new Godot.Collections.Array<PartState>();
+	
+	[Export] public Color ParticleColor { get; set; } = new Color(1, 1, 0.5f); // Цвет пшика (для визуала в будущем)
+
+	// --- ОПТИМИЗАЦИЯ ---
+    private StandardMaterial3D _cachedParticleMat;
+
+    public StandardMaterial3D GetParticleMaterial()
+    {
+        if (_cachedParticleMat != null) return _cachedParticleMat;
+        
+        _cachedParticleMat = new StandardMaterial3D { 
+            AlbedoColor = ParticleColor, 
+            EmissionEnabled = true, 
+            Emission = ParticleColor * 2.0f 
+        };
+        return _cachedParticleMat;
+    }
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/InteractionRule.cs
+================================================================================
+using Godot;
+using System;
+
+[GlobalClass]
+public partial class InteractionRule : Resource
+{
+	[Export] public ToolCategory AllowedTool { get; set; } = ToolCategory.Wrench;
+	[Export] public float RequiredSize { get; set; } = 16.0f;
+	
+	// Допуск по размеру (для ключей 0.1, для лома может быть 0 - любой размер)
+	[Export] public float SizeTolerance { get; set; } = 0.1f; 
+	
+	// Если true, то размер инструмента игнорируется (например, любой лом подходит)
+	[Export] public bool IgnoreSize { get; set; } = false;
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/PartVisualEffect.cs
+================================================================================
+using Godot;
+using System;
+
+public enum EffectRenderMode { None, ColorOverlay, TextureOverlay }
+
+[Tool]
+[GlobalClass]
+public partial class PartVisualEffect : Resource
+{
+    [Export] public PartState State { get; set; } = PartState.Rusted;
+    [Export] public EffectRenderMode Mode { get; set; } = EffectRenderMode.ColorOverlay;
+    [Export] public Color OverlayColor { get; set; } = new Color(0.6f, 0.25f, 0.05f, 0.85f);
+    [Export] public Texture2D OverlayTexture { get; set; }
+
+    // --- ОПТИМИЗАЦИЯ: КЭШИРОВАНИЕ ---
+    private Material _cachedMaterial;
+
+    public Material GetMaterial()
+    {
+        // Если материал уже был создан ранее, просто возвращаем ссылку на него (0 нагрузки на ПК)
+        if (_cachedMaterial != null) return _cachedMaterial;
+        if (Mode == EffectRenderMode.None) return null;
+
+        var mat = new StandardMaterial3D();
+        mat.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+
+        if (Mode == EffectRenderMode.ColorOverlay)
+        {
+            mat.AlbedoColor = OverlayColor;
+            mat.Metallic = 0.1f;
+            mat.Roughness = 1.0f;
+        }
+        else if (Mode == EffectRenderMode.TextureOverlay && OverlayTexture != null)
+        {
+            mat.AlbedoTexture = OverlayTexture;
+        }
+
+        _cachedMaterial = mat;
+        return _cachedMaterial;
+    }
+}
+
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/Fastener.cs
+================================================================================
+using Godot;
+using Godot.Collections; 
+
+public enum ContinuousAnimType { None, RotateX, RotateY, RotateZ }
+
+[Tool]
+[GlobalClass]
+public partial class Fastener : BasePart
+{
+    // --- ДАННЫЕ И НАСТРОЙКИ ---
+    [ExportGroup("Логика Инструментов")]
+    [Export] public Array<InteractionRule> ValidTools { get; set; } = new Array<InteractionRule>();
+    [Export] public InteractionType Type { get; set; } = InteractionType.Continuous;
+    [Export] public PartItemData PartItemResource { get; set; }[ExportGroup("Жизненный Цикл (Lifecycle)")]
+    [Export] public bool GiveItemOnRemoval { get; set; } = true;
+    [Export] public bool LeaveGhostOnRemoval { get; set; } = true;
+    
+    private bool _startsAsGhost = false;
+    [Export] public bool StartsAsGhost 
+    { 
+        get => _startsAsGhost; 
+        set { _startsAsGhost = value; if (value) IsInstalled = false; UpdateVisuals(); } 
+    }[ExportGroup("Параметры")]
+    [Export] public float Size { get; set; } = 16.0f; 
+    [Export] public float MaxTorque { get; set; } = 120.0f;
+    [Export] public float CurrentTorque { get; set; } = 120.0f;
+    
+    [ExportGroup("Состояние")]
+    private bool _isInstalled = true;
+    [Export] public bool IsInstalled 
+    { 
+        get => _isInstalled; 
+        set { _isInstalled = value; UpdateVisuals(); } 
+    }[ExportGroup("Зависимости сборки/разборки")]
+    [Export] public Array<Fastener> BlockingParts { get; set; } = new Array<Fastener>();
+    [Export] public Array<Fastener> RequiredParts { get; set; } = new Array<Fastener>();[ExportGroup("Опасности (Hazards)")]
+    [Export] public bool IsUnderPressure { get; set; } = false;
+    [Export] public string ReliefValveId { get; set; } = "";[ExportGroup("Дефектовка и Износ")]
+    [Export] public bool IsDefective { get; set; } = false;
+    [Export] public bool IsMeasurable { get; set; } = false;
+    [Export] public float CurrentWear { get; set; } = 44.8f;
+    [Export] public float NominalWear { get; set; } = 45.0f;[ExportGroup("Визуальные Эффекты")]
+    [Export] public Array<PartVisualEffect> VisualEffects { get; set; } = new Array<PartVisualEffect>();
+    
+    [ExportGroup("Анимация процесса (Continuous)")]
+    [Export] public bool EnableProgressAnim { get; set; } = true;[ExportSubgroup("Вращение")]
+    [Export] public Vector3 RotateAxis { get; set; } = new Vector3(0, 1, 0);
+    [Export] public float MaxRotationDegrees { get; set; } = 1080.0f;
+    [ExportSubgroup("Вкручивание (Смещение)")]
+    [Export] public Vector3 TranslateAxis { get; set; } = new Vector3(0, -1, 0);
+    [Export] public float MaxTranslateDistance { get; set; } = 0.0f;
+
+    // --- ВНУТРЕННИЕ ПЕРЕМЕННЫЕ ---
+    private bool _hasBeenRemoved = false;
+    private bool _isTighteningTarget = true;
+    private ulong _lastInteractFrame = 0;
+    private bool _isActionLocked = false;
+    private Basis _originalVisualsBasis;
+    private Vector3 _originalVisualsPos;
+    private bool _isTweening = false;
+
+    // --- ИНИЦИАЛИЗАЦИЯ ---
+    public override void _Ready()
+    {
+        base._Ready(); 
+        AddToGroup("Fasteners");
+
+        InitializeVisualsCache();
+        SynchronizeWithResource();
+        EnsureDefaultRules();
+
+        _isTighteningTarget = CurrentTorque < MaxTorque;
+
+        UpdateVisuals();
+        UpdateContinuousAnimation();
+    }
+
+    private void InitializeVisualsCache()
+    {
+        var visuals = GetNodeOrNull<Node3D>("VisualsRoot") ?? GetNodeOrNull<MeshInstance3D>("MeshInstance3D");
+        if (visuals != null)
+        {
+            _originalVisualsBasis = visuals.Basis;
+            _originalVisualsPos = visuals.Position;
+        }
+    }
+
+    private void SynchronizeWithResource()
+    {
+        if (StartsAsGhost) { IsInstalled = false; CurrentTorque = 0; }
+        if (PartItemResource != null)
+        {
+            if (string.IsNullOrEmpty(PartName) || PartName == "Деталь") PartName = PartItemResource.ItemName;
+            if (string.IsNullOrEmpty(PartDescription) || PartDescription == "Описание детали.") PartDescription = PartItemResource.Description;
+            if (Size <= 0.1f) Size = PartItemResource.Size;
+        }
+    }
+
+    private void EnsureDefaultRules()
+    {
+        if (ValidTools.Count == 0 && Type == InteractionType.Continuous)
+        {
+            ValidTools.Add(new InteractionRule { AllowedTool = ToolCategory.Wrench, RequiredSize = Size });
+        }
+    }
+
+    // --- ВИЗУАЛИЗАЦИЯ И ЭФФЕКТЫ ---
+    public void UpdateVisuals()
+    {
+        var collider = GetNodeOrNull<CollisionShape3D>("CollisionShape3D");
+        
+        // Включаем коллизию по умолчанию, чтобы не "терять" объект
+        if (collider != null) collider.SetDeferred("disabled", false);
+
+        if (IsInstalled)
+        {
+            // --- СОСТОЯНИЕ: УСТАНОВЛЕНО ---
+            SetMeshesState(this, true, null); 
+            CollisionLayer = 3; 
+            CollisionMask = 1;  
+        }
+        else
+        {
+            // --- СОСТОЯНИЕ: СНЯТО / ПРИЗРАК ---
+            
+            // 1. Проверка на полное удаление (работает ТОЛЬКО в игре)
+            // Если в игре деталь была снята И мы НЕ оставляем призрак
+            if (!Engine.IsEditorHint() && _hasBeenRemoved && !LeaveGhostOnRemoval)
+            {
+                SetMeshesState(this, false, null); 
+                CollisionLayer = 0; 
+                CollisionMask = 0;
+                if (collider != null) collider.SetDeferred("disabled", true);
+                return; 
+            }
+
+            // 2. Логика отображения призрака (в редакторе или если LeaveGhostOnRemoval == true)
+            bool showGhostsInGame = GameManager.Instance != null && GameManager.Instance.ShowGhosts;
+            
+            // В режиме тренировки/экзамена принудительно скрываем призрака в игре
+            if (!Engine.IsEditorHint() && GameManager.Instance?.CurrentMode != SimulatorMode.Learning)
+            {
+                showGhostsInGame = false;
+            }
+
+            // В РЕДАКТОРЕ призраки видны ВСЕГДА, если IsInstalled = false
+            bool finalShow = Engine.IsEditorHint() ? true : showGhostsInGame;
+
+            Material ghostMat;
+            if (Engine.IsEditorHint())
+            {
+                ghostMat = CreateEditorGhostMaterial();
+            }
+            else
+            {
+                ghostMat = GameManager.Instance?.GhostMaterial;
+            }
+
+            SetMeshesState(this, finalShow, finalShow ? ghostMat : null); 
+            
+            // Коллизия остается на слое 2, чтобы можно было нащупать место установки
+            CollisionLayer = 2; 
+            CollisionMask = 0;
+        }
+    }
+
+    // Вспомогательный метод для создания материала в редакторе
+    private Material CreateEditorGhostMaterial()
+    {
+        var mat = new StandardMaterial3D();
+        mat.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+        mat.AlbedoColor = new Color(0, 1, 0, 0.3f); // Зеленый полупрозрачный
+        mat.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
+        mat.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
+        return mat;
+    }
+
+    private void SetMeshesState(Node node, bool isVisible, Material mat)    
+    {
+        Material customOverlay = null;
+
+        foreach (var effect in VisualEffects)
+        {
+            if (HasState(effect.State))
+            {
+                customOverlay = effect.GetMaterial(); 
+                break; 
+            }
+        }
+
+        if (node is MeshInstance3D mesh)
+        {
+            mesh.Visible = isVisible;
+            mesh.MaterialOverride = mat;
+            mesh.MaterialOverlay = customOverlay; 
+        }
+        
+        foreach (Node child in node.GetChildren()) SetMeshesState(child, isVisible, mat);
+    }
+
+    private void SetMeshesTransparency(Node node, float alpha)
+    {
+        if (node is GeometryInstance3D geom) geom.Transparency = alpha;
+        foreach (Node child in node.GetChildren()) SetMeshesTransparency(child, alpha);
+    }
+
+    private void TweenMeshesTransparency(Tween tween, Node node, float targetAlpha, float duration)
+    {
+        if (node is GeometryInstance3D geom) tween.TweenProperty(geom, "transparency", targetAlpha, duration);
+        foreach (Node child in node.GetChildren()) TweenMeshesTransparency(tween, child, targetAlpha, duration);
+    }
+
+    private void AnimateVisuals(bool isInstalling)
+    {
+        var visuals = GetNodeOrNull<Node3D>("VisualsRoot") ?? GetNodeOrNull<MeshInstance3D>("MeshInstance3D");
+        var cam = GetViewport().GetCamera3D();
+        
+        if (visuals == null || cam == null) { UpdateVisuals(); return; }
+
+        _isTweening = true; 
+        Vector3 directionToPlayer = (cam.GlobalPosition - GlobalPosition).Normalized();
+        Vector3 pullOffset = visuals.ToLocal(GlobalPosition + directionToPlayer * 0.2f);
+
+        var tween = CreateTween();
+        tween.SetParallel(true); 
+
+        if (isInstalling)
+        {
+            visuals.Position = pullOffset;
+            UpdateVisuals(); 
+            SetMeshesTransparency(visuals, 1.0f); 
+            
+            tween.TweenProperty(visuals, "position", Vector3.Zero, 0.3f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+            TweenMeshesTransparency(tween, visuals, 0.0f, 0.3f); 
+        }
+        else
+        {
+            visuals.Position = Vector3.Zero;
+            
+            tween.TweenProperty(visuals, "position", pullOffset, 0.2f).SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.Out);
+            TweenMeshesTransparency(tween, visuals, 1.0f, 0.2f); 
+            
+            tween.Chain().TweenCallback(Callable.From(() => {
+                visuals.Position = Vector3.Zero; 
+                SetMeshesTransparency(visuals, 0.0f); 
+                UpdateVisuals();
+            }));
+        }
+
+        if (isInstalling)
+        {
+            tween.Chain().TweenCallback(Callable.From(() => {
+                _isTweening = false;
+                UpdateContinuousAnimation(); 
+            }));
+        }
+    }
+
+    private void UpdateContinuousAnimation()
+    {
+        if (Type != InteractionType.Continuous || !EnableProgressAnim || _isTweening) return;
+
+        Node3D visuals = GetNodeOrNull<Node3D>("VisualsRoot") ?? GetNodeOrNull<MeshInstance3D>("MeshInstance3D");
+        if (visuals == null) return;
+
+        float progress = MaxTorque > 0 ? CurrentTorque / MaxTorque : 0;
+        Vector3 targetPos = _originalVisualsPos;
+
+        if (MaxTranslateDistance != 0) targetPos += TranslateAxis.Normalized() * (MaxTranslateDistance * progress);
+
+        if (MaxRotationDegrees != 0 && RotateAxis != Vector3.Zero)
+        {
+            float angleRad = Mathf.DegToRad(MaxRotationDegrees * progress);
+            Basis rotatedBasis = _originalVisualsBasis * new Basis(RotateAxis.Normalized(), angleRad);
+            visuals.Transform = new Transform3D(rotatedBasis, targetPos);
+        }
+        else
+        {
+            visuals.Position = targetPos;
+        }
+    }
+
+    // --- ЛОГИКА ВЗАИМОДЕЙСТВИЯ И ПРОВЕРОК ---
+    private bool IsToolValid(ToolData tool, out float speedMultiplier)
+    {
+        speedMultiplier = 1.0f;
+        if (tool == null) return false;
+
+        foreach (var rule in ValidTools)
+        {
+            if (rule.AllowedTool == tool.Category)
+            {
+                if (rule.IgnoreSize || Mathf.Abs(tool.Size - rule.RequiredSize) <= rule.SizeTolerance)
+                {
+                    speedMultiplier = tool.Efficiency;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private bool CheckDependencies(bool isInstalling)
+    {
+        if (isInstalling)
+        {
+            foreach (var part in RequiredParts)
+            {
+                if (part != null && !part.IsInstalled)
+                {
+                    UIManager.Instance?.UpdatePrompt($"[ОШИБКА] Сначала установите: {part.PartName}", true);
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            foreach (var part in BlockingParts)
+            {
+                if (part != null && part.IsInstalled)
+                {
+                    UIManager.Instance?.UpdatePrompt($"[БЛОКИРОВКА] Мешает: {part.PartName}", true);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // --- ИНТЕРФЕЙС IInteractable ---
+    public override void Interact(ItemData currentItem)
+    {
+        string toolName = currentItem != null ? currentItem.ItemName : "Руки";
+
+        // --- 1. ЛОГИРОВАНИЕ ПОПЫТКИ ---
+        ActionLogger.Instance?.LogEvent(LogType.Action, 
+            $"Взаимодействие: {toolName} -> {PartName}", 
+            tool: toolName, target: PartName);
+
+        // --- 2. ЗАМЕРЫ И ДЕФЕКТОВКА ---
+        if (currentItem is ToolData measureTool && measureTool.Category == ToolCategory.Measurement && IsMeasurable)
+        {
+            ActionLogger.Instance?.LogEvent(LogType.Action, $"Замер детали: {PartName}", tool: toolName, target: PartName);
+            
+            string verdict = (Mathf.Abs(CurrentWear - NominalWear) > 0.5f) ? "ТРЕБУЕТ ЗАМЕНЫ" : "В НОРМЕ";
+            // Результат замера на приборе показываем ВСЕГДА (это не подсказка, а данные с инструмента)
+            UIManager.Instance?.UpdatePrompt($"Замер [{PartName}]: {CurrentWear} мм (Номинал: {NominalWear} мм) | {verdict}");
+            return; 
+        }
+
+        // --- 3. ЛОГИКА УСТАНОВКИ (Если на месте призрака) ---
+        if (!IsInstalled)
+        {
+            if (currentItem is PartItemData part)
+            {
+                // Проверка совместимости (Размер + Идентичность ресурса)
+                bool sizeMatches = Mathf.Abs(part.Size - Size) < 0.1f;
+                bool typeMatches = (PartItemResource == null) || (part == PartItemResource || part.ItemName == PartItemResource.ItemName);
+
+                if (sizeMatches && typeMatches)
+                {
+                    if (!CheckDependencies(true)) return; // Проверка, поставлена ли прокладка и т.д.
+                    
+                    // Звук установки из конфига детали
+                    if (PartItemResource?.InstallSound != null)
+                        AudioManager.Instance?.PlayStream3D(PartItemResource.InstallSound, GlobalPosition, 0f, (float)GD.RandRange(0.9, 1.1));
+
+                    _isInstalled = true; // Используем поле, чтобы не вызвать UpdateVisuals раньше времени
+                    IsDefective = !part.IsNewConsumable; // Если поставили старую деталь, помечаем износ
+                    _hasBeenRemoved = false; 
+                    CurrentTorque = (Type == InteractionType.Instant) ? MaxTorque : 0; 
+                    
+                    InventoryManager.Instance.RemoveActiveItem();
+                    
+                    AnimateVisuals(true);
+                    UpdateVisuals();
+                    UpdateContinuousAnimation();
+
+                    ActionLogger.Instance?.UpdatePartState(PartId, "Installed", PartName);
+                    ActionLogger.Instance?.LogEvent(LogType.Action, $"Успешная установка: {PartName}", toolName, PartName);
+
+                    // В Обучении пишем успех, в Экзамене - тишина
+                    if (GameManager.Instance.CurrentMode == SimulatorMode.Learning)
+                        UIManager.Instance?.UpdatePrompt($"{PartName} установлена.", false);
+                }
+                else 
+                {
+                    string reason = !typeMatches ? $"Неверный тип (нужна {PartName})" : $"Неверный размер (нужен {Size})";
+                    ActionLogger.Instance?.LogEvent(LogType.Warning, $"Ошибка установки {PartName}", toolName, PartName, tech: reason);
+                    
+                    if (GameManager.Instance.CurrentMode == SimulatorMode.Learning)
+                        UIManager.Instance?.UpdatePrompt(reason, true);
+                }
+            }
+            return;
+        }
+
+        // --- 4. ХИМИЯ (WD-40 и др.) ---
+        if (HandleChemicals(currentItem)) return;
+
+        // --- 5. СНЯТИЕ БЫСТРОСЪЕМНЫХ ДЕТАЛЕЙ (Instant) ---
+        if (Type == InteractionType.Instant)
+        {
+            if (HasState(PartState.Rusted)) 
+            { 
+                ActionLogger.Instance?.LogEvent(LogType.Warning, "Попытка снять заржавевшую деталь", toolName, PartName);
+                if (GameManager.Instance.CurrentMode == SimulatorMode.Learning)
+                    UIManager.Instance?.UpdatePrompt("ЗАРЖАВЕЛО! Требуется обработка.", true); 
+                return; 
+            }
+
+            // Проверяем, подходит ли инструмент (например, лом для крышки)
+            if (currentItem is ToolData removeTool && IsToolValid(removeTool, out _))
+            {
+                RemovePart();
+            }
+            else if (ValidTools.Count > 0)
+            {
+                ActionLogger.Instance?.LogEvent(LogType.Warning, "Попытка снять без спец. инструмента", toolName, PartName);
+                if (GameManager.Instance.CurrentMode == SimulatorMode.Learning)
+                    UIManager.Instance?.UpdatePrompt("Нужен специальный инструмент!", true);
+            }
+        }
+    }
+
+    private bool HandleMeasurement(ItemData currentItem)
+    {
+        if (currentItem is ToolData measureTool && measureTool.Category == ToolCategory.Measurement && IsMeasurable)
+        {
+            ActionLogger.Instance?.LogAction(PartId, "Measured");
+            string verdict = (Mathf.Abs(CurrentWear - NominalWear) > 0.5f) ? "ТРЕБУЕТ ЗАМЕНЫ" : "В НОРМЕ";
+            UIManager.Instance?.UpdatePrompt($"Замер [{PartName}]: {CurrentWear} мм (Номинал: {NominalWear} мм) | {verdict}");
+            return true; 
+        }
+        return false;
+    }
+
+    private void TryInstallPart(ItemData currentItem)
+    {
+        if (currentItem == null) return; 
+        string toolName = currentItem.ItemName;
+
+        if (currentItem is PartItemData part)
+        {
+            bool sizeMatches = Mathf.Abs(part.Size - Size) < 0.1f;
+            bool typeMatches = (PartItemResource == null) || (part == PartItemResource || part.ItemName == PartItemResource.ItemName);
+
+            if (sizeMatches && typeMatches)
+            {
+                if (!CheckDependencies(true)) return;
+
+				if (PartItemResource != null && PartItemResource.InstallSound != null)
+                    AudioManager.Instance?.PlayStream3D(PartItemResource.InstallSound, GlobalPosition, 0f, (float)GD.RandRange(0.9, 1.1));
+
+                IsInstalled = true;
+                IsDefective = !part.IsNewConsumable; 
+                _hasBeenRemoved = false; 
+                CurrentTorque = (Type == InteractionType.Instant) ? MaxTorque : 0; 
+                InventoryManager.Instance.RemoveActiveItem();
+                
+                AnimateVisuals(true);
+                UpdateVisuals();
+                UpdateContinuousAnimation();
+
+                ActionLogger.Instance.LogEvent(LogType.Action, $"Установка детали: {PartName}", toolName, PartName);
+            }
+            else 
+            {
+                // ЛОГИРУЕМ НЕУДАЧНУЮ ПОПЫТКУ УСТАНОВКИ
+                string reason = !typeMatches ? $"Неверный тип (нужна {PartName})" : $"Неверный размер (нужен {Size})";
+                ActionLogger.Instance.LogEvent(LogType.Warning, 
+                    $"Неудачная попытка установки {PartName}", 
+                    toolName, PartName, tech: reason);
+                
+                if (GameManager.Instance.CurrentMode == SimulatorMode.Learning)
+                    UIManager.Instance?.UpdatePrompt(reason, true);
+            }
+        }
+    }
+
+    private void TryRemoveInstantPart(ItemData currentItem)
+    {
+        if (HasState(PartState.Rusted)) { UIManager.Instance?.UpdatePrompt("ЗАРЖАВЕЛО!", true); return; }
+
+        if (currentItem is ToolData removeTool && IsToolValid(removeTool, out _))
+        {
+            RemovePart();
+        }
+        else if (ValidTools.Count > 0)
+        {
+            UIManager.Instance?.UpdatePrompt("Нужен специальный инструмент!", true);
+        }
+    }
+
+    public override void InteractContinuous(ItemData currentItem, double delta)
+    {
+        if (!IsInstalled || Type == InteractionType.Instant) return;
+        
+        string toolName = currentItem != null ? currentItem.ItemName : "Руки";
+
+        // 1. Проверка на ржавчину
+        if (HasState(PartState.Rusted)) 
+        {
+            if (Input.IsActionJustPressed("interact")) // Логируем только первый щелчок
+                ActionLogger.Instance.LogEvent(LogType.Warning, $"Попытка крутить заржавевшую деталь {PartName}", toolName, PartName);
+            return;
+        }
+
+        // 2. Проверка инструмента
+        ToolData tool = currentItem as ToolData;
+        if (!IsToolValid(tool, out float efficiency)) 
+        {
+            if (Input.IsActionJustPressed("interact")) // Записываем только момент нажатия
+            {
+                string reqTool = ValidTools.Count > 0 ? ValidTools[0].AllowedTool.ToString() : "Спец. инструмент";
+                string reqSize = ValidTools.Count > 0 ? ValidTools[0].RequiredSize.ToString() : "Любой";
+                
+                ActionLogger.Instance.LogEvent(LogType.Warning, 
+                    $"Попытка работы неверным инструментом по {PartName}", 
+                    currentItem?.ItemName ?? "Руки", PartName, 
+                    tech: $"Требуется: {reqTool} ({reqSize})");
+            }
+            return;
+        }
+
+        // 3. Проверка блокировок
+        if (!_isTighteningTarget && !CheckDependencies(false)) 
+        {
+            if (Input.IsActionJustPressed("interact"))
+                ActionLogger.Instance.LogEvent(LogType.Warning, $"Попытка открутить заблокированную деталь {PartName}", toolName, PartName);
+            return;
+        }
+
+        // --- ЕСЛИ ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ - КРУТИМ ---
+        ulong currentFrame = Engine.GetPhysicsFrames();
+        if (currentFrame > _lastInteractFrame + 1) _isActionLocked = false;
+        _lastInteractFrame = currentFrame;
+
+        if (_isActionLocked) return;
+
+        float finalSpeed = 80.0f * efficiency * (float)delta;
+
+        if (_isTighteningTarget)
+        {
+            CurrentTorque += finalSpeed;
+            if (CurrentTorque >= MaxTorque)
+            {
+                CurrentTorque = MaxTorque;
+                _isTighteningTarget = false; 
+                _isActionLocked = true; 
+                ActionLogger.Instance.UpdatePartState(PartId, "Torqued", PartName);
+                ActionLogger.Instance.LogEvent(LogType.Action, $"Деталь {PartName} полностью затянута", toolName, PartName);
+                
+                if (PartItemResource?.TorqueSound != null)
+                    AudioManager.Instance.PlayStream3D(PartItemResource.TorqueSound, GlobalPosition);
+            }
+        }
+        else
+        {
+            CurrentTorque -= finalSpeed;
+            if (CurrentTorque <= 0)
+            {
+                CurrentTorque = 0;
+                _isTighteningTarget = true; 
+                _isActionLocked = true; 
+                ActionLogger.Instance?.LogAction(PartId, "Loosened", PartName);
+            }
+        }
+
+        UIManager.Instance?.UpdateTorqueUI(CurrentTorque, MaxTorque);
+        UpdateContinuousAnimation();
+    }
+
+    public override void InteractAlt(ItemData currentItem)
+    {
+        if (!IsInstalled) return;
+
+        bool canRemove = (Type == InteractionType.Continuous && CurrentTorque <= 0.1f) || 
+                         (Type == InteractionType.Instant && ValidTools.Count == 0);
+
+        if (canRemove)
+        {
+            RemovePart();
+        }
+        else
+        {
+            // Логируем, почему не получилось снять на ПКМ
+            string reason = (Type == InteractionType.Continuous) ? "Деталь не откручена" : "Требуется инструмент (ЛКМ)";
+            ActionLogger.Instance.LogEvent(LogType.Warning, $"Не удалось снять {PartName}: {reason}", "Руки", PartName);
+        }
+    }
+
+    private void RemovePart()
+    {
+        // Проверка физических блокировок (например, не сняты болты сверху)
+        if (!CheckDependencies(false)) return;
+
+        // --- ТЕХНИКА БЕЗОПАСНОСТИ: ДАВЛЕНИЕ ---
+        if (IsUnderPressure && !string.IsNullOrEmpty(ReliefValveId))
+        {
+            if (ActionLogger.Instance?.GetState(ReliefValveId) != "Removed") 
+            {
+                // Критическая ошибка: выброс жидкости/газа
+                ActionLogger.Instance?.AddPenalty($"АВАРИЯ: Снятие {PartName} под давлением!", 25, true, true);
+                SpawnParticles(new Color(0.8f, 0.1f, 0.1f)); // Аварийные красные брызги
+            }
+        }
+
+        // Проверка места в инвентаре
+        bool success = !GiveItemOnRemoval || InventoryManager.Instance.AddItem(PartItemResource);
+        
+        if (success)
+        {
+            // Звук снятия
+            if (PartItemResource?.RemoveSound != null)
+                AudioManager.Instance?.PlayStream3D(PartItemResource.RemoveSound, GlobalPosition, 0f, (float)GD.RandRange(0.9, 1.1));
+
+            _isInstalled = false; 
+            _hasBeenRemoved = true;
+            
+            // Регистрируем изменение в логах и сценарии
+            ActionLogger.Instance?.UpdatePartState(PartId, "Removed", PartName);
+            ActionLogger.Instance?.LogEvent(LogType.Action, $"Деталь демонтирована: {PartName}", "Руки", PartName);
+
+            // Отключаем физику, чтобы деталь не мешала игроку во время анимации
+            var collider = GetNodeOrNull<CollisionShape3D>("CollisionShape3D");
+            if (collider != null) collider.SetDeferred("disabled", true);
+
+            // Запускаем 3D анимацию отлета (AnimateVisuals сама вызовет UpdateVisuals в конце)
+            AnimateVisuals(false);
+
+            // Запускаем анимацию иконки в UI с задержкой (эффект "попадания в карман")
+            if (GiveItemOnRemoval)
+            {
+                GetTree().CreateTimer(0.15f).Timeout += () => {
+                    if (PartItemResource != null && PartItemResource.Icon != null)
+                        UIManager.Instance?.AnimateItemPickup(PartItemResource.Icon);
+                };
+            }
+        }
+        else
+        {
+            ActionLogger.Instance?.LogEvent(LogType.Warning, "Инвентарь переполнен при попытке снять деталь", "Система", PartName);
+            UIManager.Instance?.UpdatePrompt("Инвентарь полон!", true);
+        }
+    }
+
+    public override string GetInteractPrompt()
+    {
+        if (!ShowInteractPrompt) return "";
+        var mode = GameManager.Instance?.CurrentMode ?? SimulatorMode.Learning;
+
+        // --- КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ: Жесткая блокировка в Экзамене/Тренировке ---
+        if (mode != SimulatorMode.Learning && !AllowMinimalPromptInExam)
+        {
+            return ""; // Никакого текста вообще
+        }
+
+        // Если мы здесь, значит либо режим Обучение, либо AllowMinimalPromptInExam == true
+        if (!IsInstalled) 
+        {
+            if (_hasBeenRemoved && !LeaveGhostOnRemoval) return "";
+
+            // В режиме Экзамена/Тренировки показываем только "сухой" технический текст
+            if (mode != SimulatorMode.Learning) return "[ЛКМ] Установить деталь";
+
+            foreach (var parts in RequiredParts)
+                if (parts != null && !parts.IsInstalled) return $"[ЗАКРЫТО] Сначала: {parts.PartName}";
+            
+            return $"Место для: {PartName} ({Size})";
+        }
+
+        // Блокировка другими деталями (только в обучении или если разрешено)
+        foreach (var part in BlockingParts)
+            if (part != null && part.IsInstalled) return mode == SimulatorMode.Learning ? $"[ЗАКРЫТО] Мешает: {part.PartName}" : "";
+
+        // Текст состояний
+        if (HasState(PartState.Rusted) || HasState(PartState.Painted)) 
+            return mode == SimulatorMode.Learning ? "[!] ТРЕБУЕТСЯ ОБРАБОТКА ДЕТАЛИ" : "Требуется обработка";
+        
+        if (Type == InteractionType.Instant) 
+        {
+            if (ValidTools.Count == 0) return mode == SimulatorMode.Learning ? $"[ПКМ] Снять {PartName}" : "Взаимодействие";
+            else return mode == SimulatorMode.Learning ? $"[ПКМ] Снять | [ЛКМ] Использовать инструмент" : "Взаимодействие";
+        }
+
+        // Для резьбовых деталей
+        if (mode != SimulatorMode.Learning) return "Взаимодействие";
+
+        string actionStr = _isTighteningTarget ? "ЗАКРУТИТЬ" : "ОТКРУТИТЬ";
+        if (CurrentTorque <= 0.1f) return $"[ПКМ] Забрать | [ЛКМ] {actionStr}";
+        return $"[ЛКМ] {actionStr}";
+    }
+
+    public override bool CanInteractWith(ItemData item)
+    {
+        if (!IsInstalled) return item is PartItemData part && Mathf.Abs(part.Size - Size) < 0.1f;
+        if (item is ChemicalData) return true;
+        if (item is ToolData tool) return IsToolValid(tool, out _);
+        return false;
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/Mechanics/MachineTester.cs
+================================================================================
+using Godot;
+
+[Tool]
+[GlobalClass]
+public partial class MachineTester : BasePart
+{
+    [ExportGroup("Проверка герметичности")]
+    // Сюда в инспекторе перетащите все прокладки (O-Rings, Gaskets) насоса
+    [Export] public Godot.Collections.Array<Fastener> RequiredSeals { get; set; } = new Godot.Collections.Array<Fastener>();
+
+    public override void Interact(ItemData currentItem)
+    {
+        bool hasLeak = false;
+
+        foreach (var seal in RequiredSeals)
+        {
+            if (seal == null || !seal.IsInstalled || seal.IsDefective)
+            {
+                hasLeak = true;
+                string reason = !seal.IsInstalled ? "отсутствует" : "изношено";
+                
+                // --- ИСПРАВЛЕНИЕ: Добавлены isAccident=true и notifyPlayer=true ---
+                ActionLogger.Instance?.AddPenalty($"Утечка! Уплотнение [{seal?.PartName}] {reason}.", 5, true, true);
+                
+                SpawnLeak(seal.GlobalPosition); 
+            }
+        }
+
+        if (hasLeak)
+        {
+            UIManager.Instance?.UpdatePrompt("[КРИТИЧЕСКАЯ ОШИБКА] Насос дал течь при тестовом запуске!", true);
+            // Метод LogSystemEvent теперь доступен через наш враппер выше
+            ActionLogger.Instance?.LogSystemEvent("TEST_RUN", "FAILED - LEAK DETECTED");
+        }
+        else
+        {
+            UIManager.Instance?.UpdatePrompt("[УСПЕХ] Тестовый запуск прошел штатно.", false);
+            ActionLogger.Instance?.LogSystemEvent("TEST_RUN", "SUCCESS");
+        }
+    }
+
+    private void SpawnLeak(Vector3 pos)
+    {
+        var particles = new CpuParticles3D { Emitting = true, OneShot = false, Amount = 100, Lifetime = 2.0f, Explosiveness = 0.1f };
+        var mat = new StandardMaterial3D { AlbedoColor = new Color(0.1f, 0.1f, 0.8f, 0.6f), Transparency = BaseMaterial3D.TransparencyEnum.Alpha };
+        particles.MaterialOverride = mat;
+        particles.Mesh = new SphereMesh { Radius = 0.05f };
+        GetTree().Root.AddChild(particles);
+        particles.GlobalPosition = pos;
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/UI/InventorySlot.cs
+================================================================================
+using Godot;
+using System;
+
+public partial class InventorySlot : Panel
+{
+    public int SlotIndex { get; set; }
+    private TextureRect _iconRect;
+    private Panel _newIndicator; // Желтый кружок
+	private Panel _selectionBorder;
+
+    public override void _Ready()
+    {
+        CustomMinimumSize = new Vector2(64, 64);
+        MouseFilter = MouseFilterEnum.Stop; 
+
+        var slotStyle = new StyleBoxFlat {
+            BgColor = new Color(0.15f, 0.15f, 0.15f, 1.0f), // Alpha изменена на 1.0f
+            CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10,
+            CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10
+        };
+        AddThemeStyleboxOverride("panel", slotStyle);
+
+        _iconRect = new TextureRect();
+        _iconRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
+        _iconRect.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+        
+        _iconRect.SetAnchorsPreset(LayoutPreset.FullRect);
+        _iconRect.OffsetLeft = 8; _iconRect.OffsetTop = 8;
+        _iconRect.OffsetRight = -8; _iconRect.OffsetBottom = -8;
+        _iconRect.MouseFilter = MouseFilterEnum.Ignore; 
+        
+        // --- ЖЕЛТЫЙ ИНДИКАТОР НОВОГО ПРЕДМЕТА ---
+        _newIndicator = new Panel();
+        var style = new StyleBoxFlat {
+            BgColor = Colors.Yellow,
+            CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10,
+            CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10
+        };
+        _newIndicator.AddThemeStyleboxOverride("panel", style);
+        _newIndicator.CustomMinimumSize = new Vector2(14, 14);
+        _newIndicator.SetAnchorsPreset(LayoutPreset.TopRight);
+        _newIndicator.Position = new Vector2(-18, 4);
+        _newIndicator.MouseFilter = MouseFilterEnum.Ignore;
+        _newIndicator.Visible = false;
+
+        // --- ОБВОДКА ВЫБРАННОГО СЛОТА ---
+        _selectionBorder = new Panel();
+        var borderStyle = new StyleBoxFlat {
+            BgColor = Colors.Transparent, // Прозрачный фон
+            BorderWidthTop = 3, BorderWidthBottom = 3, BorderWidthLeft = 3, BorderWidthRight = 3,
+            BorderColor = new Color(0.2f, 0.8f, 0.2f, 1f), // Зеленая обводка
+            CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10,
+            CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10
+        };
+        _selectionBorder.AddThemeStyleboxOverride("panel", borderStyle);
+        _selectionBorder.SetAnchorsPreset(LayoutPreset.FullRect);
+        _selectionBorder.MouseFilter = MouseFilterEnum.Ignore;
+        _selectionBorder.Visible = false;
+
+        AddChild(_iconRect);
+        AddChild(_newIndicator);
+        AddChild(_selectionBorder);
+    }
+
+    public void SetActiveStatus(bool isActive)
+    {
+        _selectionBorder.Visible = isActive;
+        
+        PivotOffset = CustomMinimumSize / 2; // Центр для масштабирования
+        var tween = CreateTween();
+        
+        if (isActive)
+        {
+            ZIndex = 1; // Поверх остальных слотов
+            tween.TweenProperty(this, "scale", new Vector2(1.1f, 1.1f), 0.15f)
+                 .SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+        }
+        else
+        {
+            ZIndex = 0;
+            tween.TweenProperty(this, "scale", Vector2.One, 0.15f);
+        }
+    }
+
+    public void UpdateSlot(ItemData item, bool isNew)
+    {
+        bool wasEmpty = _iconRect.Texture == null;
+        _iconRect.Texture = item?.Icon;
+        _newIndicator.Visible = isNew && item != null; // Показываем кружок
+        TooltipText = ""; 
+
+        // Анимация плавного появления (Bounce effect) при добавлении предмета
+        if (wasEmpty && item != null)
+        {
+            _iconRect.Scale = new Vector2(0.3f, 0.3f);
+            _iconRect.PivotOffset = CustomMinimumSize / 2; // Центр слота
+            
+            var tween = CreateTween();
+            tween.TweenProperty(_iconRect, "scale", Vector2.One, 0.4f)
+                 .SetTrans(Tween.TransitionType.Back)
+                 .SetEase(Tween.EaseType.Out);
+        }
+    }
+
+    public override void _GuiInput(InputEvent @event)
+    {
+        if (@event is InputEventMouseButton mouseEvent && mouseEvent.Pressed && mouseEvent.ButtonIndex == MouseButton.Left)
+        {
+             var item = InventoryManager.Instance.Items[SlotIndex];
+             // Снимаем метку "Новый" при клике
+             InventoryManager.Instance.MarkItemSeen(SlotIndex);
+             UIManager.Instance?.ShowItemDetails(item);
+        }
+    }
+
+    public override Variant _GetDragData(Vector2 atPosition)
+    {
+        var item = InventoryManager.Instance.Items[SlotIndex];
+        if (item == null) return default;
+
+        // --- ЗВУК ВЗЯТИЯ ИКОНКИ ---
+        if (UIManager.Instance?.SndItemDrag != null) 
+            AudioManager.Instance?.PlayStream(UIManager.Instance.SndItemDrag);
+
+        var preview = new TextureRect { Texture = item.Icon, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, Size = new Vector2(50, 50), Position = new Vector2(-25, -25) };
+        var c = new Control(); c.AddChild(preview); SetDragPreview(c);
+        return SlotIndex; 
+    }
+
+    public override bool _CanDropData(Vector2 atPosition, Variant data) => data.VariantType == Variant.Type.Int;
+    
+    public override void _DropData(Vector2 atPosition, Variant data)
+    {
+        // --- ЗВУК БРОСАНИЯ ИКОНКИ ---
+        if (UIManager.Instance?.SndItemDrop != null) 
+            AudioManager.Instance?.PlayStream(UIManager.Instance.SndItemDrop);
+            
+        InventoryManager.Instance.SwapItems((int)data, SlotIndex);
+    }
+}
+
+
+
+================================================================================
+FILE: ./Scripts/UI/MainMenu.cs
+================================================================================
+using Godot;
+using Godot.Collections;
+
+public partial class MainMenu : CanvasLayer
+{
+	[ExportGroup("Конфигурация (Данные)")]
+	[Export] public Array<ScenarioData> Scenarios { get; set; } = new Array<ScenarioData>();
+
+	[ExportGroup("Контейнеры (Из сцены)")]
+	[Export] private PanelContainer _mainPanel;
+	[Export] private VBoxContainer _cardsContainer;[Export] private GridContainer _buttonsGrid;
+
+	[ExportGroup("Иконки кнопок (SVG|PNG)")]
+	[Export] private Texture2D _iconMode;
+	[Export] private Texture2D _iconResults;[Export] private Texture2D _iconNetwork;
+	[Export] private Texture2D _iconStart;
+	[Export] private Texture2D _iconSettings;
+	[Export] private Texture2D _iconExit;
+
+	[ExportGroup("Звуки Меню")]
+    [Export] private AudioStream _sndHover;
+    [Export] private AudioStream _sndClick;
+    [Export] private AudioStream _sndDropdown;
+
+	private int _selectedScenarioIndex = 0;
+	private SimulatorMode _currentMode = SimulatorMode.Learning;
+	private Array<PanelContainer> _cardNodes = new Array<PanelContainer>();
+    private OptionButton _modeSelector;
+
+	public override async void _Ready()
+	{
+		Input.MouseMode = Input.MouseModeEnum.Visible;
+
+		ApplyMainStyles();
+		PopulateCards();
+		PopulateButtons();
+		
+		if (Scenarios.Count > 0) SelectCard(0);
+		
+		// --- ИСПРАВЛЕНИЕ АНИМАЦИИ ЦЕНТРИРОВАНИЯ ---
+		if (_mainPanel != null)
+		{
+			// Ждем один кадр, чтобы CenterContainer успел рассчитать идеальный центр по разрешению экрана
+			await ToSignal(GetTree(), "process_frame"); 
+			
+			// Запоминаем правильную центральную позицию
+			Vector2 finalPos = _mainPanel.Position; 
+			
+			_mainPanel.Modulate = new Color(1, 1, 1, 0);
+			_mainPanel.Position = finalPos + new Vector2(0, 40); // Смещаем вниз относительно центра
+			
+			var tween = CreateTween().SetParallel(true);
+			tween.TweenProperty(_mainPanel, "modulate", Colors.White, 0.6f).SetTrans(Tween.TransitionType.Cubic);
+			// Анимируем обратно к рассчитанному центру!
+			tween.TweenProperty(_mainPanel, "position", finalPos, 0.6f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+		}
+	}
+
+	private void ApplyMainStyles()
+	{
+		if (_mainPanel != null)
+		{
+			var mainStyle = new StyleBoxFlat {
+				// Идеально черный матовый цвет (почти как у Apple)
+				BgColor = new Color(0.05f, 0.05f, 0.05f, 0.95f), 
+				CornerRadiusTopLeft = 25, CornerRadiusTopRight = 25,
+				CornerRadiusBottomLeft = 25, CornerRadiusBottomRight = 25,
+				ContentMarginLeft = 20, ContentMarginRight = 20,
+				ContentMarginTop = 20, ContentMarginBottom = 20
+			};
+			_mainPanel.AddThemeStyleboxOverride("panel", mainStyle);
+		}
+	}
+
+	// --- ГЕНЕРАЦИЯ СПИСКА КАРТОЧЕК ---
+	private void PopulateCards()
+	{
+		if (_cardsContainer == null) return;
+		foreach (Node child in _cardsContainer.GetChildren()) child.QueueFree();
+		_cardNodes.Clear();
+
+		for (int i = 0; i < Scenarios.Count; i++)
+		{
+			int localIndex = i; 
+			var scenario = Scenarios[localIndex];
+
+			// --- НОВОЕ: ОБЕРТКА ДЛЯ ОТСТУПОВ (ЗАЩИТА ОТ ОБРЕЗАНИЯ) ---
+			var cardWrapper = new MarginContainer();
+			cardWrapper.AddThemeConstantOverride("margin_left", 15);
+			cardWrapper.AddThemeConstantOverride("margin_right", 25); // Больший отступ справа (защита от скроллбара!)
+			cardWrapper.AddThemeConstantOverride("margin_top", 10);
+			cardWrapper.AddThemeConstantOverride("margin_bottom", 10);
+
+			var card = new PanelContainer { 
+				CustomMinimumSize = new Vector2(0, 120), 
+				MouseFilter = Control.MouseFilterEnum.Stop,
+				SizeFlagsHorizontal = Control.SizeFlags.ExpandFill 
+			};
+
+			cardWrapper.AddChild(card); // Кладем карточку внутрь обертки
+
+			// Анимации наведения (чуть уменьшил масштаб до 1.03f для элегантности)
+			card.MouseEntered += () => AnimateHover(card, true, 1.03f);
+			card.MouseExited += () => AnimateHover(card, false, 1.0f);
+			
+			card.GuiInput += (InputEvent @event) => {
+				if (@event is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
+				{
+					SelectCard(localIndex);
+					AnimateClick(card); 
+				}
+			};
+
+			// Внутренние отступы (для текста и иконки)
+			var innerMargin = new MarginContainer();
+			innerMargin.AddThemeConstantOverride("margin_left", 15); 
+			innerMargin.AddThemeConstantOverride("margin_top", 15);
+			innerMargin.AddThemeConstantOverride("margin_right", 15); 
+			innerMargin.AddThemeConstantOverride("margin_bottom", 15);
+			card.AddChild(innerMargin);
+
+			var hbox = new HBoxContainer(); // Убрали ThemeTypeVariation для чистоты
+			hbox.AddThemeConstantOverride("separation", 20);
+			innerMargin.AddChild(hbox);
+
+			// Иконка
+			var icon = new TextureRect {
+				Texture = scenario.PreviewImage,
+				ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+				StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+				CustomMinimumSize = new Vector2(90, 90)
+			};
+			hbox.AddChild(icon);
+
+			// Тексты
+			var vbox = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+			var title = new Label { Text = scenario.ScenarioName };
+			title.AddThemeFontSizeOverride("font_size", 20);
+			
+			var desc = new Label { Text = scenario.Description, AutowrapMode = TextServer.AutowrapMode.WordSmart };
+			desc.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f)); 
+			desc.AddThemeFontSizeOverride("font_size", 14);
+
+			vbox.AddChild(title);
+			vbox.AddChild(desc);
+			hbox.AddChild(vbox);
+
+			// ДОБАВЛЯЕМ ОБЕРТКУ В СПИСОК, А НЕ САМУ КАРТОЧКУ
+			_cardsContainer.AddChild(cardWrapper);
+
+			// Добавляем лейбл с лучшей оценкой
+            string bestGrade = ProgressManager.Instance.GetBestGrade(scenario.ScenarioName);
+            var gradeLabel = new Label { 
+                Text = $"ЛУЧШАЯ ОЦЕНКА: {bestGrade}", 
+                HorizontalAlignment = HorizontalAlignment.Right,
+                SizeFlagsVertical = Control.SizeFlags.ShrinkEnd 
+            };
+            gradeLabel.AddThemeColorOverride("font_color", new Color(0.2f, 0.8f, 0.2f, 0.6f));
+            gradeLabel.AddThemeFontSizeOverride("font_size", 12);
+            vbox.AddChild(gradeLabel); // Добавляем в ту же колонку, где название и описание
+			
+			// Сохраняем саму карточку в массив для изменения зеленой рамки
+			_cardNodes.Add(card); 
+		}
+	}
+
+	// --- ЛОГИКА ВЫДЕЛЕНИЯ КАРТОЧКИ ---
+	private void SelectCard(int index)
+	{
+		if (index < 0 || index >= Scenarios.Count) return;
+		_selectedScenarioIndex = index;
+
+		for (int i = 0; i < _cardNodes.Count; i++)
+		{
+			bool isActive = (i == index);
+			var style = new StyleBoxFlat {
+				BgColor = isActive ? new Color(0.12f, 0.12f, 0.12f, 1f) : new Color(0.15f, 0.15f, 0.15f, 1f),
+				CornerRadiusTopLeft = 15, CornerRadiusTopRight = 15,
+				CornerRadiusBottomLeft = 15, CornerRadiusBottomRight = 15,
+				BorderWidthTop = 2, BorderWidthBottom = 2, BorderWidthLeft = 2, BorderWidthRight = 2,
+				BorderColor = isActive ? new Color(0.4f, 0.8f, 0.4f, 1f) : Colors.Transparent // Зеленая обводка активного
+			};
+			_cardNodes[i].AddThemeStyleboxOverride("panel", style);
+		}
+	}
+
+	// --- ГЕНЕРАЦИЯ СЕТКИ КНОПОК ---
+	private void PopulateButtons()
+	{
+		if (_buttonsGrid == null) return;
+		foreach (Node child in _buttonsGrid.GetChildren()) child.QueueFree();
+
+        // --- ВЫПАДАЮЩИЙ СПИСОК РЕЖИМА ---
+        _modeSelector = new OptionButton();
+        _modeSelector.CustomMinimumSize = new Vector2(300, 50);
+        _modeSelector.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		_modeSelector.AddThemeConstantOverride("arrow_margin", 20);
+		_modeSelector.ButtonDown += () => { 
+            if (_sndDropdown != null) AudioManager.Instance?.PlayStream(_sndDropdown); 
+        };
+        _modeSelector.AddItem("Режим: ОБУЧЕНИЕ", (int)SimulatorMode.Learning);
+        _modeSelector.AddItem("Режим: ТРЕНИРОВКА", (int)SimulatorMode.Training);
+        _modeSelector.AddItem("Режим: ЭКЗАМЕН", (int)SimulatorMode.Exam);
+        
+        var style = new StyleBoxFlat { BgColor = new Color(0.12f, 0.12f, 0.12f, 1f), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10, ContentMarginLeft = 15 };
+        _modeSelector.AddThemeStyleboxOverride("normal", style);
+        _modeSelector.AddThemeStyleboxOverride("hover", style);
+        _modeSelector.AddThemeStyleboxOverride("pressed", style);
+
+        _buttonsGrid.AddChild(_modeSelector);
+
+		_buttonsGrid.AddChild(CreateMenuButton("Запустить", _iconStart, StartGame, true));
+
+		_buttonsGrid.AddChild(CreateMenuButton("Результаты работ", _iconResults, () => { }));
+		_buttonsGrid.AddChild(CreateMenuButton("Настройки", _iconSettings, () => SettingsUI.Instance?.ToggleSettings(true)));
+
+		_buttonsGrid.AddChild(CreateMenuButton("Сетевая работа", _iconNetwork, () => { }));
+		_buttonsGrid.AddChild(CreateMenuButton("Выход", _iconExit, () => GetTree().Quit(), false, true));
+	}
+
+	private Button CreateMenuButton(string text, Texture2D icon, System.Action action, bool isPrimary = false, bool isDanger = false)
+	{
+		var btn = new Button();
+		btn.Text = text; // Больше никаких пробелов!
+		btn.Icon = icon;
+		btn.ExpandIcon = true;
+		btn.Alignment = HorizontalAlignment.Left;
+		btn.CustomMinimumSize = new Vector2(300, 50); 
+		btn.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		
+		// --- ИДЕАЛЬНОЕ ВЫРАВНИВАНИЕ ИКОНОК ---
+		btn.AddThemeConstantOverride("h_separation", 15); // Отступ текста от иконки
+		btn.AddThemeConstantOverride("icon_max_width", 24); // Жесткий размер иконки, чтобы они не прыгали
+		
+		btn.AddThemeColorOverride("icon_normal_color", new Color(0.8f, 0.8f, 0.8f));
+
+		var normalStyle = new StyleBoxFlat {
+			BgColor = new Color(0.12f, 0.12f, 0.12f, 1f), // Чуть светлее черного фона
+			CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10,
+			CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10,
+			ContentMarginLeft = 20 // Отступ иконки от левого края кнопки
+		};
+		
+		if (isPrimary) normalStyle.BorderColor = new Color(0.2f, 0.6f, 0.2f, 1f); 
+		if (isDanger) normalStyle.BorderColor = new Color(0.6f, 0.2f, 0.2f, 1f);  
+		if (isPrimary || isDanger) {
+			normalStyle.BorderWidthTop = 2; normalStyle.BorderWidthBottom = 2;
+			normalStyle.BorderWidthLeft = 2; normalStyle.BorderWidthRight = 2;
+		}
+
+		btn.AddThemeStyleboxOverride("normal", normalStyle);
+		btn.AddThemeStyleboxOverride("hover", normalStyle); // Фон не меняем, меняем масштаб Твином!
+		btn.AddThemeStyleboxOverride("pressed", normalStyle);
+		btn.AddThemeStyleboxOverride("focus", normalStyle);
+
+		// --- АНИМАЦИИ ---
+		btn.MouseEntered += () => AnimateHover(btn, true, 1.04f);
+		btn.MouseExited += () => AnimateHover(btn, false, 1.0f);
+		
+		btn.Pressed += () => {
+			AnimateClick(btn);
+			action?.Invoke();
+		};
+		
+		return btn;
+	}
+
+	// --- ЗАПУСК ИГРЫ ---
+    private void StartGame()
+    {
+        if (Scenarios.Count == 0 || _selectedScenarioIndex < 0) return;
+        var scenario = Scenarios[_selectedScenarioIndex];
+        
+        // 1. ЖЕСТКАЯ ПРОВЕРКА ДО АНИМАЦИИ
+        // Если в JSON есть ошибки, ValidateScenarioConfig сам откроет консоль и вернет false.
+        if (!GameManager.Instance.ValidateScenarioConfig(scenario))
+        {
+            return; // Прерываем запуск игры! Экран не темнеет, мы остаемся в Главном Меню!
+        }
+
+		// ЧИТАЕМ ВЫБРАННЫЙ РЕЖИМ
+        _currentMode = _modeSelector != null ? (SimulatorMode)_modeSelector.GetSelectedId() : SimulatorMode.Learning;
+        
+        // 2. ЕСЛИ ОШИБОК НЕТ - ДЕЛАЕМ КРАСИВОЕ ЗАТУХАНИЕ
+        var fade = new ColorRect { Color = Colors.Black, Modulate = new Color(1, 1, 1, 0), ZIndex = 100 };
+        fade.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        AddChild(fade);
+
+        var tween = CreateTween();
+        tween.TweenProperty(fade, "modulate:a", 1.0f, 0.4f);
+        tween.TweenCallback(Callable.From(() => GameManager.Instance.LoadScenario(scenario, _currentMode)));
+    }
+
+	// --- ДВИЖОК АНИМАЦИЙ UI ---
+	private void AnimateHover(Control control, bool isHovering, float targetScale)
+	{
+		// Звук наведения
+        if (isHovering && _sndHover != null) 
+            AudioManager.Instance?.PlayStream(_sndHover, -5f, (float)GD.RandRange(0.95, 1.05));
+
+		control.PivotOffset = control.Size / 2;
+		
+		var tween = CreateTween();
+		if (isHovering)
+		{
+			// Плавное увеличение
+			tween.TweenProperty(control, "scale", new Vector2(targetScale, targetScale), 0.15f)
+				 .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+		}
+		else
+		{
+			// Возврат в норму
+			tween.TweenProperty(control, "scale", Vector2.One, 0.2f)
+				 .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+		}
+	}
+
+	private void AnimateClick(Control control)
+	{
+		// Звук клика
+        if (_sndClick != null) 
+            AudioManager.Instance?.PlayStream(_sndClick, 0f, (float)GD.RandRange(0.95, 1.05));
+
+		control.PivotOffset = control.Size / 2;
+		var tween = CreateTween();
+		// Резкое сжатие (имитация физического нажатия)
+		tween.TweenProperty(control, "scale", new Vector2(0.95f, 0.95f), 0.05f)
+			 .SetTrans(Tween.TransitionType.Bounce).SetEase(Tween.EaseType.Out);
+		// Возврат к размеру hover
+		tween.TweenProperty(control, "scale", new Vector2(1.02f, 1.02f), 0.15f)
+			 .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+	}
+}
+
+
+
+================================================================================
+FILE: ./Scripts/UI/InventoryDropZone.cs
+================================================================================
+using Godot;
+
+public partial class InventoryDropZone : Control
+{
+    public override void _Ready()
+    {
+        // Растягиваем на весь экран
+        SetAnchorsPreset(LayoutPreset.FullRect);
+        // Ставим подложку в самый низ иерархии внутри родителя
+        ShowBehindParent = true;
+        // Важно: ловим мышь, но пропускаем клики, если это не Drag-and-Drop
+        MouseFilter = MouseFilterEnum.Stop;
+    }
+
+    public override bool _CanDropData(Vector2 atPosition, Variant data)
+    {
+        return data.VariantType == Variant.Type.Int;
+    }
+
+    public override void _DropData(Vector2 atPosition, Variant data)
+    {
+        if (UIManager.Instance?.SndItemDrop != null) 
+            AudioManager.Instance?.PlayStream(UIManager.Instance.SndItemDrop);
+
+        int slotIndex = (int)data;
+        var player = GetTree().GetFirstNodeInGroup("Player") as Player;
+        if (player != null)
+        {
+            player.DropItemFromIndex(slotIndex);
+            UIManager.Instance?.ShowItemDetails(null);
+        }
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/UI/SettingsUI.cs
+================================================================================
+using Godot;
+using System.Linq;
+
+public partial class SettingsUI : CanvasLayer
+{
+    [ExportGroup("Звуки Настроек")]
+    [Export] private AudioStream _sndHover = GD.Load<AudioStream>("res://Assets/Sounds/select.mp3");
+    [Export] private AudioStream _sndClick = GD.Load<AudioStream>("res://Assets/Sounds/click.mp3");
+    [Export] private AudioStream _sndDropdown = GD.Load<AudioStream>("res://Assets/Sounds/dropdown.mp3");
+
+    public static SettingsUI Instance { get; private set; }
+
+    private PanelContainer _bgPanel;
+    private CheckBox _fullscreenCheck, _vsyncCheck, _fpsCheck;
+    private OptionButton _resOption, _msaaOption;
+    private HSlider _scaleSlider, _volSlider, _sensSlider;
+    private Label _scaleVal, _volVal, _sensVal;
+
+    private bool _tempFullscreen, _tempVSync, _tempShowFPS;
+    private int _tempMsaa;
+    private float _tempScale, _tempVol, _tempSens;
+    private Vector2I _tempRes;
+
+    private System.Collections.Generic.List<Vector2I> _resolutions = new System.Collections.Generic.List<Vector2I> { 
+        new Vector2I(1280, 720), 
+        new Vector2I(1366, 768), 
+        new Vector2I(1600, 900), 
+        new Vector2I(1920, 1080), 
+        new Vector2I(2560, 1440),
+        new Vector2I(3840, 2160)
+    };
+
+    public override void _EnterTree()
+    {
+        Instance = this;
+        Layer = 110;
+        ProcessMode = ProcessModeEnum.Always;
+
+        // Создаем UI немедленно при входе в дерево, чтобы ссылки не были null
+        CreateUI();
+        Visible = false;
+    }
+
+    public override void _Input(InputEvent @event)
+    {
+        if (Visible && @event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.Escape)
+        {
+            ToggleSettings(false);
+            GetViewport().SetInputAsHandled();
+        }
+    }
+
+    private void CreateUI()
+    {
+        var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.85f), MouseFilter = Control.MouseFilterEnum.Stop };
+        overlay.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        AddChild(overlay);
+
+        var center = new CenterContainer();
+        center.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        overlay.AddChild(center);
+
+        _bgPanel = new PanelContainer { CustomMinimumSize = new Vector2(550, 0) };
+        var style = new StyleBoxFlat { 
+            BgColor = new Color(0.05f, 0.05f, 0.05f, 1f), 
+            CornerRadiusTopLeft = 25, CornerRadiusBottomRight = 25, 
+            CornerRadiusTopRight = 25, CornerRadiusBottomLeft = 25, 
+            ContentMarginLeft = 35, ContentMarginTop = 35, 
+            ContentMarginRight = 35, ContentMarginBottom = 35, 
+            BorderWidthTop = 1, BorderWidthBottom = 1, BorderWidthLeft = 1, BorderWidthRight = 1, 
+            BorderColor = new Color(1, 1, 1, 0.1f) 
+        };
+        _bgPanel.AddThemeStyleboxOverride("panel", style);
+        center.AddChild(_bgPanel);
+
+        var vbox = new VBoxContainer();
+        vbox.AddThemeConstantOverride("separation", 18);
+        _bgPanel.AddChild(vbox);
+
+        var title = new Label { Text = "НАСТРОЙКИ СИСТЕМЫ", HorizontalAlignment = HorizontalAlignment.Center };
+        title.AddThemeFontSizeOverride("font_size", 26);
+        vbox.AddChild(title);
+        vbox.AddChild(new HSeparator());
+
+        // --- ГЕНЕРАЦИЯ ПОЛЕЙ ---
+        _fullscreenCheck = new CheckBox { Text = "Полноэкранный режим" };
+        _fullscreenCheck.Toggled += (b) => _tempFullscreen = b;
+        vbox.AddChild(_fullscreenCheck);
+
+        Vector2I nativeRes = DisplayServer.ScreenGetSize(DisplayServer.WindowGetCurrentScreen());
+        if (!_resolutions.Contains(nativeRes))
+        {
+            _resolutions.Add(nativeRes);
+            // Сортируем список по количеству пикселей (по возрастанию)
+            _resolutions.Sort((a, b) => (a.X * a.Y).CompareTo(b.X * b.Y)); 
+        }
+
+        _resOption = CreateDropdown("Разрешение экрана", _resolutions.Select(r => $"{r.X}x{r.Y}").ToArray(), vbox);
+        _resOption.ItemSelected += (i) => _tempRes = _resolutions[(int)i];
+
+        _vsyncCheck = new CheckBox { Text = "Вертикальная синхронизация (VSync)" };
+        _vsyncCheck.Toggled += (b) => _tempVSync = b;
+        vbox.AddChild(_vsyncCheck);
+
+        _fpsCheck = new CheckBox { Text = "Показывать счетчик FPS" };
+        _fpsCheck.Toggled += (b) => _tempShowFPS = b;
+        vbox.AddChild(_fpsCheck);
+
+        _msaaOption = CreateDropdown("Сглаживание (MSAA 3D)", new[] { "Выкл", "2x", "4x", "8x" }, vbox);
+        _msaaOption.ItemSelected += (i) => _tempMsaa = (int)i;
+
+        vbox.AddChild(new HSeparator());
+
+        _scaleSlider = CreateSlider("Масштаб интерфейса", 0.5, 2.0, 0.1, vbox, out _scaleVal);
+        _scaleSlider.ValueChanged += (v) => { _tempScale = (float)v; _scaleVal.Text = v.ToString("0.0"); };
+
+        _volSlider = CreateSlider("Громкость", 0.0, 1.0, 0.05, vbox, out _volVal);
+        _volSlider.ValueChanged += (v) => { _tempVol = (float)v; _volVal.Text = (v * 100).ToString("0") + "%"; };
+
+        _sensSlider = CreateSlider("Чувств. мыши", 0.001, 0.01, 0.001, vbox, out _sensVal);
+        _sensSlider.ValueChanged += (v) => { _tempSens = (float)v; _sensVal.Text = v.ToString("0.000"); };
+
+        var btnBox = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
+        btnBox.AddThemeConstantOverride("separation", 20);
+        vbox.AddChild(btnBox);
+
+        var btnCancel = CreateStyledButton("ОТМЕНА", Colors.White);
+        btnCancel.Pressed += () => ToggleSettings(false);
+        btnBox.AddChild(btnCancel);
+
+        var btnSave = CreateStyledButton("СОХРАНИТЬ", new Color(0.4f, 0.8f, 0.4f));
+		btnSave.Pressed += () => {
+            var sm = SettingsManager.Instance;
+            // 1. Сначала ПЕРЕЗАПИСЫВАЕМ данные в менеджере из временных переменных UI
+            sm.IsFullscreen = _tempFullscreen; 
+            sm.Resolution = _tempRes; 
+            sm.VSync = _tempVSync;
+            sm.Msaa3D = _tempMsaa;
+            sm.ShowFPS = _tempShowFPS;
+            sm.UiScale = _tempScale; 
+            sm.MasterVolume = _tempVol; 
+            sm.MouseSensitivity = _tempSens;
+            
+            // 2. Затем вызываем сохранение и применение
+            sm.SaveSettings(); 
+            
+            ToggleSettings(false);
+        };
+        btnBox.AddChild(btnSave);
+    }
+
+    private OptionButton CreateDropdown(string labelText, string[] options, VBoxContainer parent)
+    {
+        var hbox = new HBoxContainer();
+        hbox.AddChild(new Label { Text = labelText, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill });
+        var ob = new OptionButton { CustomMinimumSize = new Vector2(200, 0) };
+        foreach (var opt in options) ob.AddItem(opt);
+        
+        var style = new StyleBoxFlat { BgColor = new Color(0.12f, 0.12f, 0.12f, 1f), ContentMarginLeft = 10, CornerRadiusTopLeft = 5, CornerRadiusBottomRight = 5, CornerRadiusTopRight = 5, CornerRadiusBottomLeft = 5 };
+        ob.AddThemeStyleboxOverride("normal", style);
+
+        if (_sndDropdown != null) AudioManager.Instance?.PlayStream(_sndDropdown, -5f, (float)GD.RandRange(0.95, 1.05));
+        
+        hbox.AddChild(ob);
+        parent.AddChild(hbox);
+        return ob;
+    }
+
+    private HSlider CreateSlider(string labelText, double min, double max, double step, VBoxContainer parent, out Label valLabel)
+    {
+        parent.AddChild(new Label { Text = labelText });
+        var hbox = new HBoxContainer();
+        var slider = new HSlider { MinValue = min, MaxValue = max, Step = step, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
+        valLabel = new Label { CustomMinimumSize = new Vector2(60, 0), HorizontalAlignment = HorizontalAlignment.Right };
+        hbox.AddChild(slider);
+        hbox.AddChild(valLabel);
+        parent.AddChild(hbox);
+        return slider;
+    }
+
+    private Button CreateStyledButton(string text, Color textColor)
+    {
+        var btn = new Button { Text = text, CustomMinimumSize = new Vector2(180, 45) };
+        var bStyle = new StyleBoxFlat { BgColor = new Color(0.12f, 0.12f, 0.12f, 1f), CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10 };
+        btn.AddThemeStyleboxOverride("normal", bStyle);
+        btn.AddThemeStyleboxOverride("hover", bStyle);
+        btn.AddThemeColorOverride("font_color", textColor);
+
+        BindAudioToButton(btn);
+
+        return btn;
+    }
+
+    public void ToggleSettings(bool show)
+    {
+        if (show)
+        {
+            var sm = SettingsManager.Instance;
+            _tempFullscreen = sm.IsFullscreen; _tempRes = sm.Resolution; _tempVSync = sm.VSync;
+            _tempMsaa = sm.Msaa3D; _tempScale = sm.UiScale; _tempVol = sm.MasterVolume; _tempSens = sm.MouseSensitivity;
+            _tempShowFPS = sm.ShowFPS;
+
+            // БЕЗОПАСНАЯ УСТАНОВКА ЗНАЧЕНИЙ (Null Check)
+            if (_fullscreenCheck != null) _fullscreenCheck.ButtonPressed = _tempFullscreen;
+            if (_vsyncCheck != null) _vsyncCheck.ButtonPressed = _tempVSync;
+            if (_fpsCheck != null) _fpsCheck.ButtonPressed = _tempShowFPS;
+            
+            if (_resOption != null) {
+                int resIdx = _resolutions.IndexOf(_tempRes);
+                if (resIdx >= 0) _resOption.Select(resIdx);
+            }
+            
+            if (_msaaOption != null) _msaaOption.Select(_tempMsaa);
+            if (_scaleSlider != null) _scaleSlider.Value = _tempScale;
+            if (_volSlider != null) _volSlider.Value = _tempVol;
+            if (_sensSlider != null) _sensSlider.Value = _tempSens;
+        }
+        Visible = show;
+    }
+
+    private void BindAudioToButton(BaseButton btn)
+    {
+        btn.MouseEntered += () => { 
+            if (_sndHover != null) AudioManager.Instance?.PlayStream(_sndHover, -5f, (float)GD.RandRange(0.95, 1.05)); 
+        };
+        btn.Pressed += () => { 
+            if (_sndClick != null) AudioManager.Instance?.PlayStream(_sndClick, 0f, (float)GD.RandRange(0.95, 1.05)); 
+        };
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/UI/ResultsUI.cs
+================================================================================
+using Godot;
+using System;
+
+public partial class ResultsUI : CanvasLayer
+{
+    public static ResultsUI Instance { get; private set; }
+
+    private PanelContainer _mainPanel;
+    private RichTextLabel _reportLabel;
+    private FileDialog _saveDialog; // Системное окно сохранения
+
+    public override void _EnterTree()
+    {
+        Instance = this;
+        Layer = 120;
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
+    public override void _Ready()
+    {
+        CreateUI();
+        InitializeSaveDialog();
+        Visible = false;
+    }
+
+    private void InitializeSaveDialog()
+    {
+        _saveDialog = new FileDialog();
+        _saveDialog.Access = FileDialog.AccessEnum.Filesystem;
+        _saveDialog.FileMode = FileDialog.FileModeEnum.SaveFile;
+        _saveDialog.AddFilter("*.html", "HTML Report");
+        _saveDialog.Title = "Сохранить отчет как...";
+        _saveDialog.FileSelected += OnFileSaveSelected;
+        AddChild(_saveDialog);
+    }
+
+    private void CreateUI()
+    {
+        var overlay = new ColorRect { Color = new Color(0, 0, 0, 0.9f), MouseFilter = Control.MouseFilterEnum.Stop };
+        overlay.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        AddChild(overlay);
+
+        _mainPanel = new PanelContainer { CustomMinimumSize = new Vector2(850, 650) };
+        _mainPanel.SetAnchorsPreset(Control.LayoutPreset.Center);
+        _mainPanel.PivotOffset = new Vector2(425, 325);
+        
+        var style = new StyleBoxFlat { 
+            BgColor = new Color(0.1f, 0.1f, 0.1f, 1f), 
+            CornerRadiusTopLeft = 20, CornerRadiusTopRight = 20, 
+            CornerRadiusBottomLeft = 20, CornerRadiusBottomRight = 20,
+            ContentMarginLeft = 30, ContentMarginTop = 30, ContentMarginRight = 30, ContentMarginBottom = 30,
+            BorderWidthTop = 1, BorderColor = new Color(1, 1, 1, 0.1f)
+        };
+        _mainPanel.AddThemeStyleboxOverride("panel", style);
+        overlay.AddChild(_mainPanel);
+
+        var vbox = new VBoxContainer();
+        vbox.AddThemeConstantOverride("separation", 20);
+        _mainPanel.AddChild(vbox);
+
+        _reportLabel = new RichTextLabel { 
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            BbcodeEnabled = true, SelectionEnabled = true, FocusMode = Control.FocusModeEnum.Click
+        };
+        vbox.AddChild(_reportLabel);
+
+        var btnHBox = new HBoxContainer();
+        btnHBox.AddThemeConstantOverride("separation", 15);
+        vbox.AddChild(btnHBox);
+
+        // --- КНОПКИ ---
+        var btnSave = CreateStyledButton("СОХРАНИТЬ", new Color(0.2f, 0.6f, 1f));
+        btnSave.Pressed += () => _saveDialog.PopupCentered(new Vector2I(800, 500));
+        btnHBox.AddChild(btnSave);
+
+        var btnPrint = CreateStyledButton("РАСПЕЧАТАТЬ", new Color(0.2f, 1f, 0.6f));
+        btnPrint.Pressed += OnPrintPressed;
+        btnHBox.AddChild(btnPrint);
+
+        var btnRetry = CreateStyledButton("ПОВТОРИТЬ", new Color(1f, 0.8f, 0.2f));
+        btnRetry.Pressed += OnRetryPressed;
+        btnHBox.AddChild(btnRetry);
+
+        var btnMenu = CreateStyledButton("В МЕНЮ", Colors.White);
+        btnMenu.Pressed += OnBackToMenuPressed;
+        btnHBox.AddChild(btnMenu);
+    }
+
+    public async void ShowResults()
+    {
+        if (UIManager.Instance != null) UIManager.Instance.TogglePauseMenu(false);
+        Input.MouseMode = Input.MouseModeEnum.Visible;
+        GetTree().Paused = true;
+        
+        string finalGrade = ActionLogger.Instance.CalculateGrade();
+        ProgressManager.Instance?.SaveResult(GameManager.Instance.CurrentScenario.ScenarioName, ActionLogger.Instance.Score, finalGrade);
+
+        _reportLabel.Text = ActionLogger.Instance.GenerateFullReport();
+        _reportLabel.Text += $"\n[center][font_size=32][color=yellow][b]ИТОГОВАЯ ОЦЕНКА: {finalGrade}[/b][/color][/font_size][/center]";
+        
+        Visible = true;
+        _mainPanel.SetAnchorsPreset(Control.LayoutPreset.Center);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        _mainPanel.GlobalPosition = (GetViewport().GetVisibleRect().Size / 2) - (_mainPanel.Size / 2);
+        
+        _mainPanel.Modulate = new Color(1, 1, 1, 0);
+        _mainPanel.Scale = new Vector2(0.8f, 0.8f);
+        var tween = CreateTween().SetParallel(true).SetPauseMode(Tween.TweenPauseMode.Process);
+        tween.TweenProperty(_mainPanel, "modulate:a", 1.0f, 0.4f);
+        tween.TweenProperty(_mainPanel, "scale", Vector2.One, 0.4f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+    }
+
+    private void OnFileSaveSelected(string path)
+    {
+        string html = ActionLogger.Instance.GenerateHtmlReport();
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+        if (file != null)
+        {
+            file.StoreString(html);
+            file.Close();
+            DeveloperConsole.Instance?.Log($"Отчет сохранен: {path}", "green");
+        }
+    }
+
+    private void OnPrintPressed()
+    {
+        // Для печати сохраняем временный файл и открываем его браузером
+        string tempPath = OS.GetUserDataDir().PathJoin("temp_print_report.html");
+        using var file = FileAccess.Open(tempPath, FileAccess.ModeFlags.Write);
+        if (file != null)
+        {
+            file.StoreString(ActionLogger.Instance.GenerateHtmlReport());
+            file.Close();
+            OS.ShellOpen(ProjectSettings.GlobalizePath(tempPath));
+        }
+    }
+
+    private void OnRetryPressed()
+    {
+        Visible = false;
+        GetTree().Paused = false;
+        GameManager.Instance.RestartScenario();
+    }
+
+    private void OnBackToMenuPressed()
+    {
+        Visible = false;
+        GetTree().Paused = false;
+        GameManager.Instance.LoadMainMenu();
+    }
+
+    private Button CreateStyledButton(string text, Color color)
+    {
+        var btn = new Button { 
+            Text = text, 
+            CustomMinimumSize = new Vector2(0, 50), 
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill 
+        };
+        
+        var style = new StyleBoxFlat { 
+            BgColor = new Color(0.15f, 0.15f, 0.15f, 1f), 
+            CornerRadiusTopLeft = 10, CornerRadiusTopRight = 10, 
+            CornerRadiusBottomLeft = 10, CornerRadiusBottomRight = 10 
+        };
+        
+        btn.AddThemeStyleboxOverride("normal", style);
+        btn.AddThemeStyleboxOverride("hover", style); // Анимируем скейл, а не фон
+        btn.AddThemeStyleboxOverride("pressed", style);
+        btn.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
+        btn.AddThemeColorOverride("font_color", color);
+
+        // ПРИВЯЗКА АНИМАЦИЙ
+        btn.MouseEntered += () => AnimateHover(btn, true, 1.05f);
+        btn.MouseExited += () => AnimateHover(btn, false, 1.0f);
+        btn.Pressed += () => AnimateClick(btn);
+
+        return btn;
+    }
+
+	private void AnimateHover(Control control, bool isHovering, float targetScale)
+    {
+        // Звук наведения (используем звуки из UIManager)
+        if (isHovering && UIManager.Instance?.SndHover != null) 
+            AudioManager.Instance?.PlayStream(UIManager.Instance.SndHover, -5f);
+
+        control.PivotOffset = control.Size / 2;
+        var tween = CreateTween().SetPauseMode(Tween.TweenPauseMode.Process);
+        tween.TweenProperty(control, "scale", isHovering ? new Vector2(targetScale, targetScale) : Vector2.One, 0.15f)
+             .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+    }
+
+    private void AnimateClick(Control control)
+    {
+        if (UIManager.Instance?.SndClick != null) 
+            AudioManager.Instance?.PlayStream(UIManager.Instance.SndClick);
+
+        control.PivotOffset = control.Size / 2;
+        var tween = CreateTween().SetPauseMode(Tween.TweenPauseMode.Process);
+        tween.TweenProperty(control, "scale", new Vector2(0.95f, 0.95f), 0.05f).SetTrans(Tween.TransitionType.Bounce);
+        tween.TweenProperty(control, "scale", new Vector2(1.05f, 1.05f), 0.15f);
+    }
+}
+
+
+================================================================================
+FILE: ./Scripts/UI/UIManager.cs
+================================================================================
+using Godot;
+using System.Collections.Generic;
+
+public partial class UIManager : CanvasLayer
+{
+	public static UIManager Instance { get; private set; }
+
+	// --- ССЫЛКИ НА UI ---
+	[ExportGroup("Меню Паузы")][Export] private Control _pauseMenuPanel;
+	[ExportGroup("Иконки Меню Паузы")]
+	[Export] private Texture2D _iconResume;
+	[Export] private Texture2D _iconSettings;[Export] private Texture2D _iconRestart;
+	[Export] private Texture2D _iconHome;
+
+	[ExportGroup("Инвентарь")]
+	[Export] private GridContainer _inventoryGrid; 
+	[Export] private Control _inventoryWindow; 
+	[Export] private PanelContainer _gridBackgroundPanel;
+	[Export] private PanelContainer _detailsPanelContainer;
+	[Export] private Control _detailsContentBox;[ExportGroup("Детали Предмета (Инвентарь)")]
+	[Export] private Label _detailNameLabel;
+	[Export] private Label _detailDescLabel;
+	[Export] private TextureRect _detailIcon;
+
+	[ExportGroup("Hotbar")]
+	[Export] private HBoxContainer _hotbarContainer;
+
+	[ExportGroup("HUD и Тултипы")]
+	[Export] private ColorRect _crosshair;
+	[Export] private Label _promptLabel;
+	[Export] private PanelContainer _worldTooltipPanel;[Export] private Label _worldNameLabel;
+	[Export] private Label _worldDescLabel;[Export] private Control _worldSeparator;
+	[Export] private Label _worldStatesLabel;
+	[Export] private Control _worldSeparator2;
+	[Export] private ProgressBar _torqueProgressBar;
+	[Export] private Label _torqueNumbersLabel;
+	[Export] private Control _taskTrackerPanel;
+	[Export] private ProgressBar _taskProgressBar;
+	[Export] private Label _taskNameLabel;
+	[Export] private Label _taskDescLabel;
+	[Export] private Control _taskSeparator;
+	[Export] private Label _fpsLabel;
+
+	[ExportGroup("Звуки Системы и Инвентаря")]
+	[Export] public AudioStream SndHover { get; set; }
+	[Export] public AudioStream SndClick { get; set; }
+	[Export] public AudioStream SndDropdown { get; set; }
+	[Export] public AudioStream SndInvOpen { get; set; }
+	[Export] public AudioStream SndInvClose { get; set; }
+	[Export] public AudioStream SndHotbarSwitch { get; set; }
+	[Export] public AudioStream SndItemDrag { get; set; }
+	[Export] public AudioStream SndItemDrop { get; set; }
+	[Export] public AudioStream SndTaskOk { get; set; }
+	[Export] public AudioStream SndTaskComplete { get; set; }
+	[Export] public AudioStream SndError { get; set; }
+
+	// --- СОСТОЯНИЕ И АНИМАЦИИ ---
+	private float _messageLockTimer = 0.0f;
+	private string _normalPromptCache = "";
+	private bool _isPaused = false;
+	private bool _isDetailsOpen = false;
+
+	private Tween _inventoryTween;
+	private Tween _detailsTween;
+	private Tween _pauseTween;
+
+	private List<InventorySlot> _hotbarSlots = new List<InventorySlot>();
+	private List<InventorySlot> _inventorySlots = new List<InventorySlot>();
+
+	// --- ИНИЦИАЛИЗАЦИЯ ---
+    public override void _EnterTree()
+    {
+        // Теперь Instance задается один раз и навсегда
+        if (Instance == null) Instance = this;
+    }
+
+    public override void _Ready()
+    {
+        // Инициализируем всё один раз при старте всей ИГРЫ
+        InitializeHUD();
+        ApplyGlobalStyles();
+        GenerateInventorySlots();
+
+        // Подписываемся один раз
+        InventoryManager.Instance.OnInventoryUpdated += RefreshAllSlots;
+        InventoryManager.Instance.OnActiveSlotChanged += HighlightActiveSlot;
+        
+        // Скрываем всё лишнее
+        _pauseMenuPanel.Visible = false;
+        _pauseMenuPanel.Modulate = new Color(1, 1, 1, 0);
+    }
+
+	public override void _ExitTree() { }
+
+	private void InitializeHUD()
+	{
+		HideTorqueUI();
+		if (_inventoryWindow != null) 
+		{
+			_inventoryWindow.Visible = false;
+			_inventoryWindow.Modulate = new Color(1, 1, 1, 0);
+			_inventoryWindow.MouseFilter = Control.MouseFilterEnum.Stop;
+		}
+		
+		if (_worldTooltipPanel != null) _worldTooltipPanel.Visible = false;
+		
+		if (_pauseMenuPanel != null) 
+		{
+			_pauseMenuPanel.Visible = false;
+			_pauseMenuPanel.Modulate = new Color(1, 1, 1, 0);
+		}
+
+		if (_promptLabel != null)
+		{
+			_promptLabel.TopLevel = true;
+			_promptLabel.HorizontalAlignment = HorizontalAlignment.Left;
+		}
+
+		if (_detailIcon != null)
+		{
+			_detailIcon.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
+			_detailIcon.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+			_detailIcon.CustomMinimumSize = new Vector2(100, 100);
+			_detailIcon.Size = new Vector2(100, 100);
+		}
+		
+		if (_detailsContentBox != null) _detailsContentBox.Visible = false;
+	}
+
+	private void ApplyGlobalStyles()
+	{
+		StyleBoxFlat CreateDarkPanel(int radius, int margin) => new StyleBoxFlat { 
+			BgColor = new Color(0.12f, 0.12f, 0.12f, 1.0f), 
+			CornerRadiusTopLeft = radius, CornerRadiusTopRight = radius, 
+			CornerRadiusBottomLeft = radius, CornerRadiusBottomRight = radius,
+			ContentMarginLeft = margin, ContentMarginRight = margin, 
+			ContentMarginTop = margin, ContentMarginBottom = margin
+		};
+
+		if (_gridBackgroundPanel != null) _gridBackgroundPanel.AddThemeStyleboxOverride("panel", CreateDarkPanel(15, 15));
+		
+		if (_detailsPanelContainer != null)
+		{
+			_detailsPanelContainer.AddThemeStyleboxOverride("panel", CreateDarkPanel(15, 20));
+			_detailsPanelContainer.ClipContents = true; 
+			_detailsPanelContainer.CustomMinimumSize = new Vector2(0, 0); 
+		}
+
+		StyleBoxFlat CreateTooltipPanel() => new StyleBoxFlat {
+			BgColor = new Color(0.12f, 0.12f, 0.12f, 0.95f),
+			CornerRadiusTopLeft = 12, CornerRadiusTopRight = 12,
+			CornerRadiusBottomLeft = 12, CornerRadiusBottomRight = 12,
+			ContentMarginLeft = 15, ContentMarginRight = 15,
+			ContentMarginTop = 10, ContentMarginBottom = 10,
+			BorderWidthTop = 1, BorderWidthBottom = 1, BorderWidthLeft = 1, BorderWidthRight = 1,
+			BorderColor = new Color(1, 1, 1, 0.08f) 
+		};
+
+		if (_worldTooltipPanel != null) _worldTooltipPanel.AddThemeStyleboxOverride("panel", CreateTooltipPanel());
+		if (_taskTrackerPanel != null && _taskTrackerPanel is PanelContainer tp) tp.AddThemeStyleboxOverride("panel", CreateTooltipPanel());
+
+		var sepStyle = new StyleBoxLine { Color = new Color(1, 1, 1, 0.15f), Thickness = 1, GrowBegin = 0, GrowEnd = 0 };
+		ThemeDB.GetDefaultTheme().SetStylebox("separator", "HSeparator", sepStyle);
+	}
+
+	// --- ПРОЦЕССЫ КАДРА (HUD И АНИМАЦИИ) ---
+	public override void _Process(double delta)
+	{
+		ProcessPromptTimer(delta);
+		ProcessFPSDisplay();
+		ProcessFloatingUI(delta);
+	}
+
+	private void ProcessPromptTimer(double delta)
+	{
+		if (_messageLockTimer > 0)
+		{
+			_messageLockTimer -= (float)delta;
+			if (_messageLockTimer <= 0 && _promptLabel != null)
+			{
+				_promptLabel.Modulate = Colors.White;
+				_promptLabel.Text = _normalPromptCache;
+			}
+		}
+	}
+
+	private void ProcessFPSDisplay()
+	{
+		if (_fpsLabel != null)
+		{
+			if (SettingsManager.Instance != null && SettingsManager.Instance.ShowFPS)
+			{
+				_fpsLabel.Visible = true;
+				double fps = Engine.GetFramesPerSecond();
+				_fpsLabel.Text = $"FPS: {fps}";
+				_fpsLabel.Modulate = fps >= 60 ? Colors.Green : (fps >= 30 ? Colors.Yellow : Colors.Red);
+			}
+			else _fpsLabel.Visible = false;
+		}
+	}
+
+	private void ProcessFloatingUI(double delta)
+	{
+		Vector2 mousePos = GetViewport().GetMousePosition();
+
+		if (_promptLabel != null && !string.IsNullOrEmpty(_promptLabel.Text))
+		{
+			_promptLabel.Visible = true;
+			Vector2 promptTarget = mousePos + new Vector2(25, -30); 
+			_promptLabel.GlobalPosition = _promptLabel.GlobalPosition.Lerp(promptTarget, 25f * (float)delta);
+		}
+		else if (_promptLabel != null) _promptLabel.Visible = false;
+
+		if (_worldTooltipPanel != null && _worldTooltipPanel.Visible)
+		{
+			Vector2 tooltipTarget = mousePos + new Vector2(25, 25);
+			_worldTooltipPanel.GlobalPosition = _worldTooltipPanel.GlobalPosition.Lerp(tooltipTarget, 20f * (float)delta);
+			_worldTooltipPanel.Size = Vector2.Zero; 
+		}
+	}
+
+	// --- ИНВЕНТАРЬ ---
+	private void GenerateInventorySlots()
+	{
+		// Проверяем, назначены ли контейнеры в Инспекторе
+		if (_hotbarContainer == null || _inventoryGrid == null)
+		{
+			GD.PrintErr("[UI ERROR] Контейнеры Hotbar или InventoryGrid не назначены в Инспекторе UIManager!");
+			return;
+		}
+
+		foreach (Node child in _hotbarContainer.GetChildren()) child.QueueFree();
+		foreach (Node child in _inventoryGrid.GetChildren()) child.QueueFree();
+		
+		_hotbarSlots.Clear();
+		_inventorySlots.Clear();
+
+		for (int i = 0; i < InventoryManager.HotbarSize; i++)
+		{
+			var slot = new InventorySlot { SlotIndex = i };
+			_hotbarContainer.AddChild(slot);
+			_hotbarSlots.Add(slot);
+		}
+
+		for (int i = 0; i < InventoryManager.TotalSlots; i++)
+		{
+			var slot = new InventorySlot { SlotIndex = i };
+			_inventoryGrid.AddChild(slot);
+			_inventorySlots.Add(slot);
+		}
+	}
+
+	private void RefreshAllSlots()
+	{
+		var items = InventoryManager.Instance.Items;
+		var isNew = InventoryManager.Instance.IsNewItem; 
+		
+		for (int i = 0; i < _hotbarSlots.Count; i++) _hotbarSlots[i].UpdateSlot(items[i], isNew[i]);
+		for (int i = 0; i < _inventorySlots.Count; i++) _inventorySlots[i].UpdateSlot(items[i], isNew[i]);
+	}
+
+	private void HighlightActiveSlot(int index, ItemData item)
+	{
+		for (int i = 0; i < _hotbarSlots.Count; i++) _hotbarSlots[i].SetActiveStatus(i == index);
+	}
+
+	public void ToggleFullInventory(bool isOpen)
+	{
+		if (_inventoryWindow != null)
+		{
+			if (!isOpen) ShowItemDetails(null); 
+
+			_inventoryTween?.Kill();
+			_inventoryTween = CreateTween();
+
+			if (isOpen)
+			{
+				if (SndInvOpen != null) AudioManager.Instance?.PlayStream(SndInvOpen);
+				_inventoryWindow.Visible = true;
+				RefreshAllSlots();
+				_inventoryTween.TweenProperty(_inventoryWindow, "modulate", Colors.White, 0.2f).SetTrans(Tween.TransitionType.Sine);
+			}
+			else
+			{
+				 if (SndInvClose != null) AudioManager.Instance?.PlayStream(SndInvClose);
+				_inventoryTween.TweenProperty(_inventoryWindow, "modulate", new Color(1, 1, 1, 0), 0.2f).SetTrans(Tween.TransitionType.Sine);
+				_inventoryTween.TweenCallback(Callable.From(() => _inventoryWindow.Visible = false));
+			}
+		}
+		if (_crosshair != null) _crosshair.Visible = !isOpen;
+	}
+
+	public void ShowItemDetails(ItemData item)
+	{
+		if (_detailsPanelContainer == null || _detailsContentBox == null) return;
+
+		if (item == null)
+		{
+			if (_isDetailsOpen)
+			{
+				_isDetailsOpen = false;
+				_detailsContentBox.Visible = false; 
+				
+				_detailsTween?.Kill(); 
+				_detailsTween = CreateTween();
+				
+				_detailsTween.Parallel().TweenProperty(_detailsPanelContainer, "custom_minimum_size:x", 0.0f, 0.25f)
+							 .SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut);
+				_detailsTween.Parallel().TweenProperty(_detailsPanelContainer, "modulate", new Color(1, 1, 1, 0), 0.2f);
+				_detailsTween.TweenCallback(Callable.From(() => _detailsPanelContainer.Visible = false));
+			}
+			return;
+		}
+
+		if (_detailNameLabel != null) _detailNameLabel.Text = item.ItemName;
+		if (_detailDescLabel != null) _detailDescLabel.Text = item.Description;
+		if (_detailIcon != null) _detailIcon.Texture = item.Icon;
+
+		if (!_isDetailsOpen)
+		{
+			_isDetailsOpen = true;
+			_detailsPanelContainer.Visible = true;
+			
+			_detailsTween?.Kill();
+			_detailsTween = CreateTween();
+			
+			_detailsTween.Parallel().TweenProperty(_detailsPanelContainer, "custom_minimum_size:x", 300.0f, 0.3f)
+						 .SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+			_detailsTween.Parallel().TweenProperty(_detailsPanelContainer, "modulate", Colors.White, 0.2f);
+			
+			_detailsTween.TweenCallback(Callable.From(() => _detailsContentBox.Visible = true));
+		}
+	}
+
+	public void AnimateItemPickup(Texture2D icon)
+	{
+		if (icon == null) return;
+
+		var flyingIcon = new TextureRect {
+			Texture = icon, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+			StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, Size = new Vector2(64, 64)
+		};
+		flyingIcon.PivotOffset = flyingIcon.Size / 2;
+		flyingIcon.GlobalPosition = GetViewport().GetVisibleRect().Size / 2;
+		AddChild(flyingIcon);
+
+		Vector2 endPos = new Vector2(GetViewport().GetVisibleRect().Size.X / 2, GetViewport().GetVisibleRect().Size.Y - 50);
+
+		var tween = CreateTween().SetParallel(true); 
+		tween.TweenProperty(flyingIcon, "global_position", endPos, 0.5f).SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.In);
+		tween.TweenProperty(flyingIcon, "scale", new Vector2(0.2f, 0.2f), 0.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.In);
+		tween.TweenProperty(flyingIcon, "modulate:a", 0f, 0.5f);
+		tween.Finished += () => flyingIcon.QueueFree();
+	}
+
+	// --- ПАУЗА И ДЕЙСТВИЯ ---
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        // Только "живой" экземпляр с привязанным интерфейсом может ставить игру на паузу
+        if (_hotbarContainer == null) return;
+
+        if (@event.IsActionPressed("ui_cancel"))
+        {
+            // Не позволяем открывать паузу, если мы в Главном Меню
+            if (GetTree().CurrentScene != null && GetTree().CurrentScene.Name == "MainMenu") return;
+            
+            TogglePauseMenu(!_isPaused);
+        }
+    }
+
+    public void TogglePauseMenu(bool pause)
+    {
+        // Защита от вызова на пустом синглтоне
+        if (_pauseMenuPanel == null || !IsInsideTree()) return;
+
+        _isPaused = pause;
+        GetTree().Paused = _isPaused; 
+
+        if (_isPaused)
+        {
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+            if (_crosshair != null) _crosshair.Visible = false;
+
+            var container = FindContainer(_pauseMenuPanel);
+            if (container != null && container.GetChildCount() == 0)
+            {
+                if (container is BoxContainer box) box.AddThemeConstantOverride("separation", 15);
+                container.AddChild(CreatePauseButton("Продолжить", _iconResume, OnResumePressed));
+                container.AddChild(CreatePauseButton("Начать заново", _iconRestart, OnRestartPressed));
+                container.AddChild(CreatePauseButton("Настройки", _iconSettings, OnSettingsPausePressed));
+                container.AddChild(CreatePauseButton("Выйти в меню", _iconHome, OnMainMenuPressed));
+            }
+
+            _pauseMenuPanel.Visible = true;
+            _pauseTween?.Kill();
+            _pauseTween = CreateTween();
+            _pauseTween.SetPauseMode(Tween.TweenPauseMode.Process);
+            _pauseTween.TweenProperty(_pauseMenuPanel, "modulate:a", 1.0f, 0.2f).SetTrans(Tween.TransitionType.Sine);
+        }
+        else
+        {
+            // Прячем меню
+            _pauseTween?.Kill();
+            _pauseTween = CreateTween();
+            _pauseTween.SetPauseMode(Tween.TweenPauseMode.Process);
+            _pauseTween.TweenProperty(_pauseMenuPanel, "modulate:a", 0.0f, 0.2f).SetTrans(Tween.TransitionType.Sine);
+            _pauseTween.TweenCallback(Callable.From(() => _pauseMenuPanel.Visible = false));
+
+            // Возвращаем мышь только если не открыт инвентарь
+            bool isInvOpen = _inventoryWindow != null && _inventoryWindow.Visible;
+            Input.MouseMode = isInvOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
+            if (_crosshair != null && !isInvOpen) _crosshair.Visible = true;
+        }
+    }
+
+	private Control FindContainer(Node root)
+	{
+		if (root is VBoxContainer || root is HBoxContainer) return (Control)root;
+		foreach (Node child in root.GetChildren())
+		{
+			var result = FindContainer(child);
+			if (result != null) return result;
+		}
+		return null;
+	}
+
+	private Button CreatePauseButton(string text, Texture2D icon, System.Action action)
+	{
+		var btn = new Button { Text = text, Icon = icon, ExpandIcon = true, Alignment = HorizontalAlignment.Left, CustomMinimumSize = new Vector2(280, 55) };
+		btn.AddThemeConstantOverride("h_separation", 15);
+		btn.AddThemeConstantOverride("icon_max_width", 24);
+
+		var style = new StyleBoxFlat { BgColor = new Color(0.12f, 0.12f, 0.12f, 1f), CornerRadiusTopLeft = 12, CornerRadiusTopRight = 12, CornerRadiusBottomLeft = 12, CornerRadiusBottomRight = 12, ContentMarginLeft = 20 };
+		btn.AddThemeStyleboxOverride("normal", style);
+		btn.AddThemeStyleboxOverride("hover", style); 
+		btn.AddThemeStyleboxOverride("pressed", style);
+		btn.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
+
+		btn.MouseEntered += () => AnimateHover(btn, true, 1.05f);
+		btn.MouseExited += () => AnimateHover(btn, false, 1.0f);
+		btn.Pressed += () => { AnimateClick(btn); action?.Invoke(); };
+
+		return btn;
+	}
+
+	public void OnResumePressed() => TogglePauseMenu(false);
+	public void OnRestartPressed() { GetTree().Paused = false; GameManager.Instance.RestartScenario(); }
+	public void OnSettingsPausePressed() => SettingsUI.Instance?.ToggleSettings(true);
+	public void OnMainMenuPressed() { GetTree().Paused = false; GameManager.Instance.LoadMainMenu(); }
+
+	// --- АНИМАЦИИ ---
+	private void AnimateHover(Control control, bool isHovering, float targetScale)
+	{
+		// Звук наведения
+		if (isHovering && SndHover != null) AudioManager.Instance?.PlayStream(SndHover, -5f);
+
+		control.PivotOffset = control.Size / 2;
+		var tween = CreateTween();
+		tween.TweenProperty(control, "scale", isHovering ? new Vector2(targetScale, targetScale) : Vector2.One, 0.15f)
+			 .SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+	}
+
+	private void AnimateClick(Control control)
+	{
+		// Звук клика
+		if (SndClick != null) AudioManager.Instance?.PlayStream(SndClick);
+
+		control.PivotOffset = control.Size / 2;
+		var tween = CreateTween();
+		tween.TweenProperty(control, "scale", new Vector2(0.95f, 0.95f), 0.05f).SetTrans(Tween.TransitionType.Bounce);
+		tween.TweenProperty(control, "scale", new Vector2(1.04f, 1.04f), 0.15f);
+	}
+
+	// --- ИНФОРМАЦИОННЫЕ ПАНЕЛИ ---
+	public void UpdatePrompt(string text, bool isError = false)
+	{
+		if (_promptLabel == null) return;
+
+		// --- ИСПРАВЛЕНИЕ: ПРИОРЕТЕТЫ СООБЩЕНИЙ ---
+		if (isError)
+		{
+			_promptLabel.Text = text;
+			_promptLabel.Modulate = Colors.Red;
+			_messageLockTimer = 3.0f; // Увеличим до 3 секунд для аварий
+			return;
+		}
+
+		// Если висит блокировка от ошибки - сохраняем текст в кэш, но не выводим
+		_normalPromptCache = text;
+		
+		if (_messageLockTimer <= 0)
+		{
+			_promptLabel.Text = text;
+			_promptLabel.Modulate = Colors.White;
+		}
+	}
+
+	public void ShowWorldTooltip(string name, string desc, string states = "")
+	{
+		if (_worldTooltipPanel == null) return;
+
+		if (string.IsNullOrEmpty(name))
+		{
+			_worldTooltipPanel.Visible = false;
+		}
+		else
+		{
+			_worldTooltipPanel.Visible = true;
+			if (_worldNameLabel != null) _worldNameLabel.Text = name;
+			
+			bool hasDesc = !string.IsNullOrEmpty(desc);
+			if (_worldDescLabel != null) { _worldDescLabel.Text = desc; _worldDescLabel.Visible = hasDesc; }
+			if (_worldSeparator != null) _worldSeparator.Visible = hasDesc;
+
+			bool hasStates = !string.IsNullOrEmpty(states);
+			if (_worldStatesLabel != null) { _worldStatesLabel.Text = states; _worldStatesLabel.Visible = hasStates; }
+			if (_worldSeparator2 != null) _worldSeparator2.Visible = hasStates;
+		}
+	}
+
+	public void UpdateTorqueUI(float current, float max)
+	{
+		if (_torqueProgressBar == null) return;
+		_torqueProgressBar.Visible = true;
+		_torqueNumbersLabel.Visible = true;
+		_torqueProgressBar.MaxValue = max;
+		_torqueProgressBar.Value = max - current; 
+		_torqueNumbersLabel.Text = $"{current:F1} / {max} Н·м";
+	}
+
+	public void HideTorqueUI()
+	{
+		if (_torqueProgressBar != null) _torqueProgressBar.Visible = false;
+		if (_torqueNumbersLabel != null) _torqueNumbersLabel.Visible = false;
+	}
+
+	public void UpdateCrosshairColor(Color color)
+	{
+		if (_crosshair != null) _crosshair.Color = _crosshair.Color.Lerp(color, 15f * (float)GetProcessDeltaTime());
+	}
+
+	public void UpdateTaskUI(int currentStep, int totalSteps, string taskName, string taskDesc = "")
+	{
+		if (_taskTrackerPanel != null) _taskTrackerPanel.Visible = (totalSteps > 0);
+
+		if (_taskNameLabel != null)
+		{
+			_taskNameLabel.Text = $"ЗАДАЧА: {taskName} ({currentStep}/{totalSteps})";
+			_taskNameLabel.Modulate = new Color(0.2f, 0.9f, 0.2f); 
+		}
+
+		bool hasDesc = !string.IsNullOrEmpty(taskDesc);
+
+		if (_taskDescLabel != null)
+		{
+			_taskDescLabel.Text = taskDesc;
+			_taskDescLabel.Visible = hasDesc;
+		}
+
+		if (_taskSeparator != null) _taskSeparator.Visible = hasDesc;
+
+		if (_taskProgressBar != null)
+		{
+			_taskProgressBar.MaxValue = totalSteps;
+			_taskProgressBar.Value = currentStep;
+			_taskProgressBar.CustomMinimumSize = new Vector2(0, 12);
+		}
+	}
+
+    public void ResetUIForNewLevel()
+    {
+        _isPaused = false;
+        GetTree().Paused = false;
+        
+        if (_pauseMenuPanel != null)
+        {
+            _pauseMenuPanel.Visible = false;
+            _pauseMenuPanel.Modulate = new Color(1, 1, 1, 0);
+        }
+
+        if (_inventoryWindow != null)
+        {
+            _inventoryWindow.Visible = false;
+            _inventoryWindow.Modulate = new Color(1, 1, 1, 0);
+        }
+
+        UpdatePrompt("");
+        ShowWorldTooltip("", "", "");
+        HideTorqueUI();
+        
+        if (_crosshair != null) _crosshair.Visible = true;
+        Input.MouseMode = Input.MouseModeEnum.Captured;
+    }
+}
+
+
+

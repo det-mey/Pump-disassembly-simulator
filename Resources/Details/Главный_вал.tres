@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://cwd8vrgxwh2ba"]
+
+[ext_resource type="PackedScene" uid="uid://dkeebyfe3yp2i" path="res://Scenes/Details/Главный_вал.tscn" id="1_mck5l"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_stfnv"]
+[ext_resource type="PackedScene" uid="uid://b75thby5ige32" path="res://Scenes/Details pickup/Главный_вал_предмет.tscn" id="3_stfnv"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_eycdl"]
+
+[resource]
+script = ExtResource("4_eycdl")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Главный вал"
+Description = "Передает крутящий момент от двигателя к рабочему колесу. Ступенчатая конструкция обеспечивает посадку подшипников и уплотнений."
+Icon = ExtResource("2_stfnv")
+Weight = 8.5
+WorldPrefab = ExtResource("3_stfnv")
+HandPrefab = ExtResource("1_mck5l")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ChemicalData" format=3 uid="uid://d2k6xulstgujr"]
+
+[ext_resource type="Script" uid="uid://d01ducjlv0hvk" path="res://Scripts/Mechanics/ChemicalData.cs" id="1_184xp"]
+[ext_resource type="PackedScene" uid="uid://0ql3817l78om" path="res://Scenes/Tools/WD40.tscn" id="1_ylxce"]
+[ext_resource type="Texture2D" uid="uid://csholxv4hq520" path="res://Assets/Icons/Tools/WD40.png" id="2_uyb6j"]
+[ext_resource type="AudioStream" uid="uid://bcfb1uqnwknpi" path="res://Assets/Sounds/WD40.mp3" id="3_is0q0"]
+
+[resource]
+script = ExtResource("1_184xp")
+RemovesStates = Array[int]([1])
+ParticleColor = Color(0.9999997, 0.953998, 0.96685034, 1)
+ItemName = "WD-40"
+Description = "Универсальная смазка. Растворяет ржавчину, смазывает механизмы."
+Icon = ExtResource("2_uyb6j")
+WorldPrefab = ExtResource("1_ylxce")
+HandPrefab = ExtResource("1_ylxce")
+UseSound = ExtResource("3_is0q0")
+metadata/_custom_type_script = "uid://d01ducjlv0hvk"

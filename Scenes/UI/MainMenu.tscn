@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://r31qw0ag7gli"]
+
+[ext_resource type="Script" uid="uid://b731knm5qm5vy" path="res://Scripts/UI/MainMenu.cs" id="1_g18y6"]
+[ext_resource type="Script" uid="uid://djgfpyyoxk1kx" path="res://Scripts/Core/ScenarioData.cs" id="2_t6w0q"]
+[ext_resource type="Resource" uid="uid://dob57ofo2o2ky" path="res://Resources/Maps/Тренировочный_полигон.tres" id="3_k8um8"]
+[ext_resource type="Texture2D" uid="uid://cgi5r4telhgsl" path="res://Assets/UI/Background.svg" id="4_jex3y"]
+[ext_resource type="Resource" uid="uid://lbgkidki5kii" path="res://Resources/Maps/Демонтаж_консольного_центробежного_насоса.tres" id="4_k8um8"]
+[ext_resource type="Resource" uid="uid://cegexbqh83nbu" path="res://Resources/Maps/Узловая_сборка_консольного_центробежного_насоса.tres" id="5_jex3y"]
+[ext_resource type="Texture2D" uid="uid://jdvngs1ojnje" path="res://Assets/UI/icon_mode.svg" id="6_ab04i"]
+[ext_resource type="Texture2D" uid="uid://cketuqod5lqd3" path="res://Assets/UI/icon_results.svg" id="7_hys1s"]
+[ext_resource type="Texture2D" uid="uid://dhdhd8tyenn77" path="res://Assets/UI/icon_network.svg" id="8_fgqbg"]
+[ext_resource type="Texture2D" uid="uid://bqj252fe77pw2" path="res://Assets/UI/icon_start.svg" id="9_euk5f"]
+[ext_resource type="Texture2D" uid="uid://c2j2errpqy1du" path="res://Assets/UI/icon_settings.svg" id="10_kdsd0"]
+[ext_resource type="Texture2D" uid="uid://dnit5d2ywvllu" path="res://Assets/UI/icon_exit.svg" id="11_w0mr3"]
+[ext_resource type="AudioStream" uid="uid://yh4afegjp1c8" path="res://Assets/Sounds/select.mp3" id="12_euk5f"]
+[ext_resource type="AudioStream" uid="uid://djp2tigudjbav" path="res://Assets/Sounds/click.mp3" id="13_kdsd0"]
+[ext_resource type="AudioStream" uid="uid://deo4tkqff5r6s" path="res://Assets/Sounds/dropdown.mp3" id="14_euk5f"]
+
+[node name="MainMenu" type="CanvasLayer" unique_id=148292500 node_paths=PackedStringArray("_mainPanel", "_cardsContainer", "_buttonsGrid")]
+script = ExtResource("1_g18y6")
+Scenarios = Array[ExtResource("2_t6w0q")]([ExtResource("4_k8um8"), ExtResource("5_jex3y"), ExtResource("3_k8um8")])
+_mainPanel = NodePath("CenterAnchor/MainPanel")
+_cardsContainer = NodePath("CenterAnchor/MainPanel/Padding/MainVBox/Scroll/CardsContainer")
+_buttonsGrid = NodePath("CenterAnchor/MainPanel/Padding/MainVBox/ButtonsGrid")
+_iconMode = ExtResource("6_ab04i")
+_iconResults = ExtResource("7_hys1s")
+_iconNetwork = ExtResource("8_fgqbg")
+_iconStart = ExtResource("9_euk5f")
+_iconSettings = ExtResource("10_kdsd0")
+_iconExit = ExtResource("11_w0mr3")
+_sndHover = ExtResource("12_euk5f")
+_sndClick = ExtResource("13_kdsd0")
+_sndDropdown = ExtResource("14_euk5f")
+
+[node name="Background" type="TextureRect" parent="." unique_id=341819383]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_jex3y")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CenterAnchor" type="CenterContainer" parent="." unique_id=1501865593]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainPanel" type="PanelContainer" parent="CenterAnchor" unique_id=337049010]
+layout_mode = 2
+
+[node name="Padding" type="MarginContainer" parent="CenterAnchor/MainPanel" unique_id=55229475]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="MainVBox" type="VBoxContainer" parent="CenterAnchor/MainPanel/Padding" unique_id=879078066]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Scroll" type="ScrollContainer" parent="CenterAnchor/MainPanel/Padding/MainVBox" unique_id=2013328448]
+custom_minimum_size = Vector2(650, 300)
+layout_mode = 2
+
+[node name="CardsContainer" type="VBoxContainer" parent="CenterAnchor/MainPanel/Padding/MainVBox/Scroll" unique_id=1088340023]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ButtonsGrid" type="GridContainer" parent="CenterAnchor/MainPanel/Padding/MainVBox" unique_id=1776888946]
+layout_mode = 2
+theme_override_constants/h_separation = 15
+theme_override_constants/v_separation = 15
+columns = 2

@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://cryksmet3pwaw"]
+
+[ext_resource type="Script" uid="uid://cibmj5gsvofqt" path="res://Scripts/Mechanics/Fastener.cs" id="1_xs733"]
+[ext_resource type="Script" uid="uid://cat5dhp5lnxdp" path="res://Scripts/Mechanics/InteractionRule.cs" id="2_4phvp"]
+
+[sub_resource type="Resource" id="Resource_1blun"]
+script = ExtResource("2_4phvp")
+AllowedTool = 2
+RequiredSize = 1.0
+metadata/_custom_type_script = "uid://cat5dhp5lnxdp"
+
+[sub_resource type="Resource" id="Resource_bdu1p"]
+script = ExtResource("2_4phvp")
+AllowedTool = 3
+RequiredSize = 1.0
+metadata/_custom_type_script = "uid://cat5dhp5lnxdp"
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_f0vjq"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.1
+radial_segments = 6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_aibf1"]
+top_radius = 0.1
+bottom_radius = 0.0
+height = 0.5
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1blun"]
+height = 0.4
+radius = 0.1
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_fghl6"]
+height = 0.1
+radius = 0.2
+
+[node name="Screw_1" type="StaticBody3D" unique_id=343833881]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_xs733")
+ValidTools = Array[ExtResource("2_4phvp")]([SubResource("Resource_1blun"), SubResource("Resource_bdu1p")])
+Size = 1.0
+MaxTorque = 100.0
+CurrentTorque = 100.0
+PartName = "Шуруп с плоской резбой"
+PartDescription = "Обычный щуруп с плоской резбой."
+
+[node name="VisualsRoot" type="Node3D" parent="." unique_id=142637068]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VisualsRoot" unique_id=1686864184]
+mesh = SubResource("CylinderMesh_f0vjq")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="VisualsRoot" unique_id=1448804949]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+mesh = SubResource("CylinderMesh_aibf1")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=210645752]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+shape = SubResource("CylinderShape3D_1blun")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1285793853]
+shape = SubResource("CylinderShape3D_fghl6")

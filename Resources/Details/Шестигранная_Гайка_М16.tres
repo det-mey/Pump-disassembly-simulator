@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://c7dmv4o4dun4"]
+
+[ext_resource type="PackedScene" uid="uid://botpmchsq7wk1" path="res://Scenes/Details/Шестигранная_Гайка_М16.tscn" id="1_10e34"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_ccisv"]
+[ext_resource type="PackedScene" uid="uid://c4425wxjuyexm" path="res://Scenes/Details pickup/Шестигранная_Гайка_М16_предмет.tscn" id="3_jge4e"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_0qrnr"]
+
+[resource]
+script = ExtResource("4_0qrnr")
+Size = 24.0
+ItemName = "Гайка М16"
+Description = "Великолепная гайка на 16 прямо с завода."
+Icon = ExtResource("2_ccisv")
+WorldPrefab = ExtResource("3_jge4e")
+HandPrefab = ExtResource("1_10e34")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

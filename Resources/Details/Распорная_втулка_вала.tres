@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://bfgxd224t1uug"]
+
+[ext_resource type="PackedScene" uid="uid://0dhn7p3d8dam" path="res://Scenes/Details/Распорная_втулка_вала.tscn" id="1_ultxq"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_a71x5"]
+[ext_resource type="PackedScene" uid="uid://caaqxqy26hbfs" path="res://Scenes/Details pickup/Распорная_втулка_вала_предмет.tscn" id="3_a71x5"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_knqgi"]
+
+[resource]
+script = ExtResource("4_knqgi")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Распорная втулка вала"
+Description = "Обеспечивает точное осевое расположение узлов ротора и защищает поверхность вала от механического износа в зоне уплотнений."
+Icon = ExtResource("2_a71x5")
+Weight = 1.2
+WorldPrefab = ExtResource("3_a71x5")
+HandPrefab = ExtResource("1_ultxq")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

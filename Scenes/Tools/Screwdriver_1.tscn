@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://dy0edrubwv0rt"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_cs84l"]
+[ext_resource type="PackedScene" uid="uid://ynmhbwkdi15i" path="res://Assets/Models/screwdriver.glb" id="2_4wnh8"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_shlw8"]
+size = Vector3(0.05, 0.05, 0.41501465)
+
+[node name="Screwdriver_1" type="RigidBody3D" unique_id=1828159176]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_cs84l")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1036491239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.021223903)
+shape = SubResource("BoxShape3D_shlw8")
+
+[node name="screwdriver" parent="." unique_id=1976726368 instance=ExtResource("2_4wnh8")]
+transform = Transform3D(2, 0, 0, 0, -8.742278e-08, -2, 0, 2, -8.742278e-08, 0, -2.2507587e-09, 0.05149136)
+
+[editable path="screwdriver"]

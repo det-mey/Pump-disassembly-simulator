@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://c0qjsq7bk1kal"]
+
+[ext_resource type="PackedScene" uid="uid://dph5mj026xivf" path="res://Scenes/Details/Крышка_подшипникового_узла.tscn" id="1_ap0kf"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_tbjxd"]
+[ext_resource type="PackedScene" uid="uid://45x7vlcg6ch1" path="res://Scenes/Details pickup/Крышка_подшипникового_узла_предмет.tscn" id="3_tbjxd"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_w1auu"]
+
+[resource]
+script = ExtResource("4_w1auu")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Крышка подшипникового узла"
+Description = "Фиксирует подшипник на валу и удерживает смазку. Снимается строго вдоль оси вала после выкручивания крепежных винтов."
+Icon = ExtResource("2_tbjxd")
+Weight = 2.5
+WorldPrefab = ExtResource("3_tbjxd")
+HandPrefab = ExtResource("1_ap0kf")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

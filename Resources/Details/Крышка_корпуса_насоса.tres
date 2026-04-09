@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://dbb2dmynrkgmt"]
+
+[ext_resource type="PackedScene" uid="uid://bdkn6skbw5611" path="res://Scenes/Details/Крышка_корпуса_насоса.tscn" id="1_xsi2k"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_0k405"]
+[ext_resource type="PackedScene" uid="uid://jn7jt1epflkp" path="res://Scenes/Details pickup/Крышка_корпуса_насоса_предмет.tscn" id="3_0k405"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_axbcl"]
+
+[resource]
+script = ExtResource("4_axbcl")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Крышка корпуса насоса"
+Description = "Чугунная крышка. Обеспечивает герметичность рабочей камеры и центровку вала."
+Icon = ExtResource("2_0k405")
+Weight = 25.0
+WorldPrefab = ExtResource("3_0k405")
+HandPrefab = ExtResource("1_xsi2k")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

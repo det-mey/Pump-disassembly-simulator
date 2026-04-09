@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://bb8hu87kk6vqb"]
+
+[ext_resource type="Script" uid="uid://dcxa1dqo1ntm8" path="res://Scripts/Mechanics/MachineTester.cs" id="1_n2fug"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_f0vjq"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.2
+radial_segments = 6
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1blun"]
+height = 0.2
+radius = 0.2
+
+[node name="Nut_M16" type="StaticBody3D" unique_id=343833881]
+collision_layer = 3
+script = ExtResource("1_n2fug")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1686864184]
+transform = Transform3D(1, 0, 4.7699523e-08, 0, 1, 0, -4.7699523e-08, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_f0vjq")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1285793853]
+shape = SubResource("CylinderShape3D_1blun")

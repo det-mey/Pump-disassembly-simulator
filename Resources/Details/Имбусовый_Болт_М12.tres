@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://conj06jjrwerg"]
+
+[ext_resource type="PackedScene" uid="uid://bxhxko66uvtpi" path="res://Scenes/Details pickup/Имбусовый_Болт_М12_предмет.tscn" id="1_lceym"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_ihlsu"]
+[ext_resource type="PackedScene" uid="uid://clapufys3cvsm" path="res://Scenes/Details/Имбусовый_Болт_М12.tscn" id="3_ihlsu"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_l1rvl"]
+
+[resource]
+script = ExtResource("4_l1rvl")
+Size = 10.0
+RequiredTorque = 85.0
+ItemName = "Имбусовый болт М12"
+Description = "Винт DIN 912."
+Icon = ExtResource("2_ihlsu")
+WorldPrefab = ExtResource("1_lceym")
+HandPrefab = ExtResource("3_ihlsu")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

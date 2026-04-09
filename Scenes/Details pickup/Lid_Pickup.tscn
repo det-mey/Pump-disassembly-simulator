@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://fgghki0ehakm"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_o5msa"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dln12"]
+size = Vector3(2, 0.02, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xes4p"]
+size = Vector3(2, 0.01, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ay0or"]
+
+[node name="Lid_Pickup" type="RigidBody3D" unique_id=9238459]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_o5msa")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=122803446]
+shape = SubResource("BoxShape3D_dln12")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1396213663]
+mesh = SubResource("BoxMesh_xes4p")
+surface_material_override/0 = SubResource("StandardMaterial3D_ay0or")

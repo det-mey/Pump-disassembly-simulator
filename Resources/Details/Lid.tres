@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://c72amjxcwr45x"]
+
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="1_iprpn"]
+[ext_resource type="PackedScene" uid="uid://3vuiffdtmgn2" path="res://Scenes/Details/Lid.tscn" id="1_l5a0i"]
+[ext_resource type="Texture2D" uid="uid://dmy755kelm486" path="res://Assets/Icons/Details/Lid.png" id="2_8seom"]
+[ext_resource type="PackedScene" uid="uid://fgghki0ehakm" path="res://Scenes/Details pickup/Lid_Pickup.tscn" id="3_8seom"]
+
+[resource]
+script = ExtResource("1_iprpn")
+RequiredTorque = 0.0
+ItemName = "Крышка"
+Description = "Крышка от чего-то."
+Icon = ExtResource("2_8seom")
+WorldPrefab = ExtResource("3_8seom")
+HandPrefab = ExtResource("1_l5a0i")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

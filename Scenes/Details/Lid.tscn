@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://3vuiffdtmgn2"]
+
+[ext_resource type="Script" uid="uid://cibmj5gsvofqt" path="res://Scripts/Mechanics/Fastener.cs" id="1_86ppf"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_xes4p"]
+size = Vector3(2, 0.01, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ay0or"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dln12"]
+size = Vector3(2, 0.02, 2)
+
+[node name="Lid" type="StaticBody3D" unique_id=1623280934]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_86ppf")
+Type = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1396213663]
+mesh = SubResource("BoxMesh_xes4p")
+surface_material_override/0 = SubResource("StandardMaterial3D_ay0or")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=122803446]
+shape = SubResource("BoxShape3D_dln12")

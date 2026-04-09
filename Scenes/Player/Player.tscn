@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://cfqrp5rwfl6jx"]
+
+[ext_resource type="Script" uid="uid://cmbmt1cq8s1yh" path="res://Scripts/Core/Player.cs" id="1_gntrk"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dewec"]
+
+[node name="Player" type="CharacterBody3D" unique_id=1330768253]
+collision_layer = 5
+script = ExtResource("1_gntrk")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1168483638]
+shape = SubResource("CapsuleShape3D_dewec")
+
+[node name="Head" type="Node3D" parent="." unique_id=1577626826]
+
+[node name="Camera3D" type="Camera3D" parent="Head" unique_id=85342988]
+
+[node name="HandPosition" type="Node3D" parent="Head/Camera3D" unique_id=1961229447]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42563224, -0.29460624, -0.6026442)
+
+[node name="RayCast3D" type="RayCast3D" parent="Head/Camera3D" unique_id=1691760044]
+target_position = Vector3(0, 0, -50)
+collision_mask = 2

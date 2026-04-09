@@ -1,0 +1,47 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+export_credentials.cfg
+
+# IDE files
+.vscode/
+.rider/
+.idea/
+*.sln
+*.csproj
+*.suo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Build outputs
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+
+# User-specific Godot files
+user://
+
+# Temporary files
+*.tmp
+*.log
+
+# Backup files
+*~
+*.bak
+*.swp
+*.swo
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/

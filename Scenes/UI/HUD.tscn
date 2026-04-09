@@ -1,0 +1,333 @@
+[gd_scene format=3 uid="uid://bu5uycd3f382d"]
+
+[ext_resource type="Script" uid="uid://bsdbo2tfkecjo" path="res://Scripts/UI/UIManager.cs" id="1_jbjhr"]
+[ext_resource type="Texture2D" uid="uid://clioodtmo2gu6" path="res://Assets/UI/icon_resume.svg" id="2_b3vmo"]
+[ext_resource type="Texture2D" uid="uid://bkslyk0cmn3wt" path="res://Assets/UI/icon_settings_esc.svg" id="3_dds1n"]
+[ext_resource type="Texture2D" uid="uid://dii0ynlsfx05r" path="res://Assets/UI/icon_restart.svg" id="4_cn5rm"]
+[ext_resource type="Texture2D" uid="uid://iw03sce4206" path="res://Assets/UI/icon_home.svg" id="5_ako3u"]
+[ext_resource type="AudioStream" uid="uid://yh4afegjp1c8" path="res://Assets/Sounds/select.mp3" id="6_khvou"]
+[ext_resource type="AudioStream" uid="uid://djp2tigudjbav" path="res://Assets/Sounds/click.mp3" id="7_55bpt"]
+[ext_resource type="AudioStream" uid="uid://deo4tkqff5r6s" path="res://Assets/Sounds/dropdown.mp3" id="8_yd1yt"]
+[ext_resource type="AudioStream" uid="uid://5oojh1l6limn" path="res://Assets/Sounds/open.mp3" id="9_0n5r3"]
+[ext_resource type="AudioStream" uid="uid://dt8nt1k388cv1" path="res://Assets/Sounds/clouse.mp3" id="10_5h4o4"]
+[ext_resource type="AudioStream" uid="uid://7jpt82jxnwxa" path="res://Assets/Sounds/hotbar.mp3" id="11_p4bpa"]
+[ext_resource type="AudioStream" uid="uid://ouahnwlh7ocw" path="res://Assets/Sounds/drag.mp3" id="12_gcvgm"]
+[ext_resource type="AudioStream" uid="uid://fwcs4cb8fvle" path="res://Assets/Sounds/drop.mp3" id="13_k3th7"]
+[ext_resource type="AudioStream" uid="uid://dyyfwsd7domda" path="res://Assets/Sounds/task ok.mp3" id="14_dlptc"]
+[ext_resource type="AudioStream" uid="uid://b5iupr6c04shc" path="res://Assets/Sounds/Task complete.mp3" id="15_cg6gh"]
+[ext_resource type="AudioStream" uid="uid://t4rwun16ko33" path="res://Assets/Sounds/task fail.mp3" id="16_iub3o"]
+[ext_resource type="Script" uid="uid://dcbkwcsbd5n4i" path="res://Scripts/UI/InventoryDropZone.cs" id="17_eedsi"]
+[ext_resource type="Script" uid="uid://dwckc6ousv62p" path="res://Scripts/UI/ResultsUI.cs" id="18_b3vmo"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a6001"]
+content_margin_left = 30.0
+content_margin_top = 30.0
+content_margin_right = 30.0
+content_margin_bottom = 30.0
+bg_color = Color(0.05882353, 0.05882353, 0.05882353, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cv3dm"]
+content_margin_left = 15.0
+content_margin_top = 15.0
+content_margin_right = 15.0
+content_margin_bottom = 15.0
+bg_color = Color(0.019607844, 0.019607844, 0.019607844, 0.8039216)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="HUD" type="CanvasLayer" unique_id=959732859 node_paths=PackedStringArray("_pauseMenuPanel", "_inventoryGrid", "_inventoryWindow", "_gridBackgroundPanel", "_detailsPanelContainer", "_detailsContentBox", "_detailNameLabel", "_detailDescLabel", "_detailIcon", "_hotbarContainer", "_crosshair", "_promptLabel", "_worldTooltipPanel", "_worldNameLabel", "_worldDescLabel", "_worldSeparator", "_worldStatesLabel", "_worldSeparator2", "_torqueProgressBar", "_torqueNumbersLabel", "_taskTrackerPanel", "_taskProgressBar", "_taskNameLabel", "_taskDescLabel", "_taskSeparator", "_fpsLabel")]
+process_mode = 3
+script = ExtResource("1_jbjhr")
+_pauseMenuPanel = NodePath("PauseMenuPanel")
+_iconResume = ExtResource("2_b3vmo")
+_iconSettings = ExtResource("3_dds1n")
+_iconRestart = ExtResource("4_cn5rm")
+_iconHome = ExtResource("5_ako3u")
+_inventoryGrid = NodePath("InventoryWindow/InventoryHBox/GridBackgroundPanel/GridContainer")
+_inventoryWindow = NodePath("InventoryWindow/InventoryHBox")
+_gridBackgroundPanel = NodePath("InventoryWindow/InventoryHBox/GridBackgroundPanel")
+_detailsPanelContainer = NodePath("InventoryWindow/InventoryHBox/DetailsPanelContainer")
+_detailsContentBox = NodePath("InventoryWindow/InventoryHBox/DetailsPanelContainer/DetailsContentBox")
+_detailNameLabel = NodePath("InventoryWindow/InventoryHBox/DetailsPanelContainer/DetailsContentBox/Name")
+_detailDescLabel = NodePath("InventoryWindow/InventoryHBox/DetailsPanelContainer/DetailsContentBox/Descriptions")
+_detailIcon = NodePath("InventoryWindow/InventoryHBox/DetailsPanelContainer/DetailsContentBox/Icon")
+_hotbarContainer = NodePath("HotbarContainer")
+_crosshair = NodePath("Crosshair")
+_promptLabel = NodePath("PromptLabel")
+_worldTooltipPanel = NodePath("TooltipPanel")
+_worldNameLabel = NodePath("TooltipPanel/VBoxContainer/NameLabel")
+_worldDescLabel = NodePath("TooltipPanel/VBoxContainer/DescLabel")
+_worldSeparator = NodePath("TooltipPanel/VBoxContainer/HSeparator")
+_worldStatesLabel = NodePath("TooltipPanel/VBoxContainer/StatesLabel")
+_worldSeparator2 = NodePath("TooltipPanel/VBoxContainer/HSeparator2")
+_torqueProgressBar = NodePath("TorqueBar")
+_torqueNumbersLabel = NodePath("TorqueBar/TorqueText")
+_taskTrackerPanel = NodePath("TaskTrackerPanel")
+_taskProgressBar = NodePath("TaskTrackerPanel/VBoxContainer/TaskProgressBar")
+_taskNameLabel = NodePath("TaskTrackerPanel/VBoxContainer/TaskNameLabel")
+_taskDescLabel = NodePath("TaskTrackerPanel/VBoxContainer/TaskDescLabel")
+_taskSeparator = NodePath("TaskTrackerPanel/VBoxContainer/TaskSeparator")
+_fpsLabel = NodePath("FPSLabel")
+SndHover = ExtResource("6_khvou")
+SndClick = ExtResource("7_55bpt")
+SndDropdown = ExtResource("8_yd1yt")
+SndInvOpen = ExtResource("9_0n5r3")
+SndInvClose = ExtResource("10_5h4o4")
+SndHotbarSwitch = ExtResource("11_p4bpa")
+SndItemDrag = ExtResource("12_gcvgm")
+SndItemDrop = ExtResource("13_k3th7")
+SndTaskOk = ExtResource("14_dlptc")
+SndTaskComplete = ExtResource("15_cg6gh")
+SndError = ExtResource("16_iub3o")
+
+[node name="TorqueBar" type="ProgressBar" parent="." unique_id=1108472694]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -133.5
+offset_top = -117.0
+offset_right = 133.5
+offset_bottom = -90.0
+grow_horizontal = 2
+grow_vertical = 0
+show_percentage = false
+
+[node name="TorqueText" type="Label" parent="TorqueBar" unique_id=751636268]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HotbarContainer" type="HBoxContainer" parent="." unique_id=659453844]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -60.0
+offset_right = 20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 5
+
+[node name="DropZoneFull" type="Control" parent="." unique_id=187131676]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("17_eedsi")
+
+[node name="Crosshair" type="ColorRect" parent="." unique_id=948021285]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.5019608)
+
+[node name="InventoryWindow" type="CenterContainer" parent="." unique_id=865313571]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InventoryHBox" type="HBoxContainer" parent="InventoryWindow" unique_id=967631951]
+layout_mode = 2
+
+[node name="GridBackgroundPanel" type="PanelContainer" parent="InventoryWindow/InventoryHBox" unique_id=2144502171]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="InventoryWindow/InventoryHBox/GridBackgroundPanel" unique_id=1934646294]
+layout_mode = 2
+columns = 5
+
+[node name="DetailsPanelContainer" type="PanelContainer" parent="InventoryWindow/InventoryHBox" unique_id=1656482933]
+visible = false
+clip_contents = true
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="DetailsContentBox" type="VBoxContainer" parent="InventoryWindow/InventoryHBox/DetailsPanelContainer" unique_id=791696346]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="InventoryWindow/InventoryHBox/DetailsPanelContainer/DetailsContentBox" unique_id=2000951772]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+expand_mode = 4
+
+[node name="Name" type="Label" parent="InventoryWindow/InventoryHBox/DetailsPanelContainer/DetailsContentBox" unique_id=1166491054]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="InventoryWindow/InventoryHBox/DetailsPanelContainer/DetailsContentBox" unique_id=958739826]
+layout_mode = 2
+
+[node name="Descriptions" type="Label" parent="InventoryWindow/InventoryHBox/DetailsPanelContainer/DetailsContentBox" unique_id=625949285]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="TooltipPanel" type="PanelContainer" parent="." unique_id=374974524]
+offset_left = 430.0
+offset_top = 488.0
+offset_right = 719.0
+offset_bottom = 528.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TooltipPanel" unique_id=1711329620]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="TooltipPanel/VBoxContainer" unique_id=984528516]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="TooltipPanel/VBoxContainer" unique_id=1102927907]
+layout_mode = 2
+
+[node name="DescLabel" type="Label" parent="TooltipPanel/VBoxContainer" unique_id=1619339457]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="TooltipPanel/VBoxContainer" unique_id=86209960]
+layout_mode = 2
+
+[node name="StatesLabel" type="Label" parent="TooltipPanel/VBoxContainer" unique_id=1759100695]
+layout_mode = 2
+
+[node name="PromptLabel" type="Label" parent="." unique_id=697623790]
+anchors_preset = -1
+anchor_left = 0.61
+anchor_top = 0.514
+anchor_right = 0.61
+anchor_bottom = 0.514
+offset_left = -99.72003
+offset_top = -19.071991
+offset_right = 99.27997
+offset_bottom = 18.928009
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PauseMenuPanel" type="ColorRect" parent="." unique_id=26482714]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.60784316)
+
+[node name="Center" type="CenterContainer" parent="PauseMenuPanel" unique_id=287511545]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuBackground" type="PanelContainer" parent="PauseMenuPanel/Center" unique_id=121380230]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_a6001")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenuPanel/Center/MenuBackground" unique_id=921190663]
+layout_mode = 2
+
+[node name="TaskTrackerPanel" type="PanelContainer" parent="." unique_id=2000818931]
+custom_minimum_size = Vector2(20, 20)
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -49.5
+offset_right = 330.0
+offset_bottom = 49.5
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_cv3dm")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TaskTrackerPanel" unique_id=1368562558]
+layout_mode = 2
+
+[node name="TaskNameLabel" type="Label" parent="TaskTrackerPanel/VBoxContainer" unique_id=1544166501]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.6745098, 0, 1)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="TaskSeparator" type="HSeparator" parent="TaskTrackerPanel/VBoxContainer" unique_id=2121028402]
+layout_mode = 2
+
+[node name="TaskDescLabel" type="Label" parent="TaskTrackerPanel/VBoxContainer" unique_id=627313513]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6313726, 0.6431373, 0.6509804, 1)
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 3
+
+[node name="Control" type="Control" parent="TaskTrackerPanel/VBoxContainer" unique_id=251664024]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+
+[node name="TaskProgressBar" type="ProgressBar" parent="TaskTrackerPanel/VBoxContainer" unique_id=457679057]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+show_percentage = false
+
+[node name="FPSLabel" type="Label" parent="." unique_id=1376000770]
+offset_right = 197.0
+offset_bottom = 51.0
+theme_override_font_sizes/font_size = 25
+
+[node name="ResultsRoot" type="Control" parent="." unique_id=1826507641 node_paths=PackedStringArray("_mainPanel")]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("18_b3vmo")
+_mainPanel = NodePath("ActualWindow")
+
+[node name="ActualWindow" type="PanelContainer" parent="ResultsRoot" unique_id=2072530730]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2

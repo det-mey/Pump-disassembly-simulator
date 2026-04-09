@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://c8q5chxeeo02g"]
+
+[ext_resource type="PackedScene" uid="uid://sfdgskbcdsr4" path="res://Scenes/Details/Стяжной_Винт_М16_корпуса.tscn" id="1_cy8h1"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_wqube"]
+[ext_resource type="PackedScene" uid="uid://d2s731ni0drf3" path="res://Scenes/Details pickup/Стяжной_Винт_М16_корпуса_предмет.tscn" id="3_wqube"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_ui6dk"]
+
+[resource]
+script = ExtResource("4_ui6dk")
+Size = 14.0
+RequiredTorque = 200.0
+ItemName = "Стяжной винт М16"
+Description = "Длинный винт DIN 912. Стягивает секции корпуса насоса, удерживая высокое внутреннее давление."
+Icon = ExtResource("2_wqube")
+WorldPrefab = ExtResource("3_wqube")
+HandPrefab = ExtResource("1_cy8h1")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

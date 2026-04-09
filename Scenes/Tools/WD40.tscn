@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://0ql3817l78om"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_rax6q"]
+[ext_resource type="PackedScene" uid="uid://dt6jmg12svot4" path="res://Assets/Models/wd40_spray_can.glb" id="2_dxqax"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_wsxlf"]
+height = 0.2794922
+radius = 0.07
+
+[node name="WD40" type="RigidBody3D" unique_id=458046737]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_rax6q")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2114819996]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03428764, 0)
+shape = SubResource("CylinderShape3D_wsxlf")
+
+[node name="Sketchfab_Scene" parent="." unique_id=1152203974 instance=ExtResource("2_dxqax")]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, -0.10466814, 0)

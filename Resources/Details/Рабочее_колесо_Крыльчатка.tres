@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://tqahfcok40v5"]
+
+[ext_resource type="PackedScene" uid="uid://bvoub8e7ql0ss" path="res://Scenes/Details/Рабочее_колесо_Крыльчатка.tscn" id="1_014gl"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_327sa"]
+[ext_resource type="PackedScene" uid="uid://b5ciwe4pwgutb" path="res://Scenes/Details pickup/Рабочее_колесо_Крыльчатка_предмет.tscn" id="3_327sa"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_1q4xp"]
+
+[resource]
+script = ExtResource("4_1q4xp")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Рабочее колесо (Крыльчатка)"
+Description = "Основной рабочий орган насоса. Преобразует энергию вращения вала в кинетическую энергию потока жидкости. Устанавливается на вал с помощью шпоночного соединения."
+Icon = ExtResource("2_327sa")
+Weight = 12.0
+WorldPrefab = ExtResource("3_327sa")
+HandPrefab = ExtResource("1_014gl")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

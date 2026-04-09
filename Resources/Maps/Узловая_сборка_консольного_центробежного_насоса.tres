@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ScenarioData" format=3 uid="uid://cegexbqh83nbu"]
+
+[ext_resource type="Texture2D" uid="uid://hgajqany0st1" path="res://icon.svg" id="1_r7vsy"]
+[ext_resource type="Script" uid="uid://djgfpyyoxk1kx" path="res://Scripts/Core/ScenarioData.cs" id="2_sacpf"]
+
+[resource]
+script = ExtResource("2_sacpf")
+ScenarioName = "Узловая сборка консольного центробежного насоса"
+Description = " Регламентная сборка роторного оборудования после завершения капитального ремонта. Задача включает: монтаж рабочего колеса на вал, центровку заднего фланца и стягивание корпуса длинными винтами."
+PreviewImage = ExtResource("1_r7vsy")
+ScenePath = "uid://ca7vbjbf2h8il"
+metadata/_custom_type_script = "uid://djgfpyyoxk1kx"

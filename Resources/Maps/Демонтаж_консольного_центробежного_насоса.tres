@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ScenarioData" format=3 uid="uid://lbgkidki5kii"]
+
+[ext_resource type="Texture2D" uid="uid://hgajqany0st1" path="res://icon.svg" id="1_2ia45"]
+[ext_resource type="Script" uid="uid://djgfpyyoxk1kx" path="res://Scripts/Core/ScenarioData.cs" id="2_u2v6e"]
+
+[resource]
+script = ExtResource("2_u2v6e")
+ScenarioName = "Демонтаж консольного центробежного насоса"
+Description = "Учебно-производственный сценарий полной разборки центробежного насоса. Процесс включает: демонтаж задней крышки и извлечение подшипникового узла из спирального корпуса (улитки). Вам предстоит снять стяжные имбусовые винты, извлечь вал с рабочим колесом (турбиной). Строго соблюдайте технику безопасности при работе с фланцевыми соединениями."
+PreviewImage = ExtResource("1_2ia45")
+ScenePath = "uid://ca7vbjbf2h8il"
+SequenceJsonPath = "res://Config/pump_full_disassembly.json"
+metadata/_custom_type_script = "uid://djgfpyyoxk1kx"

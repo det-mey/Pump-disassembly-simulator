@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ToolData" format=3 uid="uid://b6yr4r75joq81"]
+
+[ext_resource type="Texture2D" uid="uid://cu44cqghfbhrl" path="res://Assets/Icons/Tools/Drill_1.png" id="1_jk7vs"]
+[ext_resource type="PackedScene" uid="uid://qxarp00vxnm4" path="res://Scenes/Tools/Drill_1.tscn" id="1_kebij"]
+[ext_resource type="Script" uid="uid://w36tayqkc2x7" path="res://Scripts/Mechanics/ToolData.cs" id="1_sgsuj"]
+[ext_resource type="AudioStream" uid="uid://q4yhhb16nte0" path="res://Assets/Sounds/drill_whirring.mp3" id="3_f5lp3"]
+
+[resource]
+script = ExtResource("1_sgsuj")
+Category = 3
+Size = 1.0
+Efficiency = 5.0
+ItemName = "Дрель - плоская"
+Description = "Обычная дрель с плоской битой."
+Icon = ExtResource("1_jk7vs")
+WorldPrefab = ExtResource("1_kebij")
+HandPrefab = ExtResource("1_kebij")
+UseSound = ExtResource("3_f5lp3")
+AnimDuration = 0.05
+metadata/_custom_type_script = "uid://w36tayqkc2x7"

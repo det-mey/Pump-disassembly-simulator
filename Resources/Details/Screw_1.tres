@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://d0amcfwy08am4"]
+
+[ext_resource type="PackedScene" uid="uid://cryksmet3pwaw" path="res://Scenes/Details/Screw_1.tscn" id="1_0s2cd"]
+[ext_resource type="Texture2D" uid="uid://dfxntolesdljc" path="res://Assets/Icons/Details/Screw_1.png" id="2_hycnn"]
+[ext_resource type="PackedScene" uid="uid://oo532t87g165" path="res://Scenes/Details pickup/Screw_1_Pickup.tscn" id="3_huc3w"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_hvndi"]
+
+[resource]
+script = ExtResource("4_hvndi")
+Size = 1.0
+RequiredTorque = 100.0
+ItemName = "Шуруп с плоской резбой"
+Description = "Обычный щуруп с плоской резбой."
+Icon = ExtResource("2_hycnn")
+WorldPrefab = ExtResource("3_huc3w")
+HandPrefab = ExtResource("1_0s2cd")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

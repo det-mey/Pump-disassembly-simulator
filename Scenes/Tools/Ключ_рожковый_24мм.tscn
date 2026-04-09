@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bqnhxees1whpp"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_4rrp7"]
+[ext_resource type="PackedScene" uid="uid://cwfnu51eqkgnu" path="res://Assets/Models/tools__open_end_wrench.glb" id="2_nfmct"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_shlw8"]
+size = Vector3(0.1, 0.05, 0.5)
+
+[node name="Ключ_рожковый_24мм" type="RigidBody3D" unique_id=1828159176]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_4rrp7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1036491239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.012669429, 0)
+shape = SubResource("BoxShape3D_shlw8")
+
+[node name="Sketchfab_Scene" parent="." unique_id=2090644221 instance=ExtResource("2_nfmct")]
+transform = Transform3D(2.5, 0, -1.09278474e-07, -1.09278474e-07, 4.7767136e-15, -2.5, 0, 2.5, 4.7767136e-15, 0, 0, 0)

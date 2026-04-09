@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ToolData" format=3 uid="uid://cj6h4yfmylbk2"]
+
+[ext_resource type="Texture2D" uid="uid://16tqfn823ax1" path="res://Assets/Icons/Tools/Screwdriver_1.png" id="1_6bdeu"]
+[ext_resource type="PackedScene" uid="uid://dy0edrubwv0rt" path="res://Scenes/Tools/Screwdriver_1.tscn" id="1_wv2xr"]
+[ext_resource type="Script" uid="uid://w36tayqkc2x7" path="res://Scripts/Mechanics/ToolData.cs" id="2_wv2xr"]
+
+[resource]
+script = ExtResource("2_wv2xr")
+Category = 2
+Size = 1.0
+ItemName = "Плоская отвертка"
+Description = "Самая обычная плоская отверка."
+Icon = ExtResource("1_6bdeu")
+WorldPrefab = ExtResource("1_wv2xr")
+HandPrefab = ExtResource("1_wv2xr")
+metadata/_custom_type_script = "uid://w36tayqkc2x7"

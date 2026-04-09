@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ScenarioData" format=3 uid="uid://dob57ofo2o2ky"]
+
+[ext_resource type="Texture2D" uid="uid://djpne1k2wc0qi" path="res://Assets/Icons/Maps/Test.png" id="1_66rc0"]
+[ext_resource type="Script" uid="uid://djgfpyyoxk1kx" path="res://Scripts/Core/ScenarioData.cs" id="2_677b2"]
+
+[resource]
+script = ExtResource("2_677b2")
+ScenarioName = "Тренировочный полигон"
+Description = "Тренировочный полигон базовым механикам."
+PreviewImage = ExtResource("1_66rc0")
+ScenePath = "uid://ca7vbjbf2h8il"
+metadata/_custom_type_script = "uid://djgfpyyoxk1kx"

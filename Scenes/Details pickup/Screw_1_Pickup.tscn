@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://oo532t87g165"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_637g7"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_f0vjq"]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.1
+radial_segments = 6
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_aibf1"]
+top_radius = 0.1
+bottom_radius = 0.0
+height = 0.5
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_fghl6"]
+height = 0.1
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1blun"]
+height = 0.4
+radius = 0.1
+
+[node name="Screw_1_Pickup" type="RigidBody3D" unique_id=658258247]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_637g7")
+metadata/_custom_type_script = "uid://cr57i4e5sn6td"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1686864184]
+mesh = SubResource("CylinderMesh_f0vjq")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1448804949]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+mesh = SubResource("CylinderMesh_aibf1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1285793853]
+shape = SubResource("CylinderShape3D_fghl6")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=210645752]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
+shape = SubResource("CylinderShape3D_1blun")

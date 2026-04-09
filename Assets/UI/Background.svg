@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+    <defs>
+        <!-- Глубокий темный фон с легким зеленым отливом -->
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#09120c" />
+            <stop offset="100%" stop-color="#14261c" />
+        </linearGradient>
+
+        <!-- Градиенты волн: от ночного леса к приглушенному пастельному зеленому -->
+        <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#11291b" stop-opacity="0.9" />
+            <stop offset="100%" stop-color="#244a33" stop-opacity="0.8" />
+        </linearGradient>
+
+        <linearGradient id="wave2" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#163322" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#376648" stop-opacity="0.7" />
+        </linearGradient>
+
+        <!-- Самая светлая пастельная волна, создающая глубину резкости -->
+        <linearGradient id="wave3" x1="100%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#467a58" stop-opacity="0.3" />
+            <stop offset="100%" stop-color="#6ea382" stop-opacity="0.4" />
+        </linearGradient>
+
+        <!-- Мягкое пастельно-мятное свечение (Ambient light) -->
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#80bda1" stop-opacity="0.12" />
+            <stop offset="100%" stop-color="#80bda1" stop-opacity="0" />
+        </radialGradient>
+    </defs>
+
+    <!-- 1. Заливка темного фона -->
+    <rect width="1920" height="1080" fill="url(#bg)" />
+
+    <!-- 2. Рассеянное свечение для придания объема формам -->
+    <circle cx="350" cy="250" r="750" fill="url(#glow)" />
+    <circle cx="1600" cy="950" r="850" fill="url(#glow)" />
+
+    <!-- 3. Абстрактные пересекающиеся волны -->
+    <!-- Верхняя волна -->
+    <path d="M 0 0 L 1920 0 L 1920 350 C 1440 450 1000 150 480 250 C 240 296 100 200 0 150 Z"
+          fill="url(#wave1)" />
+
+    <!-- Нижняя волна -->
+    <path d="M 0 1080 L 1920 1080 L 1920 650 C 1350 850 950 500 450 750 C 250 850 100 800 0 700 Z"
+          fill="url(#wave2)" />
+
+    <!-- Боковая перекрывающая волна -->
+    <path d="M 1920 1080 L 1920 200 C 1600 300 1400 600 1000 700 C 600 800 300 950 0 900 L 0 1080 Z"
+          fill="url(#wave3)" />
+
+    <!-- 4. Тонкие акцентные контуры из светлой пастели -->
+    <path d="M 0 150 C 100 200 240 296 480 250 C 1000 150 1440 450 1920 350"
+          fill="none" stroke="#a8d1b8" stroke-width="2.5" stroke-opacity="0.3" />
+
+    <path d="M 0 700 C 100 800 250 850 450 750 C 950 500 1350 850 1920 650"
+          fill="none" stroke="#a8d1b8" stroke-width="1.5" stroke-opacity="0.15" />
+    </svg>

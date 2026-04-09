@@ -1,0 +1,87 @@
+[gd_scene format=3 uid="uid://ca7vbjbf2h8il"]
+
+[ext_resource type="Texture2D" uid="uid://c8spg563rei4t" path="res://Assets/Texture/Beton.jpg" id="4_sixs7"]
+[ext_resource type="PackedScene" uid="uid://cfqrp5rwfl6jx" path="res://Scenes/Player/Player.tscn" id="5_pcxso"]
+[ext_resource type="PackedScene" uid="uid://bqnhxees1whpp" path="res://Scenes/Tools/Ключ_рожковый_24мм.tscn" id="6_w6teh"]
+[ext_resource type="Resource" uid="uid://8qdmsxp6hlwf" path="res://Resources/Tools/Ключ_рожковый_24мм.tres" id="7_aqrll"]
+[ext_resource type="PackedScene" uid="uid://0ql3817l78om" path="res://Scenes/Tools/WD40.tscn" id="8_dv0cb"]
+[ext_resource type="Resource" uid="uid://d2k6xulstgujr" path="res://Resources/Tools/WD40.tres" id="9_n8f3y"]
+[ext_resource type="PackedScene" uid="uid://c0qm1r4vkk1xe" path="res://Assets/Models/industrial_steel_table.glb" id="12_7k5sk"]
+[ext_resource type="PackedScene" uid="uid://dy0edrubwv0rt" path="res://Scenes/Tools/Screwdriver_1.tscn" id="12_53lty"]
+[ext_resource type="Resource" uid="uid://cj6h4yfmylbk2" path="res://Resources/Tools/Screwdriver_1.tres" id="13_afps7"]
+[ext_resource type="PackedScene" uid="uid://qxarp00vxnm4" path="res://Scenes/Tools/Drill_1.tscn" id="14_4b5y3"]
+[ext_resource type="Resource" uid="uid://b6yr4r75joq81" path="res://Resources/Tools/Drill_1.tres" id="15_rpig1"]
+[ext_resource type="PackedScene" uid="uid://cgnfclynkgghw" path="res://Assets/Models/Console_pump/Console_pump.tscn" id="20_q8mnr"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cj56a"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_bottom_color = Color(0.3607935, 0.4586606, 0.4863214, 1)
+
+[sub_resource type="Sky" id="Sky_q52xq"]
+sky_material = SubResource("ProceduralSkyMaterial_cj56a")
+
+[sub_resource type="Environment" id="Environment_dgkld"]
+background_mode = 2
+sky = SubResource("Sky_q52xq")
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qad5b"]
+albedo_color = Color(0.04599744, 0.18528515, 0.16702667, 1)
+albedo_texture = ExtResource("4_sixs7")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7k5sk"]
+size = Vector3(81.50583, 100, 200.38867)
+
+[node name="MainSimulator" type="Node3D" unique_id=369453358]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1080398589]
+environment = SubResource("Environment_dgkld")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=120462989]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Floor" type="CSGBox3D" parent="." unique_id=385445125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+material_override = SubResource("StandardMaterial3D_qad5b")
+use_collision = true
+collision_layer = 3
+size = Vector3(20, 1, 20)
+
+[node name="Floor2" type="CSGBox3D" parent="." unique_id=1237469852]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7485224, -0.94547474, -3.577491)
+material_override = SubResource("StandardMaterial3D_qad5b")
+use_collision = true
+collision_layer = 3
+size = Vector3(1.4730835, 1.3642578, 1)
+
+[node name="Player" parent="." unique_id=1330768253 instance=ExtResource("5_pcxso")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1.318)
+
+[node name="Ключ_рожковый_24мм" parent="." unique_id=1828159176 instance=ExtResource("6_w6teh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15527448, 0.36500996, -3.5081527)
+ItemResource = ExtResource("7_aqrll")
+
+[node name="WD40" parent="." unique_id=458046737 instance=ExtResource("8_dv0cb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.38398466, 0.42999586, -3.7805133)
+ItemResource = ExtResource("9_n8f3y")
+
+[node name="Screwdriver_1" parent="." unique_id=1530035773 instance=ExtResource("12_53lty")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3493783, 0.3612368, -3.4501727)
+ItemResource = ExtResource("13_afps7")
+
+[node name="Drill_1" parent="." unique_id=2022278888 instance=ExtResource("14_4b5y3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5502837, 0.54741806, -3.4392896)
+ItemResource = ExtResource("15_rpig1")
+
+[node name="BMB" parent="." unique_id=307814687 instance=ExtResource("20_q8mnr")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.411874, -0.04738936, -3.6048152)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=852286533]
+
+[node name="Sketchfab_Scene" parent="StaticBody3D" unique_id=1706687003 instance=ExtResource("12_7k5sk")]
+transform = Transform3D(-4.3711387e-10, 0, 0.01, 0, 0.01, 0, -0.01, 0, -4.3711387e-10, -0.87183243, -0.49998835, -3.5616481)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=800504168]
+transform = Transform3D(-4.3711387e-10, 0, 0.01, 0, 0.01, 0, -0.01, 0, -4.3711387e-10, -0.8726039, -0.20109344, -3.5632389)
+shape = SubResource("BoxShape3D_7k5sk")

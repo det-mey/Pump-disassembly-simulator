@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://dhn84oq3w4pes"]
+
+[ext_resource type="PackedScene" uid="uid://dxafqmxqaoqw6" path="res://Scenes/Details/Задняя_стенка_корпуса.tscn" id="1_x3g8b"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_nisu1"]
+[ext_resource type="PackedScene" uid="uid://c10rpjlyrlqwt" path="res://Scenes/Details pickup/Задняя_стенка_корпуса_предмет.tscn" id="3_nisu1"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_7leso"]
+
+[resource]
+script = ExtResource("4_7leso")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Задняя стенка корпуса"
+Description = "Обеспечивает герметичность рабочей камеры насоса. Содержит посадочное место для сальникового уплотнения. Устанавливается между спиральным корпусом и кронштейном подшипников."
+Icon = ExtResource("2_nisu1")
+Weight = 18.0
+WorldPrefab = ExtResource("3_nisu1")
+HandPrefab = ExtResource("1_x3g8b")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

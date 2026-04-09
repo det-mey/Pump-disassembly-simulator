@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://dw2h1ferfutvp"]
+
+[ext_resource type="PackedScene" uid="uid://kkt2xgxg1jfq" path="res://Scenes/Details/Водоотбойное_кольцо_Дефлектор.tscn" id="1_meiev"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_1t730"]
+[ext_resource type="PackedScene" uid="uid://cmeff3whlrd6j" path="res://Scenes/Details pickup/Водоотбойное_кольцо_Дефлектор_предмет.tscn" id="3_1t730"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_8yfag"]
+
+[resource]
+script = ExtResource("4_8yfag")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Водоотбойное кольцо (Дефлектор)"
+Description = "Защитный элемент подшипникового узла. Предотвращает попадание утечек жидкости в корпус подшипников за счет центробежного сброса капель с вала."
+Icon = ExtResource("2_1t730")
+Weight = 0.3
+WorldPrefab = ExtResource("3_1t730")
+HandPrefab = ExtResource("1_meiev")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"
