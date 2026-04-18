@@ -15,6 +15,7 @@ config/description="Pump disassembly and assembly simulator "
 config/version="0.1"
 run/main_scene="uid://r31qw0ag7gli"
 config/features=PackedStringArray("4.6", "C#", "GL Compatibility")
+boot_splash/image="uid://b5eu5h5qhxsgb"
 config/icon="res://icon.svg"
 
 [autoload]
@@ -29,11 +30,13 @@ DeveloperConsole="*uid://ckd1w5o4dc63v"
 HUD="*uid://bu5uycd3f382d"
 SettingsUi="*uid://b6qmgi42a8ep3"
 ProgressManager="*uid://dadjjw3h8m2k6"
+ResultsHistoryManager="*uid://yix5y1ec04ng"
+ResultsHistoryUI="*uid://bday3156gpban"
+LoadingScreen="*uid://bukk7bhoo813o"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
+window/size/mode=2
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
@@ -161,5 +164,17 @@ crouch={
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-anti_aliasing/quality/msaa_3d=2
+textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/msaa_3d=1
 occlusion_culling/use_occlusion_culling=true
+vrs/mode=2
+
+[xr]
+
+openxr/enabled=true
+openxr/foveation_level=3
+openxr/foveation_dynamic=true
+openxr/startup_alert=false
+openxr/extensions/debug_utils=3
+openxr/extensions/hand_interaction_profile=true
+shaders/enabled=true

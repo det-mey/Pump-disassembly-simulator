@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://3dmmb5r6liqe"
 path.s3tc="res://.godot/imported/tools__open_end_wrench_0.jpg-539f7d5298e9d1ef4dde1b1f3ed1e5d5.s3tc.ctex"
+path.etc2="res://.godot/imported/tools__open_end_wrench_0.jpg-539f7d5298e9d1ef4dde1b1f3ed1e5d5.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Assets/Models/tools__open_end_wrench_0.jpg"
-dest_files=["res://.godot/imported/tools__open_end_wrench_0.jpg-539f7d5298e9d1ef4dde1b1f3ed1e5d5.s3tc.ctex"]
+dest_files=["res://.godot/imported/tools__open_end_wrench_0.jpg-539f7d5298e9d1ef4dde1b1f3ed1e5d5.s3tc.ctex", "res://.godot/imported/tools__open_end_wrench_0.jpg-539f7d5298e9d1ef4dde1b1f3ed1e5d5.etc2.ctex"]
 
 [params]
 

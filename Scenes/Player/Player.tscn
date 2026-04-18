@@ -1,6 +1,10 @@
 [gd_scene format=3 uid="uid://cfqrp5rwfl6jx"]
 
 [ext_resource type="Script" uid="uid://cmbmt1cq8s1yh" path="res://Scripts/Core/Player.cs" id="1_gntrk"]
+[ext_resource type="Script" uid="uid://dynir3m4dff22" path="res://Scripts/Core/CameraController.cs" id="2_ft8w5"]
+[ext_resource type="Script" uid="uid://se1vh3ks5nrs" path="res://Scripts/VR/VRManager.cs" id="2_jmcll"]
+[ext_resource type="Script" uid="uid://dja00nviec7v5" path="res://Scripts/VR/VRUIAdapter.cs" id="3_4wape"]
+[ext_resource type="Script" uid="uid://be7mv30tlahh2" path="res://Scripts/VR/VRController.cs" id="5_t26db"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dewec"]
 
@@ -8,16 +12,48 @@
 collision_layer = 5
 script = ExtResource("1_gntrk")
 
+[node name="VRManager" type="Node" parent="." unique_id=442026489 node_paths=PackedStringArray("_camera2D", "_cameraVR")]
+script = ExtResource("2_jmcll")
+_camera2D = NodePath("../Head/CameraController/XROrigin3D/XRCamera3D/Camera3D")
+_cameraVR = NodePath("../Head/CameraController/XROrigin3D/XRCamera3D")
+
+[node name="VRUIAdapter" type="Node3D" parent="." unique_id=44500267]
+script = ExtResource("3_4wape")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1168483638]
 shape = SubResource("CapsuleShape3D_dewec")
 
 [node name="Head" type="Node3D" parent="." unique_id=1577626826]
 
-[node name="Camera3D" type="Camera3D" parent="Head" unique_id=85342988]
+[node name="CameraController" type="Node3D" parent="Head" unique_id=1196778585]
+script = ExtResource("2_ft8w5")
 
-[node name="HandPosition" type="Node3D" parent="Head/Camera3D" unique_id=1961229447]
+[node name="XROrigin3D" type="XROrigin3D" parent="Head/CameraController" unique_id=1685647482]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="Head/CameraController/XROrigin3D" unique_id=1807138392]
+
+[node name="Camera3D" type="Camera3D" parent="Head/CameraController/XROrigin3D/XRCamera3D" unique_id=85342988]
+
+[node name="HandPosition" type="Node3D" parent="Head/CameraController/XROrigin3D/XRCamera3D" unique_id=1961229447]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42563224, -0.29460624, -0.6026442)
 
-[node name="RayCast3D" type="RayCast3D" parent="Head/Camera3D" unique_id=1691760044]
+[node name="RayCast3D" type="RayCast3D" parent="Head/CameraController/XROrigin3D/XRCamera3D" unique_id=1691760044]
 target_position = Vector3(0, 0, -50)
 collision_mask = 2
+
+[node name="LeftController" type="XRController3D" parent="Head/CameraController/XROrigin3D" unique_id=152939493]
+tracker = &"left_hand"
+
+[node name="VRController_L" type="Node3D" parent="Head/CameraController/XROrigin3D/LeftController" unique_id=1955075407 node_paths=PackedStringArray("_xrController", "_interactionRay")]
+script = ExtResource("5_t26db")
+Hand = 0
+_xrController = NodePath("..")
+_interactionRay = NodePath("../../XRCamera3D/RayCast3D")
+
+[node name="RightController" type="XRController3D" parent="Head/CameraController/XROrigin3D" unique_id=1386803151]
+tracker = &"right_hand"
+
+[node name="VRController_R" type="Node3D" parent="Head/CameraController/XROrigin3D/RightController" unique_id=1785612238 node_paths=PackedStringArray("_xrController", "_interactionRay")]
+script = ExtResource("5_t26db")
+_xrController = NodePath("..")
+_interactionRay = NodePath("../../XRCamera3D/RayCast3D")

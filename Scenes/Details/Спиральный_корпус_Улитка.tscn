@@ -3,20 +3,12 @@
 [ext_resource type="Material" path="res://Assets/Materials/blue_shader.material" id="1_pmcpi"]
 [ext_resource type="Script" uid="uid://cibmj5gsvofqt" path="res://Scripts/Mechanics/Fastener.cs" id="1_rbpen"]
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_ierb7"]
-height = 0.13232422
-radius = 0.14208984
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_28314"]
-size = Vector3(0.40698242, 0.15356445, 0.021892548)
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_3477h"]
-height = 0.17114258
-radius = 0.20117188
+size = Vector3(0.40698242, 0.15356445, 0.02120018)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_7w3fk"]
 height = 0.14593506
-radius = 0.111816406
+radius = 0.07
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_st8yo"]
 resource_name = "polished steel"
@@ -205,20 +197,12 @@ PartName = "Спиральный корпус (Улитка)"
 PartDescription = "Корпус консольного центробежного насоса. Выполнен из чугуна. Имеет осевой входной патрубок и вертикальный напорный патрубок."
 metadata/_edit_group_ = true
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2020371784]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.07446289, 2.646978e-23)
-shape = SubResource("CylinderShape3D_ierb7")
-
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=1151899903]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0008544922, -0.0018310547, 0.22028542)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0008544922, -0.0018310547, 0.2206316)
 shape = SubResource("BoxShape3D_28314")
 
-[node name="CollisionShape3D3" type="CollisionShape3D" parent="." unique_id=895419413]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0021854118, 0.009887695, 3.3087225e-23)
-shape = SubResource("CylinderShape3D_3477h")
-
 [node name="CollisionShape3D4" type="CollisionShape3D" parent="." unique_id=309374657]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.0344904e-08, -0.23666382)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1.0569047e-08, -0.2417916)
 shape = SubResource("CylinderShape3D_7w3fk")
 
 [node name="VisualsRoot" type="Node3D" parent="." unique_id=697319098]

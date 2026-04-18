@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmttoibrw70x1"
 path.s3tc="res://.godot/imported/rust_coarse_01_nor_gl_4k.jpg-a1a81ae46987942f2c90fd151de89069.s3tc.ctex"
+path.etc2="res://.godot/imported/rust_coarse_01_nor_gl_4k.jpg-a1a81ae46987942f2c90fd151de89069.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Assets/Models/Console_pump/rust_coarse_01_nor_gl_4k.jpg"
-dest_files=["res://.godot/imported/rust_coarse_01_nor_gl_4k.jpg-a1a81ae46987942f2c90fd151de89069.s3tc.ctex"]
+dest_files=["res://.godot/imported/rust_coarse_01_nor_gl_4k.jpg-a1a81ae46987942f2c90fd151de89069.s3tc.ctex", "res://.godot/imported/rust_coarse_01_nor_gl_4k.jpg-a1a81ae46987942f2c90fd151de89069.etc2.ctex"]
 
 [params]
 

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ToolData" format=3 uid="uid://css4on0cgfu8t"]
+
+[ext_resource type="PackedScene" uid="uid://bbw3234dvegfu" path="res://Scenes/Tools/Промышленный_Гайковерт_8мм.tscn" id="1_iakpg"]
+[ext_resource type="Texture2D" uid="uid://ji0tqtsfc1lm" path="res://Assets/Icons/Tools/ImpactWrench.png" id="2_yopcf"]
+[ext_resource type="AudioStream" uid="uid://q4yhhb16nte0" path="res://Assets/Sounds/drill_whirring.mp3" id="3_gxs6a"]
+[ext_resource type="Script" uid="uid://w36tayqkc2x7" path="res://Scripts/Mechanics/ToolData.cs" id="4_3gui8"]
+
+[resource]
+script = ExtResource("4_3gui8")
+Category = 3
+Size = 8.0
+Efficiency = 5.0
+ItemName = "Промышленный гайковерт на 8мм"
+Description = "Промышленный гайковерт с насадкой для винтов 
+8мм."
+Icon = ExtResource("2_yopcf")
+WorldPrefab = ExtResource("1_iakpg")
+HandPrefab = ExtResource("1_iakpg")
+AnimDuration = 0.05
+UseSound = ExtResource("3_gxs6a")
+metadata/_custom_type_script = "uid://w36tayqkc2x7"

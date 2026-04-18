@@ -22,6 +22,9 @@ public partial class Player : CharacterBody3D
     private bool _isInventoryOpen = false;
     private Vector3 _handDefaultPos;
 
+    // VR-состояние
+    private bool _isVRMode = false;
+
     // Кэш оптимизации UI
     private string _lastPromptText = "";
     private string _lastTooltipName = "";
@@ -36,9 +39,9 @@ public partial class Player : CharacterBody3D
 
         _head = GetNode<Node3D>("Head");
         _cameraController = GetNode<CameraController>("Head/CameraController");
-        _camera = GetNode<Camera3D>("Head/CameraController/Camera3D");
-        _handPosition = GetNode<Node3D>("Head/CameraController/Camera3D/HandPosition");
-        _interactionRay = GetNode<RayCast3D>("Head/CameraController/Camera3D/RayCast3D");
+        _camera = GetNode<Camera3D>("Head/CameraController/XROrigin3D/XRCamera3D/Camera3D");
+        _handPosition = GetNode<Node3D>("Head/CameraController/XROrigin3D/XRCamera3D/HandPosition");
+        _interactionRay = GetNode<RayCast3D>("Head/CameraController/XROrigin3D/XRCamera3D/RayCast3D");
 
         _handAudioPlayer = new AudioStreamPlayer { Bus = "Master" };
         AddChild(_handAudioPlayer);
@@ -47,7 +50,19 @@ public partial class Player : CharacterBody3D
 
         _handDefaultPos = _handPosition.Position;
 
-        Input.MouseMode = Input.MouseModeEnum.Captured;
+        // Проверяем VR-режим
+        _isVRMode = VRManager.Instance?.IsVRMode == true;
+        
+        if (_isVRMode)
+        {
+            // В VR мышь захватывается системой, не нужно Captured
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+            GD.Print("[Player] VR-режим обнаружен, управление через контроллеры");
+        }
+        else
+        {
+            Input.MouseMode = Input.MouseModeEnum.Captured;
+        }
 
         InventoryManager.Instance.OnActiveSlotChanged += UpdateHandVisual;
         UpdateHandVisual(0, null);
@@ -79,10 +94,14 @@ public partial class Player : CharacterBody3D
 
         if (_isInventoryOpen) return;
 
-        // ПРЯМОЕ УПРАВЛЕНИЕ УГЛАМИ (делегировано в CameraController)
-        if (@event is InputEventMouseMotion mouseMotion && Input.MouseMode == Input.MouseModeEnum.Captured)
+        // В VR управление камерой через XR-трекеры, мышь не используется
+        if (!_isVRMode)
         {
-            _cameraController?.ProcessCameraRotation(mouseMotion);
+            // ПРЯМОЕ УПРАВЛЕНИЕ УГЛАМИ (делегировано в CameraController)
+            if (@event is InputEventMouseMotion mouseMotion && Input.MouseMode == Input.MouseModeEnum.Captured)
+            {
+                _cameraController?.ProcessCameraRotation(mouseMotion);
+            }
         }
 
         if (@event.IsActionPressed("slot_next")) { InventoryManager.Instance.NextSlot(); SwitchSlotWithSound(InventoryManager.Instance.ActiveSlotIndex); }
@@ -102,9 +121,9 @@ public partial class Player : CharacterBody3D
         // Плавная анимация рук (устраняет дрожание)
         ProcessHandAnimation(delta);
 
-        if (!_isInventoryOpen)
+        if (!_isInventoryOpen && !_isVRMode)
         {
-            // Делегируем динамику камеры в CameraController
+            // В VR динамика камеры обрабатывается XR-трекерами
             bool isCrouching = Input.IsActionPressed("crouch");
             bool isSprinting = Input.IsActionPressed("sprint") && !isCrouching && IsOnFloor();
             ItemData activeItem = InventoryManager.Instance.GetActiveItem();

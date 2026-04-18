@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://b6wwi3qjm1gka"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_xt318"]
+[ext_resource type="PackedScene" uid="uid://dnmum1dc5hp7l" path="res://Assets/Models/Ключик.glb" id="2_ck7gh"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_shlw8"]
+size = Vector3(0.023779297, 0.42940482, 0.12517643)
+
+[node name="Ключ_шестигранный_14мм" type="RigidBody3D" unique_id=1828159176]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_xt318")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1036491239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.003361689, 0.022839874, -0.011535183)
+shape = SubResource("BoxShape3D_shlw8")
+
+[node name="Sketchfab_Scene" parent="." unique_id=856543545 instance=ExtResource("2_ck7gh")]
+transform = Transform3D(-1.7484555e-10, 0, 0.004, 0, 0.004, 0, -0.004, 0, -1.7484555e-10, -0.011564765, -0.1848204, 0.048338357)

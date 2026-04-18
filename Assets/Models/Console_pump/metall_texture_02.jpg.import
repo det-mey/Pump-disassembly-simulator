@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://ceif5s3mol0vi"
 path.s3tc="res://.godot/imported/metall_texture_02.jpg-1fdedb4301a3f8044ec4226d54b773d4.s3tc.ctex"
+path.etc2="res://.godot/imported/metall_texture_02.jpg-1fdedb4301a3f8044ec4226d54b773d4.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Assets/Models/Console_pump/metall_texture_02.jpg"
-dest_files=["res://.godot/imported/metall_texture_02.jpg-1fdedb4301a3f8044ec4226d54b773d4.s3tc.ctex"]
+dest_files=["res://.godot/imported/metall_texture_02.jpg-1fdedb4301a3f8044ec4226d54b773d4.s3tc.ctex", "res://.godot/imported/metall_texture_02.jpg-1fdedb4301a3f8044ec4226d54b773d4.etc2.ctex"]
 
 [params]
 

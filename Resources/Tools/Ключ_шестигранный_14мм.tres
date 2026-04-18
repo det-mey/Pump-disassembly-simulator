@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ToolData" format=3 uid="uid://fj212ab6bor1"]
+
+[ext_resource type="PackedScene" uid="uid://b6wwi3qjm1gka" path="res://Scenes/Tools/Ключ_шестигранный_14мм.tscn" id="1_tmdx1"]
+[ext_resource type="Texture2D" uid="uid://bi8t3yfm21nyo" path="res://Assets/Icons/Tools/HexKey.png" id="2_etdt4"]
+[ext_resource type="AudioStream" uid="uid://v2hv6gl3bly1" path="res://Assets/Sounds/ratchet_click.mp3" id="3_w8f3b"]
+[ext_resource type="Script" uid="uid://w36tayqkc2x7" path="res://Scripts/Mechanics/ToolData.cs" id="4_hq261"]
+
+[resource]
+script = ExtResource("4_hq261")
+Size = 14.0
+ItemName = "Ключ шестигранный 14мм"
+Description = "Прекрасный шестигранный ключ на 14мм."
+Icon = ExtResource("2_etdt4")
+WorldPrefab = ExtResource("1_tmdx1")
+HandPrefab = ExtResource("1_tmdx1")
+AnimRotDegrees = Vector3(0, 0, -35)
+UseSound = ExtResource("3_w8f3b")
+metadata/_custom_type_script = "uid://w36tayqkc2x7"

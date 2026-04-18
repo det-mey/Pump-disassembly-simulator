@@ -3,10 +3,24 @@
 [ext_resource type="Script" uid="uid://cibmj5gsvofqt" path="res://Scripts/Mechanics/Fastener.cs" id="1_rv6oe"]
 [ext_resource type="Script" uid="uid://cat5dhp5lnxdp" path="res://Scripts/Mechanics/InteractionRule.cs" id="2_b3fl2"]
 [ext_resource type="Material" uid="uid://caxb0ph8vvswi" path="res://Assets/Materials/metall_shader_nut.material" id="2_s06fc"]
+[ext_resource type="Script" uid="uid://c1me1ofgew4oi" path="res://Scripts/Mechanics/PartVisualEffect.cs" id="3_50sew"]
+[ext_resource type="Texture2D" uid="uid://bqimlpovxsfr4" path="res://Assets/Models/Console_pump/rust_coarse_01_diff_4k.jpg" id="4_aigp6"]
 
 [sub_resource type="Resource" id="Resource_s06fc"]
 script = ExtResource("2_b3fl2")
-RequiredSize = 24.0
+RequiredSize = 8.0
+
+[sub_resource type="Resource" id="Resource_50sew"]
+script = ExtResource("2_b3fl2")
+AllowedTool = 3
+RequiredSize = 8.0
+metadata/_custom_type_script = "uid://cat5dhp5lnxdp"
+
+[sub_resource type="Resource" id="Resource_v3p3k"]
+script = ExtResource("3_50sew")
+Mode = 2
+OverlayTexture = ExtResource("4_aigp6")
+metadata/_custom_type_script = "uid://c1me1ofgew4oi"
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_lg54v"]
 height = 0.02
@@ -59,10 +73,11 @@ shadow_mesh = SubResource("ArrayMesh_cejyw")
 transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_rv6oe")
-ValidTools = Array[ExtResource("2_b3fl2")]([SubResource("Resource_s06fc")])
+ValidTools = Array[ExtResource("2_b3fl2")]([SubResource("Resource_s06fc"), SubResource("Resource_50sew")])
 Size = 8.0
 MaxTorque = 60.0
 CurrentTorque = 60.0
+VisualEffects = Array[ExtResource("3_50sew")]([SubResource("Resource_v3p3k")])
 RotateAxis = Vector3(1, 0, 0)
 TranslateAxis = Vector3(1, 0, 0)
 PartId = "Имбусовый_Болт_М10"
@@ -74,7 +89,7 @@ transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.01
 shape = SubResource("CylinderShape3D_lg54v")
 
 [node name="VisualsRoot" type="Node3D" parent="." unique_id=1379367251]
-transform = Transform3D(1, 0, 2.3849762e-07, 0, 1, 0, -2.3849762e-07, 0, 1, 0, 0, 0)
+transform = Transform3D(1, 2.2752445e-14, 2.3849762e-07, 0, 1, -9.5399045e-08, -2.3849762e-07, 9.5399045e-08, 1, 0, 0, 0)
 
 [node name="head-cap-screw-1" type="MeshInstance3D" parent="VisualsRoot" unique_id=686300692]
 material_override = ExtResource("2_s06fc")

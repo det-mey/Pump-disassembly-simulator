@@ -9,4 +9,5 @@ ScenarioName = "Тренировочный полигон"
 Description = "Тренировочный полигон базовым механикам."
 PreviewImage = ExtResource("1_66rc0")
 ScenePath = "uid://ca7vbjbf2h8il"
+TimeLimitSeconds = 600.0
 metadata/_custom_type_script = "uid://djgfpyyoxk1kx"

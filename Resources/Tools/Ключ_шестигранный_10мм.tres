@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ToolData" format=3 uid="uid://cd2ukkrt81xdj"]
+
+[ext_resource type="PackedScene" uid="uid://dwmtod7s7jrtc" path="res://Scenes/Tools/Ключ_шестигранный_10мм.tscn" id="1_r56jv"]
+[ext_resource type="Texture2D" uid="uid://bi8t3yfm21nyo" path="res://Assets/Icons/Tools/HexKey.png" id="2_loiuf"]
+[ext_resource type="AudioStream" uid="uid://v2hv6gl3bly1" path="res://Assets/Sounds/ratchet_click.mp3" id="3_0i0l4"]
+[ext_resource type="Script" uid="uid://w36tayqkc2x7" path="res://Scripts/Mechanics/ToolData.cs" id="4_dcg83"]
+
+[resource]
+script = ExtResource("4_dcg83")
+Size = 10.0
+ItemName = "Ключ шестигранный 10мм"
+Description = "Прекрасный шестигранный ключ на 10мм."
+Icon = ExtResource("2_loiuf")
+WorldPrefab = ExtResource("1_r56jv")
+HandPrefab = ExtResource("1_r56jv")
+AnimRotDegrees = Vector3(0, 0, -40)
+UseSound = ExtResource("3_0i0l4")
+metadata/_custom_type_script = "uid://w36tayqkc2x7"

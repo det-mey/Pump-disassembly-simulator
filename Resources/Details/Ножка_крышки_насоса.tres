@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PartItemData" format=3 uid="uid://bf78oix0avrat"]
+
+[ext_resource type="PackedScene" uid="uid://bilya824n8ls4" path="res://Scenes/Details/Ножка_крышки_насоса.tscn" id="1_mpos2"]
+[ext_resource type="Texture2D" uid="uid://d2fo2e2u3825q" path="res://Assets/Icons/Details/Nut_M16_Item.png" id="2_f4cgx"]
+[ext_resource type="PackedScene" uid="uid://bgi0gwxhfpddy" path="res://Scenes/Details pickup/Ножка_крышки_насоса_предмет.tscn" id="3_wlav1"]
+[ext_resource type="Script" uid="uid://hwenl8sty7p4" path="res://Scripts/Mechanics/PartItemData.cs" id="4_gwif6"]
+
+[resource]
+script = ExtResource("4_gwif6")
+Size = 0.0
+RequiredTorque = 0.0
+ItemName = "Ножка крышки насоса"
+Description = "Ножка крышки насоса."
+Icon = ExtResource("2_f4cgx")
+WorldPrefab = ExtResource("3_wlav1")
+HandPrefab = ExtResource("1_mpos2")
+metadata/_custom_type_script = "uid://hwenl8sty7p4"

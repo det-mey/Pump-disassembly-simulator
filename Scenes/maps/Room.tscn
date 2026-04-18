@@ -1,0 +1,164 @@
+[gd_scene format=3 uid="uid://20xctew7mfx5"]
+
+[ext_resource type="Texture2D" uid="uid://bt3eulaa45nxs" path="res://Assets/Texture/Трава.jpg" id="1_sbpyc"]
+[ext_resource type="Texture2D" uid="uid://corn3iew2sfgl" path="res://Assets/Texture/sky.jpg" id="1_srrq2"]
+[ext_resource type="PackedScene" uid="uid://cfqrp5rwfl6jx" path="res://Scenes/Player/Player.tscn" id="2_sbpyc"]
+[ext_resource type="PackedScene" uid="uid://bqnhxees1whpp" path="res://Scenes/Tools/Ключ_рожковый_24мм.tscn" id="3_srrq2"]
+[ext_resource type="Resource" uid="uid://8qdmsxp6hlwf" path="res://Resources/Tools/Ключ_рожковый_24мм.tres" id="4_q7agd"]
+[ext_resource type="PackedScene" uid="uid://0ql3817l78om" path="res://Scenes/Tools/WD40.tscn" id="5_48666"]
+[ext_resource type="Resource" uid="uid://d2k6xulstgujr" path="res://Resources/Tools/WD40.tres" id="6_e47cb"]
+[ext_resource type="PackedScene" uid="uid://dy0edrubwv0rt" path="res://Scenes/Tools/Screwdriver_1.tscn" id="7_rw41v"]
+[ext_resource type="Resource" uid="uid://cj6h4yfmylbk2" path="res://Resources/Tools/Screwdriver_1.tres" id="8_vnyn1"]
+[ext_resource type="PackedScene" uid="uid://qxarp00vxnm4" path="res://Scenes/Tools/Drill_1.tscn" id="9_xyvo3"]
+[ext_resource type="Resource" uid="uid://b6yr4r75joq81" path="res://Resources/Tools/Drill_1.tres" id="10_ovwyc"]
+[ext_resource type="PackedScene" uid="uid://cgnfclynkgghw" path="res://Scenes/Machines/Console_pump.tscn" id="11_3354g"]
+[ext_resource type="PackedScene" uid="uid://cub6x4sa4tdjw" path="res://Scenes/Tools/Ключ_шестигранный_8мм.tscn" id="13_qe3qs"]
+[ext_resource type="Resource" uid="uid://bfnokmfi20j1h" path="res://Resources/Tools/Ключ_шестигранный_8мм.tres" id="14_qk1n4"]
+[ext_resource type="PackedScene" uid="uid://dwmtod7s7jrtc" path="res://Scenes/Tools/Ключ_шестигранный_10мм.tscn" id="15_is7aj"]
+[ext_resource type="Resource" uid="uid://cd2ukkrt81xdj" path="res://Resources/Tools/Ключ_шестигранный_10мм.tres" id="16_ylcob"]
+[ext_resource type="PackedScene" uid="uid://b6wwi3qjm1gka" path="res://Scenes/Tools/Ключ_шестигранный_14мм.tscn" id="17_g83hi"]
+[ext_resource type="Resource" uid="uid://fj212ab6bor1" path="res://Resources/Tools/Ключ_шестигранный_14мм.tres" id="18_4lje5"]
+[ext_resource type="PackedScene" uid="uid://cxnob3hdwdul8" path="res://Scenes/Tools/Монтировка.tscn" id="19_q17ji"]
+[ext_resource type="Resource" uid="uid://bnwbsyw48ks3" path="res://Resources/Tools/Монтировка.tres" id="20_hpcwo"]
+[ext_resource type="PackedScene" uid="uid://bbw3234dvegfu" path="res://Scenes/Tools/Промышленный_Гайковерт_8мм.tscn" id="21_6fdxx"]
+[ext_resource type="Resource" uid="uid://css4on0cgfu8t" path="res://Resources/Tools/Промышленный_Гайковерт_8мм.tres" id="22_l4cyn"]
+[ext_resource type="PackedScene" uid="uid://drjntx5cyxdfn" path="res://Scenes/Tools/Промышленный_Гайковерт_10мм.tscn" id="23_ujoos"]
+[ext_resource type="Resource" uid="uid://drwyel5hegiui" path="res://Resources/Tools/Промышленный_Гайковерт_10мм.tres" id="24_t4j5d"]
+[ext_resource type="PackedScene" uid="uid://da6670neayh1k" path="res://Scenes/Tools/Электронный_Микрометр.tscn" id="25_plggl"]
+[ext_resource type="Resource" uid="uid://n46qajbrhx5b" path="res://Resources/Tools/Электронный_Микрометр.tres" id="26_btp3x"]
+[ext_resource type="PackedScene" uid="uid://cbew8kc5cxmju" path="res://Scenes/Map details/стол.tscn" id="27_sbpyc"]
+[ext_resource type="PackedScene" uid="uid://cihbn1n3dseah" path="res://Scenes/Map details/Комната.tscn" id="27_srrq2"]
+[ext_resource type="Texture2D" uid="uid://bc8qxokqakv0a" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_COL_2K.jpg" id="29_e47cb"]
+[ext_resource type="Texture2D" uid="uid://byyopo37v17i5" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_REFL_2K_jpg-CityStreetAsphaltGenericClean001_GLOSS_2K_jpg.png" id="30_rw41v"]
+[ext_resource type="Texture2D" uid="uid://c6i5x1ih1jwjy" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_NRM_2K.jpg" id="31_vnyn1"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cj56a"]
+sky_horizon_color = Color(0.005005935, 0.0051382263, 0.005408868, 1)
+sky_curve = 2.4161183e-05
+sky_energy_multiplier = 0.6
+sky_cover = ExtResource("1_srrq2")
+ground_bottom_color = Color(0.3607935, 0.4586606, 0.4863214, 1)
+
+[sub_resource type="Sky" id="Sky_q52xq"]
+sky_material = SubResource("ProceduralSkyMaterial_cj56a")
+
+[sub_resource type="Environment" id="Environment_dgkld"]
+background_mode = 2
+sky = SubResource("Sky_q52xq")
+tonemap_mode = 2
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q7agd"]
+cull_mode = 2
+albedo_texture = ExtResource("1_sbpyc")
+uv1_scale = Vector3(60, 60, 60)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xyvo3"]
+resource_name = "CityStreetAsphaltGenericClean001_2K"
+cull_mode = 2
+albedo_texture = ExtResource("29_e47cb")
+metallic = 1.0
+metallic_texture = ExtResource("30_rw41v")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("30_rw41v")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.5
+normal_texture = ExtResource("31_vnyn1")
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+stencil_flags = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_ovwyc"]
+material = SubResource("StandardMaterial3D_xyvo3")
+size = Vector3(0.8, 0.5, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3354g"]
+size = Vector3(0.8, 0.5, 0.6)
+
+[node name="MainSimulator" type="Node3D" unique_id=369453358]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1080398589]
+environment = SubResource("Environment_dgkld")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=120462989]
+transform = Transform3D(-0.6742845, -0.30876294, 0.67082477, 0.3725061, 0.64214635, 0.66999054, -0.6376358, 0.70165056, -0.31797332, 10.941481, 3.1962984, -2.546711)
+shadow_enabled = true
+
+[node name="Floor" type="CSGBox3D" parent="." unique_id=385445125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.4709473, 0)
+material_override = SubResource("StandardMaterial3D_q7agd")
+use_collision = true
+collision_layer = 3
+size = Vector3(581.83496, 0.05810547, 1023.1846)
+
+[node name="Player" parent="." unique_id=1330768253 instance=ExtResource("2_sbpyc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4039322, 1.318)
+
+[node name="Ключ_рожковый_24мм" parent="." unique_id=1828159176 instance=ExtResource("3_srrq2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6125117, -0.48073432, -2.9253037)
+ItemResource = ExtResource("4_q7agd")
+
+[node name="WD40" parent="." unique_id=458046737 instance=ExtResource("5_48666")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.5747874, -0.4298812, -3.1232455)
+ItemResource = ExtResource("6_e47cb")
+
+[node name="Screwdriver_1" parent="." unique_id=1530035773 instance=ExtResource("7_rw41v")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24070966, -0.51317656, -2.8929446)
+ItemResource = ExtResource("8_vnyn1")
+
+[node name="Drill_1" parent="." unique_id=2022278888 instance=ExtResource("9_xyvo3")]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -2.9972394, -0.49275187, -2.8948886)
+ItemResource = ExtResource("10_ovwyc")
+
+[node name="BMB" parent="." unique_id=307814687 instance=ExtResource("11_3354g")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -1.4885876, -0.81121415, 0.055698633)
+
+[node name="Ключ_шестигранный_8мм" parent="." unique_id=1726792624 instance=ExtResource("13_qe3qs")]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.10351437, -0.51076555, -2.7517152)
+ItemResource = ExtResource("14_qk1n4")
+
+[node name="Ключ_шестигранный_10мм" parent="." unique_id=2069185414 instance=ExtResource("15_is7aj")]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.21973586, -0.5131767, -2.8440094)
+ItemResource = ExtResource("16_ylcob")
+
+[node name="Ключ_шестигранный_14мм" parent="." unique_id=1581108248 instance=ExtResource("17_g83hi")]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.35859257, -0.51317656, -2.9491978)
+ItemResource = ExtResource("18_4lje5")
+
+[node name="Монтировка" parent="." unique_id=989579083 instance=ExtResource("19_q17ji")]
+transform = Transform3D(1.9106853e-15, -4.371139e-08, 1, -0.99999994, -4.371139e-08, 0, 4.3711385e-08, -1, -4.371139e-08, -0.88754416, -0.51317656, -2.8451607)
+ItemResource = ExtResource("20_hpcwo")
+
+[node name="Промышленный_Гайковерт_8мм" parent="." unique_id=2020131499 instance=ExtResource("21_6fdxx")]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -2.496723, -0.49275187, -2.8948886)
+ItemResource = ExtResource("22_l4cyn")
+
+[node name="Промышленный_Гайковерт_10мм" parent="." unique_id=952343988 instance=ExtResource("23_ujoos")]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -2.1033046, -0.49275184, -2.8948886)
+ItemResource = ExtResource("24_t4j5d")
+
+[node name="Электронный_Микрометр" parent="." unique_id=1635620638 instance=ExtResource("25_plggl")]
+transform = Transform3D(-4.371139e-08, -0.8597899, 0.51064795, 1, -3.758261e-08, 2.2321132e-08, 0, 0.51064795, 0.8597899, -1.6759673, -0.49275184, -2.78555)
+ItemResource = ExtResource("26_btp3x")
+
+[node name="Комната" parent="." unique_id=1311189745 instance=ExtResource("27_srrq2")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, -1.376004, 0)
+
+[node name="Стол" parent="." unique_id=744458440 instance=ExtResource("27_sbpyc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3771915, -1.3682402, -2.9314258)
+
+[node name="Стол2" parent="." unique_id=119037595 instance=ExtResource("27_sbpyc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14374638, -1.3682402, -2.9305713)
+
+[node name="Стол3" parent="." unique_id=1965841618 instance=ExtResource("27_sbpyc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2569876, -1.3682402, -3.516626)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1719750490]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=1160085515]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0845687, -1.3208612, 0.05584061)
+mesh = SubResource("BoxMesh_ovwyc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1783815253]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0845687, -1.3208612, 0.05584061)
+shape = SubResource("BoxShape3D_3354g")

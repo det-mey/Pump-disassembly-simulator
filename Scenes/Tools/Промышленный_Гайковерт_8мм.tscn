@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://bbw3234dvegfu"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_ty5xq"]
+[ext_resource type="PackedScene" uid="uid://dhgpsacpavyl2" path="res://Assets/Models/hytorc_lion_gun__electric_torque_wrench.glb" id="2_fvvdn"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_shlw8"]
+size = Vector3(0.047008492, 0.077746585, 0.11815643)
+
+[node name="Промышленный_Гайковерт_8мм" type="RigidBody3D" unique_id=1828159176]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_ty5xq")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1036491239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0047496203, 0.08496295, 0.06554614)
+shape = SubResource("BoxShape3D_shlw8")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=1086919836]
+transform = Transform3D(1, 0, 0, 0, -4.3711385e-08, -0.99999994, 0, 0.99999994, -4.3711385e-08, 0.012269963, 0.0030475846, 0.055293735)
+shape = SubResource("BoxShape3D_shlw8")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="." unique_id=941157547]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0033663362, -0.10268739, 0.050216675)
+shape = SubResource("BoxShape3D_shlw8")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="." unique_id=1626038280]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0047496203, 0.10837929, -0.059124842)
+shape = SubResource("BoxShape3D_shlw8")
+
+[node name="Sketchfab_Scene2" parent="." unique_id=127162412 instance=ExtResource("2_fvvdn")]
+transform = Transform3D(-0.001, 0, -8.742278e-11, 0, 0.001, 0, 8.742278e-11, 0, -0.001, 0, -0.14176142, 0)

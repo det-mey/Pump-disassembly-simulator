@@ -1,0 +1,47 @@
+[gd_scene load_steps=4 format=3 uid="uid://vrmenu001"]
+
+[ext_resource type="Script" path="res://Scripts/UI/VRMenu.cs" id="1_vrmenu"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/MainMenu.tscn" id="2_mainmenu"]
+[ext_resource type="Script" path="res://Scripts/VR/VRController.cs" id="3_vrcontroller"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_blackbg"]
+radius = 100.0
+height = 200.0
+
+[node name="VRMenu" type="Node3D"]
+
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+
+[node name="LeftController" type="XRController3D" parent="XROrigin3D"]
+tracker = "left_hand"
+
+[node name="VRController_L" type="Node3D" parent="XROrigin3D/LeftController"]
+script = ExtResource("3_vrcontroller")
+
+[node name="RightController" type="XRController3D" parent="XROrigin3D"]
+tracker = "right_hand"
+
+[node name="VRController_R" type="Node3D" parent="XROrigin3D/RightController"]
+script = ExtResource("3_vrcontroller")
+
+[node name="MenuHolder" type="Node3D" parent="."]
+
+[node name="MenuPanel" type="SubViewportContainer" parent="MenuHolder"]
+scale = Vector3(0.0015, 0.0015, 0.0015)
+
+[node name="Viewport" type="SubViewport" parent="MenuHolder/MenuPanel"]
+size = Vector2i(1920, 1080)
+transparent_bg = true
+world_3d = NodePath("../../../.")
+
+[node name="UI" type="CanvasLayer" parent="MenuHolder/MenuPanel/Viewport"]
+
+[node name="MainMenu" type="CanvasLayer" parent="MenuHolder/MenuPanel/Viewport/UI" instance=ExtResource("2_mainmenu")]
+
+[node name="BlackBackground" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_blackbg")
+
+[node name="VRMenuScript" type="Node" parent="."]
+script = ExtResource("1_vrmenu")

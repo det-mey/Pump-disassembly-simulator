@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ToolData" format=3 uid="uid://bnwbsyw48ks3"]
+
+[ext_resource type="PackedScene" uid="uid://cxnob3hdwdul8" path="res://Scenes/Tools/Монтировка.tscn" id="1_nymry"]
+[ext_resource type="Texture2D" uid="uid://cvxfmb4m64ple" path="res://Assets/Icons/Tools/Crowbar.png" id="2_hfvp1"]
+[ext_resource type="Script" uid="uid://w36tayqkc2x7" path="res://Scripts/Mechanics/ToolData.cs" id="4_tvo35"]
+
+[resource]
+script = ExtResource("4_tvo35")
+Category = 4
+Size = 0.0
+ItemName = "Монтировка"
+Description = "Монтировка обыкновенная."
+Icon = ExtResource("2_hfvp1")
+WorldPrefab = ExtResource("1_nymry")
+HandPrefab = ExtResource("1_nymry")
+AnimPosOffset = Vector3(-0.1, 0, -0.2)
+metadata/_custom_type_script = "uid://w36tayqkc2x7"

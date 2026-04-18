@@ -45,3 +45,6 @@ user://
 *.nupkg
 *.snupkg
 packages/
+
+# Config
+Config/game_settings.json

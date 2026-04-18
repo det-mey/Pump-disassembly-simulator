@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b1dpjghpfa11o"
 path.s3tc="res://.godot/imported/wd40_spray_can_2.png-baed15b507fff5b82c3040ea4ebe52de.s3tc.ctex"
+path.etc2="res://.godot/imported/wd40_spray_can_2.png-baed15b507fff5b82c3040ea4ebe52de.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Assets/Models/wd40_spray_can_2.png"
-dest_files=["res://.godot/imported/wd40_spray_can_2.png-baed15b507fff5b82c3040ea4ebe52de.s3tc.ctex"]
+dest_files=["res://.godot/imported/wd40_spray_can_2.png-baed15b507fff5b82c3040ea4ebe52de.s3tc.ctex", "res://.godot/imported/wd40_spray_can_2.png-baed15b507fff5b82c3040ea4ebe52de.etc2.ctex"]
 
 [params]
 

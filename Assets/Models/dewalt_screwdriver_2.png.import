@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://chpnv7bxtl50o"
 path.s3tc="res://.godot/imported/dewalt_screwdriver_2.png-5b24c139cef67ba98b0e7a5f576e5839.s3tc.ctex"
+path.etc2="res://.godot/imported/dewalt_screwdriver_2.png-5b24c139cef67ba98b0e7a5f576e5839.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Assets/Models/dewalt_screwdriver_2.png"
-dest_files=["res://.godot/imported/dewalt_screwdriver_2.png-5b24c139cef67ba98b0e7a5f576e5839.s3tc.ctex"]
+dest_files=["res://.godot/imported/dewalt_screwdriver_2.png-5b24c139cef67ba98b0e7a5f576e5839.s3tc.ctex", "res://.godot/imported/dewalt_screwdriver_2.png-5b24c139cef67ba98b0e7a5f576e5839.etc2.ctex"]
 
 [params]
 

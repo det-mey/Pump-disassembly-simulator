@@ -6,10 +6,13 @@ public partial class UIManager : CanvasLayer
 	public static UIManager Instance { get; private set; }
 
 	// --- ССЫЛКИ НА UI ---
-	[ExportGroup("Меню Паузы")][Export] private Control _pauseMenuPanel;
+	[ExportGroup("Меню Паузы")]
+	[Export] private Control _pauseMenuPanel;
 	[ExportGroup("Иконки Меню Паузы")]
+
 	[Export] private Texture2D _iconResume;
-	[Export] private Texture2D _iconSettings;[Export] private Texture2D _iconRestart;
+	[Export] private Texture2D _iconSettings;
+	[Export] private Texture2D _iconRestart;
 	[Export] private Texture2D _iconHome;
 
 	[ExportGroup("Инвентарь")]
@@ -17,19 +20,20 @@ public partial class UIManager : CanvasLayer
 	[Export] private Control _inventoryWindow; 
 	[Export] private PanelContainer _gridBackgroundPanel;
 	[Export] private PanelContainer _detailsPanelContainer;
-	[Export] private Control _detailsContentBox;[ExportGroup("Детали Предмета (Инвентарь)")]
+	[Export] private Control _detailsContentBox;
+	[ExportGroup("Детали Предмета (Инвентарь)")]
 	[Export] private Label _detailNameLabel;
 	[Export] private Label _detailDescLabel;
 	[Export] private TextureRect _detailIcon;
-
 	[ExportGroup("Hotbar")]
 	[Export] private HBoxContainer _hotbarContainer;
-
 	[ExportGroup("HUD и Тултипы")]
 	[Export] private ColorRect _crosshair;
 	[Export] private Label _promptLabel;
-	[Export] private PanelContainer _worldTooltipPanel;[Export] private Label _worldNameLabel;
-	[Export] private Label _worldDescLabel;[Export] private Control _worldSeparator;
+	[Export] private PanelContainer _worldTooltipPanel;
+	[Export] private Label _worldNameLabel;
+	[Export] private Label _worldDescLabel;
+	[Export] private Control _worldSeparator;
 	[Export] private Label _worldStatesLabel;
 	[Export] private Control _worldSeparator2;
 	[Export] private ProgressBar _torqueProgressBar;
@@ -44,8 +48,7 @@ public partial class UIManager : CanvasLayer
 	[ExportGroup("Звуки Системы и Инвентаря")]
 	[Export] public AudioStream SndHover { get; set; }
 	[Export] public AudioStream SndClick { get; set; }
-	[Export] public AudioStream SndDropdown { get; set; }
-	[Export] public AudioStream SndInvOpen { get; set; }
+	[Export] public AudioStream SndDropdown { get; set; }[Export] public AudioStream SndInvOpen { get; set; }
 	[Export] public AudioStream SndInvClose { get; set; }
 	[Export] public AudioStream SndHotbarSwitch { get; set; }
 	[Export] public AudioStream SndItemDrag { get; set; }
@@ -63,6 +66,10 @@ public partial class UIManager : CanvasLayer
 	private Tween _inventoryTween;
 	private Tween _detailsTween;
 	private Tween _pauseTween;
+	
+	// Переменные для нового плавающего текста предмета
+	private Label _activeItemNameLabel;
+	private Tween _activeItemNameTween;
 
 	private List<InventorySlot> _hotbarSlots = new List<InventorySlot>();
 	private List<InventorySlot> _inventorySlots = new List<InventorySlot>();
@@ -70,39 +77,35 @@ public partial class UIManager : CanvasLayer
 	// --- ИНИЦИАЛИЗАЦИЯ ---
     public override void _EnterTree()
     {
-        // Теперь Instance задается один раз и навсегда
         if (Instance == null) Instance = this;
     }
 
     public override void _Ready()
     {
-        // Инициализируем всё один раз при старте всей ИГРЫ
         InitializeHUD();
         ApplyGlobalStyles();
         GenerateInventorySlots();
 
-        // Подписываемся один раз
         InventoryManager.Instance.OnInventoryUpdated += RefreshAllSlots;
         InventoryManager.Instance.OnActiveSlotChanged += HighlightActiveSlot;
         
-        // Скрываем всё лишнее
         _pauseMenuPanel.Visible = false;
         _pauseMenuPanel.Modulate = new Color(1, 1, 1, 0);
 
 		if (_worldDescLabel != null)
 		{
 			_worldDescLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
-			_worldDescLabel.CustomMinimumSize = new Vector2(400, 0); // Лимит ширины описания
+			_worldDescLabel.CustomMinimumSize = new Vector2(400, 0); 
 		}
 		if (_worldStatesLabel != null)
 		{
 			_worldStatesLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
-			_worldStatesLabel.CustomMinimumSize = new Vector2(400, 0); // Лимит ширины статусов
+			_worldStatesLabel.CustomMinimumSize = new Vector2(400, 0); 
 		}
 		if (_promptLabel != null)
 		{
 			_promptLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
-			_promptLabel.CustomMinimumSize = new Vector2(400, 0); // Лимит для верхней подсказки
+			_promptLabel.CustomMinimumSize = new Vector2(400, 0); 
 		}
     }
 
@@ -141,6 +144,30 @@ public partial class UIManager : CanvasLayer
 		}
 		
 		if (_detailsContentBox != null) _detailsContentBox.Visible = false;
+
+		// --- ПРОГРАММНОЕ СОЗДАНИЕ ТЕКСТА НАД ХОТБАРОМ ---
+		_activeItemNameLabel = new Label();
+		_activeItemNameLabel.Text = "";
+		_activeItemNameLabel.HorizontalAlignment = HorizontalAlignment.Center;
+		_activeItemNameLabel.VerticalAlignment = VerticalAlignment.Center;
+		
+		// Стилизация текста
+		_activeItemNameLabel.AddThemeFontSizeOverride("font_size", 24);
+		_activeItemNameLabel.AddThemeColorOverride("font_color", Colors.White);
+		_activeItemNameLabel.AddThemeColorOverride("font_outline_color", new Color(0, 0, 0, 0.8f));
+		_activeItemNameLabel.AddThemeConstantOverride("outline_size", 8);
+		_activeItemNameLabel.AddThemeColorOverride("font_shadow_color", new Color(0, 0, 0, 0.5f));
+		_activeItemNameLabel.AddThemeConstantOverride("shadow_offset_x", 2);
+		_activeItemNameLabel.AddThemeConstantOverride("shadow_offset_y", 2);
+		
+		// Привязываем к низу экрана по всей ширине, чтобы центрирование работало идеально
+		_activeItemNameLabel.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
+		_activeItemNameLabel.OffsetTop = -150; 
+		_activeItemNameLabel.OffsetBottom = -110;
+		_activeItemNameLabel.Modulate = new Color(1, 1, 1, 0); // Скрыт по умолчанию
+		
+		// Добавляем самым последним в CanvasLayer, чтобы текст был поверх всего остального HUD
+		AddChild(_activeItemNameLabel);
 	}
 
 	private void ApplyGlobalStyles()
@@ -217,7 +244,6 @@ public partial class UIManager : CanvasLayer
 
 	private void ProcessFloatingUI(double delta)
 	{
-		// Оптимизация: обрабатываем только если элементы видимы
 		bool hasPrompt = _promptLabel != null && _promptLabel.Visible;
 		bool hasTooltip = _worldTooltipPanel != null && _worldTooltipPanel.Visible;
 		
@@ -238,22 +264,19 @@ public partial class UIManager : CanvasLayer
             Vector2 screenSize = GetViewport().GetVisibleRect().Size;
             Vector2 panelSize = _worldTooltipPanel.Size;
             
-            // Желаемая позиция (чуть ниже и правее курсора)
             Vector2 targetPos = mousePos + new Vector2(25, 25);
             
-            // МАТЕМАТИЧЕСКИЙ ФИКС: Ограничиваем координаты, чтобы панель всегда была в кадре
             targetPos.X = Mathf.Clamp(targetPos.X, 0, screenSize.X - panelSize.X - 10);
             targetPos.Y = Mathf.Clamp(targetPos.Y, 0, screenSize.Y - panelSize.Y - 10);
 
             _worldTooltipPanel.GlobalPosition = _worldTooltipPanel.GlobalPosition.Lerp(targetPos, 20f * (float)delta);
-            _worldTooltipPanel.Size = Vector2.Zero; // Принудительный пересчет под новую ширину
+            _worldTooltipPanel.Size = Vector2.Zero; 
         }
 	}
 
 	// --- ИНВЕНТАРЬ ---
 	private void GenerateInventorySlots()
 	{
-		// Проверяем, назначены ли контейнеры в Инспекторе
 		if (_hotbarContainer == null || _inventoryGrid == null)
 		{
 			GD.PrintErr("[UI ERROR] Контейнеры Hotbar или InventoryGrid не назначены в Инспекторе UIManager!");
@@ -293,6 +316,41 @@ public partial class UIManager : CanvasLayer
 	private void HighlightActiveSlot(int index, ItemData item)
 	{
 		for (int i = 0; i < _hotbarSlots.Count; i++) _hotbarSlots[i].SetActiveStatus(i == index);
+		
+		// Запуск анимации названия предмета при смене слота
+		AnimateActiveItemName(item);
+	}
+
+	private void AnimateActiveItemName(ItemData item)
+	{
+		if (_activeItemNameLabel == null) return;
+
+		_activeItemNameTween?.Kill();
+		_activeItemNameTween = CreateTween();
+
+		if (item == null)
+		{
+			_activeItemNameTween.TweenProperty(_activeItemNameLabel, "modulate:a", 0.0f, 0.2f);
+			return;
+		}
+
+		_activeItemNameLabel.Text = item.ItemName;
+		
+		// Сброс прозрачности и смещение вниз на 25 пикселей для эффекта "всплытия"
+		_activeItemNameLabel.Modulate = new Color(1, 1, 1, 0);
+		_activeItemNameLabel.OffsetTop = -125f; 
+		_activeItemNameLabel.OffsetBottom = -85f;
+
+		// Параллельное появление прозрачности и вылет снизу с эффектом пружинки (Back Out)
+		_activeItemNameTween.SetParallel(true);
+		_activeItemNameTween.TweenProperty(_activeItemNameLabel, "modulate:a", 1.0f, 0.25f).SetTrans(Tween.TransitionType.Sine);
+		// Используем offset_top/bottom, чтобы не сбить Anchors, если окно поменяет размер
+		_activeItemNameTween.TweenProperty(_activeItemNameLabel, "offset_top", -150f, 0.4f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+		_activeItemNameTween.TweenProperty(_activeItemNameLabel, "offset_bottom", -110f, 0.4f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+
+		// Цепь: Задержка на 2 секунды, затем растворение
+		_activeItemNameTween.Chain().TweenInterval(2.0f);
+		_activeItemNameTween.Chain().TweenProperty(_activeItemNameLabel, "modulate:a", 0.0f, 0.5f).SetTrans(Tween.TransitionType.Sine);
 	}
 
 	public void ToggleFullInventory(bool isOpen)
@@ -306,6 +364,10 @@ public partial class UIManager : CanvasLayer
 
 			if (isOpen)
 			{
+				// Мгновенно скрываем название предмета, чтобы не мешало инвентарю
+				_activeItemNameTween?.Kill();
+				if (_activeItemNameLabel != null) _activeItemNameLabel.Modulate = new Color(1, 1, 1, 0);
+
 				if (SndInvOpen != null) AudioManager.Instance?.PlayStream(SndInvOpen);
 				_inventoryWindow.Visible = true;
 				RefreshAllSlots();
@@ -364,35 +426,36 @@ public partial class UIManager : CanvasLayer
 	}
 
 	public void AnimateItemPickup(Texture2D icon)
-	{
-		if (icon == null) return;
+    {
+        if (icon == null || !IsInsideTree()) return; 
 
-		var flyingIcon = new TextureRect {
-			Texture = icon, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-			StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, Size = new Vector2(64, 64)
-		};
-		flyingIcon.PivotOffset = flyingIcon.Size / 2;
-		flyingIcon.GlobalPosition = GetViewport().GetVisibleRect().Size / 2;
-		AddChild(flyingIcon);
+        var flyingIcon = new TextureRect {
+            Texture = icon, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, Size = new Vector2(64, 64)
+        };
+        flyingIcon.PivotOffset = flyingIcon.Size / 2;
+        flyingIcon.GlobalPosition = GetViewport().GetVisibleRect().Size / 2;
+        AddChild(flyingIcon);
 
-		Vector2 endPos = new Vector2(GetViewport().GetVisibleRect().Size.X / 2, GetViewport().GetVisibleRect().Size.Y - 50);
+        Vector2 endPos = new Vector2(GetViewport().GetVisibleRect().Size.X / 2, GetViewport().GetVisibleRect().Size.Y - 50);
 
-		var tween = CreateTween().SetParallel(true); 
-		tween.TweenProperty(flyingIcon, "global_position", endPos, 0.5f).SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.In);
-		tween.TweenProperty(flyingIcon, "scale", new Vector2(0.2f, 0.2f), 0.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.In);
-		tween.TweenProperty(flyingIcon, "modulate:a", 0f, 0.5f);
-		tween.Finished += () => flyingIcon.QueueFree();
-	}
+        var tween = CreateTween().SetParallel(true); 
+        tween.TweenProperty(flyingIcon, "global_position", endPos, 0.5f).SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.In);
+        tween.TweenProperty(flyingIcon, "scale", new Vector2(0.2f, 0.2f), 0.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.In);
+        tween.TweenProperty(flyingIcon, "modulate:a", 0f, 0.5f);
+        
+        tween.Finished += () => {
+            if (IsInstanceValid(flyingIcon)) flyingIcon.QueueFree();
+        };
+    }
 
 	// --- ПАУЗА И ДЕЙСТВИЯ ---
     public override void _UnhandledInput(InputEvent @event)
     {
-        // Только "живой" экземпляр с привязанным интерфейсом может ставить игру на паузу
         if (_hotbarContainer == null) return;
 
         if (@event.IsActionPressed("ui_cancel"))
         {
-            // Не позволяем открывать паузу, если мы в Главном Меню
             if (GetTree().CurrentScene != null && GetTree().CurrentScene.Name == "MainMenu") return;
             
             TogglePauseMenu(!_isPaused);
@@ -401,7 +464,6 @@ public partial class UIManager : CanvasLayer
 
     public void TogglePauseMenu(bool pause)
     {
-        // Защита от вызова на пустом синглтоне
         if (_pauseMenuPanel == null || !IsInsideTree()) return;
 
         _isPaused = pause;
@@ -412,10 +474,11 @@ public partial class UIManager : CanvasLayer
             Input.MouseMode = Input.MouseModeEnum.Visible;
             if (_crosshair != null) _crosshair.Visible = false;
 
-            var container = FindContainer(_pauseMenuPanel);
+			var container = FindContainer(_pauseMenuPanel);
             if (container != null && container.GetChildCount() == 0)
             {
                 if (container is BoxContainer box) box.AddThemeConstantOverride("separation", 15);
+                
                 container.AddChild(CreatePauseButton("Продолжить", _iconResume, OnResumePressed));
                 container.AddChild(CreatePauseButton("Начать заново", _iconRestart, OnRestartPressed));
                 container.AddChild(CreatePauseButton("Настройки", _iconSettings, OnSettingsPausePressed));
@@ -430,14 +493,12 @@ public partial class UIManager : CanvasLayer
         }
         else
         {
-            // Прячем меню
             _pauseTween?.Kill();
             _pauseTween = CreateTween();
             _pauseTween.SetPauseMode(Tween.TweenPauseMode.Process);
             _pauseTween.TweenProperty(_pauseMenuPanel, "modulate:a", 0.0f, 0.2f).SetTrans(Tween.TransitionType.Sine);
             _pauseTween.TweenCallback(Callable.From(() => _pauseMenuPanel.Visible = false));
 
-            // Возвращаем мышь только если не открыт инвентарь
             bool isInvOpen = _inventoryWindow != null && _inventoryWindow.Visible;
             Input.MouseMode = isInvOpen ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
             if (_crosshair != null && !isInvOpen) _crosshair.Visible = true;
@@ -482,7 +543,6 @@ public partial class UIManager : CanvasLayer
 	// --- АНИМАЦИИ ---
 	private void AnimateHover(Control control, bool isHovering, float targetScale)
 	{
-		// Звук наведения
 		if (isHovering && SndHover != null) AudioManager.Instance?.PlayStream(SndHover, -5f);
 
 		control.PivotOffset = control.Size / 2;
@@ -493,7 +553,6 @@ public partial class UIManager : CanvasLayer
 
 	private void AnimateClick(Control control)
 	{
-		// Звук клика
 		if (SndClick != null) AudioManager.Instance?.PlayStream(SndClick);
 
 		control.PivotOffset = control.Size / 2;
@@ -507,16 +566,14 @@ public partial class UIManager : CanvasLayer
 	{
 		if (_promptLabel == null) return;
 
-		// --- ИСПРАВЛЕНИЕ: ПРИОРЕТЕТЫ СООБЩЕНИЙ ---
 		if (isError)
 		{
 			_promptLabel.Text = text;
 			_promptLabel.Modulate = Colors.Red;
-			_messageLockTimer = 3.0f; // Увеличим до 3 секунд для аварий
+			_messageLockTimer = 3.0f; 
 			return;
 		}
 
-		// Если висит блокировка от ошибки - сохраняем текст в кэш, но не выводим
 		_normalPromptCache = text;
 		
 		if (_messageLockTimer <= 0)
@@ -615,7 +672,6 @@ public partial class UIManager : CanvasLayer
             _inventoryWindow.Modulate = new Color(1, 1, 1, 0);
         }
 
-        // Полный сброс кэша текстов и таймеров ошибок
         _messageLockTimer = 0.0f;
         _normalPromptCache = "";
         
@@ -623,6 +679,13 @@ public partial class UIManager : CanvasLayer
         {
             _promptLabel.Text = "";
             _promptLabel.Modulate = Colors.White;
+        }
+        
+        // Скрываем плавающий текст при сбросе уровня
+        if (_activeItemNameLabel != null)
+        {
+             _activeItemNameTween?.Kill();
+             _activeItemNameLabel.Modulate = new Color(1, 1, 1, 0);
         }
 
         ShowWorldTooltip("", "", "");

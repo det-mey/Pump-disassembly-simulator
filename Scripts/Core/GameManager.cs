@@ -40,11 +40,10 @@ public partial class GameManager : Node
     }
 
     // Универсальный метод загрузки любой карты с любым режимом
-    public async void LoadScenario(ScenarioData scenario, SimulatorMode mode)
+    public void LoadScenario(ScenarioData scenario, SimulatorMode mode)
     {
         if (scenario == null) return;
 
-        // 1. Сначала СБРАСЫВАЕМ ИНТЕРФЕЙС
         UIManager.Instance?.ResetUIForNewLevel();
 
         CurrentScenario = scenario;
@@ -58,21 +57,23 @@ public partial class GameManager : Node
         {
             GetTree().Paused = false; 
             
-            Godot.Error err = GetTree().ChangeSceneToFile(scenario.ScenePath);
-            if (err != Godot.Error.Ok)
-            {
-                DeveloperConsole.Instance?.ToggleConsole(true);
-                DeveloperConsole.Instance?.LogError($"Ошибка загрузки сцены: {err}");
-                return;
-            }
-            
-            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-            
-            SequenceManager.Instance?.LoadSequenceFromJson(scenario.SequenceJsonPath);
-            
-            // ВАЖНО: После загрузки сцены еще раз проверяем фокус мыши
-            Input.MouseMode = Input.MouseModeEnum.Captured;
+            // --- КРАН ЗАГРУЗКИ ---
+            LoadingScreen.Instance?.LoadScene(scenario.ScenePath, async () => {
+                
+                // Этот код выполнится ТОЛЬКО когда 3D сцена полностью загрузится
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+
+                SequenceManager.Instance?.LoadSequenceFromJson(scenario.SequenceJsonPath);
+
+                if (VRManager.Instance != null && VRManager.Instance.IsVRPlatform())
+                {
+                    VRManager.Instance.InitializeXR();
+                }
+
+                bool isVR = VRManager.Instance?.IsVRMode == true;
+                Input.MouseMode = isVR ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
+            });
         }
     }
 
@@ -92,10 +93,17 @@ public partial class GameManager : Node
 
     public void LoadMainMenu()
     {
-        GetTree().Paused = false; 
-        DeveloperConsole.Instance?.ToggleConsole(false); 
+        GetTree().Paused = false;
+        DeveloperConsole.Instance?.ToggleConsole(false);
 
-        string menuPath = "res://Scenes/UI/MainMenu.tscn"; 
+        string menuPath = VRManager.Instance != null && VRManager.Instance.IsVRMode 
+            ? "res://Scenes/UI/VRMenu.tscn" 
+            : "res://Scenes/UI/MainMenu.tscn";
+
+        LoadingScreen.Instance?.LoadScene(menuPath, () => {
+            // Как только меню загрузилось - освобождаем мышь
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+        });
 
         Godot.Error err = GetTree().ChangeSceneToFile(menuPath);
         // Если движок не смог загрузить файл

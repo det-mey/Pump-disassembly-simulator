@@ -20,11 +20,10 @@ public partial class SequenceManager : Node
 
     public override void _Process(double delta)
     {
-        // Не обновляем время, если игра на паузе или сценарий завершен
         if (GetTree().Paused || _groups == null || _currentGroupIndex >= _groups.Count) return;
 
         _timeUpdateAccumulator += delta;
-        if (_timeUpdateAccumulator >= 1.0) // Обновляем раз в секунду для экономии ресурсов
+        if (_timeUpdateAccumulator >= 1.0) 
         {
             _timeUpdateAccumulator = 0;
             RefreshCurrentTaskDisplay();
@@ -48,7 +47,7 @@ public partial class SequenceManager : Node
         _groups = new Godot.Collections.Array();
         _currentGroupIndex = 0;
         _currentStepInGroupIndex = 0;
-        MaxPossibleScore = 0; // Сброс
+        MaxPossibleScore = 0; 
 
         if (string.IsNullOrEmpty(jsonPath) || !FileAccess.FileExists(jsonPath)) return;
 
@@ -59,7 +58,6 @@ public partial class SequenceManager : Node
             var data = json.Data.AsGodotDictionary();
             _groups = data.ContainsKey("groups") ? data["groups"].AsGodotArray() : new Godot.Collections.Array();
             
-            // ПОДСЧЕТ МАКСИМАЛЬНОГО БАЛЛА
             foreach (var gVar in _groups)
             {
                 var g = gVar.AsGodotDictionary();
@@ -78,7 +76,6 @@ public partial class SequenceManager : Node
         }
     }
 
-    // МЕТОД ВАЛИДАЦИИ
     public static System.Collections.Generic.List<string> ValidateSequenceJsonStrict(string jsonPath, System.Collections.Generic.HashSet<string> validIds)
     {
         var errors = new System.Collections.Generic.List<string>();
@@ -94,14 +91,12 @@ public partial class SequenceManager : Node
 
         var data = json.Data.AsGodotDictionary();
         
-        // ПРОВЕРКА ГРУПП
         if (!data.ContainsKey("groups"))
         {
             errors.Add("Критическая ошибка: В корневом объекте JSON отсутствует массив 'groups'!");
             return errors;
         }
 
-        // Локальная функция проверки ID
         void CheckTargets(Godot.Collections.Dictionary dict, string context)
         {
             if (dict.ContainsKey("target"))
@@ -120,7 +115,6 @@ public partial class SequenceManager : Node
             }
         }
 
-        // 1. Проверка структуры групп и шагов
         var groups = data["groups"].AsGodotArray();
         if (groups.Count == 0) errors.Add("Массив 'groups' пуст. Сценарию нечего выполнять.");
 
@@ -145,10 +139,19 @@ public partial class SequenceManager : Node
                     CheckTargets(step["condition"].AsGodotDictionary(), $"Группе '{gName}' -> Шаге '{sName}'");
                 else
                     errors.Add($"В Шаге '{sName}' (Группа: {gName}) отсутствует условие 'condition'!");
+
+                // ПРОВЕРКА НОВОЙ ФУНКЦИИ show_ghosts
+                if (step.ContainsKey("show_ghosts"))
+                {
+                    foreach (var g in step["show_ghosts"].AsGodotArray())
+                    {
+                        if (!validIds.Contains(g.AsString())) 
+                            errors.Add($"Неизвестный ID '{g.AsString()}' в show_ghosts шага '{sName}'!");
+                    }
+                }
             }
         }
 
-        // 2. Проверка штрафов
         if (data.ContainsKey("penalties"))
         {
             var penalties = data["penalties"].AsGodotArray();
@@ -170,7 +173,6 @@ public partial class SequenceManager : Node
             }
         }
 
-        // 3. Проверка стартового setup (random_states, dependencies)
         if (data.ContainsKey("setup"))
         {
             var setup = data["setup"].AsGodotDictionary();
@@ -221,7 +223,6 @@ public partial class SequenceManager : Node
         var currentStep = steps[_currentStepInGroupIndex].AsGodotDictionary();
         UpdateUI(currentGroup, currentStep, steps.Count);
 
-        // Проверка условия
         if (EvaluateConditionRecursive(currentStep["condition"].AsGodotDictionary()))
         {
             ProcessStepSuccess(currentGroup, currentStep);
@@ -241,7 +242,6 @@ public partial class SequenceManager : Node
             var step = steps[i].AsGodotDictionary();
             if (EvaluateConditionRecursive(step["condition"].AsGodotDictionary()))
             {
-                // Игрок выполнил шаг 'i', хотя мы ждали шаг '_currentStepInGroupIndex'
                 var groupName = _groups[_currentGroupIndex].AsGodotDictionary()["name"].AsString();
                 var penaltyPoints = _groups[_currentGroupIndex].AsGodotDictionary().TryGetValue("penalty_points", out Variant p) ? p.AsInt32() : 10;
                 var isAccident = _groups[_currentGroupIndex].AsGodotDictionary().TryGetValue("is_accident", out Variant a) && a.AsBool();
@@ -249,8 +249,8 @@ public partial class SequenceManager : Node
 
                 ActionLogger.Instance.AddPenalty($"Нарушена строгая последовательность в группе '{groupName}'", penaltyPoints, isAccident, notify);
                 
-                // Чтобы не стопорить игру, "подтягиваем" индекс (игрок как бы перепрыгнул шаг)
                 _currentStepInGroupIndex = i;
+                return;
             }
         }
     }
@@ -262,8 +262,27 @@ public partial class SequenceManager : Node
         
         ActionLogger.Instance.LogEvent(LogType.StepComplete, $"Выполнен шаг: {stepName}", points: points);
         
+        // --- ДИНАМИЧЕСКОЕ ПОЯВЛЕНИЕ ПРИЗРАКОВ ---
+        if (step.ContainsKey("show_ghosts"))
+        {
+            var ghosts = step["show_ghosts"].AsGodotArray();
+            var nodes = GetTree().GetNodesInGroup("Fasteners");
+            foreach (var g in ghosts)
+            {
+                string targetId = g.AsString();
+                foreach (Node n in nodes)
+                {
+                    if (n is Fastener f && f.PartId == targetId)
+                    {
+                        f.IsGhostHidden = false; // Снимаем блокировку невидимости
+                        f.UpdateVisuals();       // Заставляем перерисовать призрака
+                    }
+                }
+            }
+        }
+        
         _currentStepInGroupIndex++;
-        EvaluateCurrentStep(); // Проверяем следующий
+        EvaluateCurrentStep(); 
     }
 
     private void CompleteGroup(Godot.Collections.Dictionary group)
@@ -280,12 +299,28 @@ public partial class SequenceManager : Node
         }
         else
         {
-            // --- ВСЁ ВЫПОЛНЕНО ---
             ActionLogger.Instance.LogEvent(LogType.System, "СЦЕНАРИЙ ПОЛНОСТЬЮ ЗАВЕРШЕН");
+
+            string finalGrade = ActionLogger.Instance.CalculateGrade();
+            float elapsed = ActionLogger.Instance.ElapsedSeconds;
+            string protocolPreview = ActionLogger.Instance.GetProtocolPreview();
+            string fullProtocolHtml = ActionLogger.Instance.GenerateHtmlReport();
             
-            // Задержка 2 секунды перед показом результатов
+            ResultsHistoryManager.Instance?.AddResult(
+                GameManager.Instance.CurrentScenario.ScenarioName,
+                GameManager.Instance.CurrentMode,
+                ActionLogger.Instance.Score,
+                finalGrade,
+                elapsed,
+                protocolPreview,
+                fullProtocolHtml
+            );
+
             GetTree().CreateTimer(2.0f).Timeout += () => {
-                ResultsUI.Instance?.ShowResults();
+                if (ResultsUI.Instance != null && IsInstanceValid(ResultsUI.Instance))
+                {
+                    ResultsUI.Instance.ShowResults();
+                }
             };
         }
     }
@@ -296,21 +331,19 @@ public partial class SequenceManager : Node
         string sName = step["name"].AsString();
         string sDesc = step.TryGetValue("description", out Variant d) ? d.AsString() : "";
         
-        // Считаем оставшееся время
         float elapsed = (Time.GetTicksMsec() - ActionLogger.Instance.SessionStartTime) / 1000f;
         float remaining = GameManager.Instance.CurrentScenario.TimeLimitSeconds - elapsed;
 
         if (remaining <= 0 && GameManager.Instance.CurrentMode == SimulatorMode.Exam)
         {
             ActionLogger.Instance.AddPenalty("Время на выполнение задачи истекло!", 100, true, true);
-            ResultsUI.Instance?.ShowResults(); // Принудительный конец
+            ResultsUI.Instance?.ShowResults(); 
         }
 
         string timeStr = remaining > 0 ? $" | Время: {(int)remaining / 60}:{(int)remaining % 60:D2}" : " | ВРЕМЯ ИСТЕКЛО";
         UIManager.Instance?.UpdateTaskUI(_currentStepInGroupIndex, totalStepsInGroup, $"{gName}: {sName}{timeStr}", sDesc);
     }
 
-    // РЕКУРСИВНЫЙ АНАЛИЗАТОР ЛОГИКИ (AND, OR, NOT, STATE)
     private bool EvaluateConditionRecursive(Godot.Collections.Dictionary cond)
     {
         string op = cond.ContainsKey("op") ? cond["op"].AsString().ToUpper() : "STATE";
@@ -319,7 +352,13 @@ public partial class SequenceManager : Node
         {
             string targetId = cond["target"].AsString();
             string expectedState = cond["state"].AsString();
-            return ActionLogger.Instance.GetState(targetId) == expectedState;
+            
+            if (expectedState == "Measured")
+            {
+                return ActionLogger.Instance != null && ActionLogger.Instance.HasActionOccurred(targetId, "Measured");
+            }
+            
+            return ActionLogger.Instance != null && ActionLogger.Instance.GetState(targetId) == expectedState;
         }
         else if (op == "AND")
         {
@@ -347,7 +386,6 @@ public partial class SequenceManager : Node
     {
         if (_steps == null || _steps.Count == 0) 
         {
-            // --- ИСПРАВЛЕНИЕ: Передаем 0, 0 для скрытия панели ---
             UIManager.Instance?.UpdateTaskUI(0, 0, "Свободный режим", "Сценарий не задан");
             return;
         }
@@ -366,7 +404,6 @@ public partial class SequenceManager : Node
         }
     }
 
-    // --- НОВОЕ: МЕТОД ИНИЦИАЛИЗАЦИИ СЦЕНАРИЯ ---
     private void ApplyScenarioSetup(Godot.Collections.Dictionary data)
     {
         if (!data.ContainsKey("setup")) return;
@@ -377,7 +414,14 @@ public partial class SequenceManager : Node
         foreach(BasePart part in allParts)
             if (!string.IsNullOrEmpty(part.PartId)) partsDict[part.PartId] = part;
 
-        // 1. УЛУЧШЕННЫЕ СЛУЧАЙНЫЕ СОСТОЯНИЯ
+        if (setup.ContainsKey("start_all_as_ghosts") && setup["start_all_as_ghosts"].AsBool())
+        {
+            foreach (var bp in partsDict.Values)
+            {
+                if (bp is Fastener f) f.StartsAsGhost = true;
+            }
+        }
+
         if (setup.ContainsKey("random_states"))
         {
             foreach(var rsVar in setup["random_states"].AsGodotArray())
@@ -393,10 +437,9 @@ public partial class SequenceManager : Node
                         string stateStr = rs["state"].AsString();
                         if (Enum.TryParse(stateStr, out PartState pState)) bp.AddState(pState);
 
-                        // --- НОВОЕ: Случайный износ для дефектовки ---
                         if (rs.ContainsKey("wear_range") && bp is Fastener f)
                         {
-                            var range = rs["wear_range"].AsVector2(); // Задать в JSON как [min, max]
+                            var range = rs["wear_range"].AsVector2(); 
                             f.CurrentWear = (float)GD.RandRange(range.X, range.Y);
                             f.IsDefective = Mathf.Abs(f.CurrentWear - f.NominalWear) > 0.5f;
                         }
@@ -407,7 +450,6 @@ public partial class SequenceManager : Node
             }
         }
 
-        // 2. Инъекция физических зависимостей из JSON прямо в детали
         if (setup.ContainsKey("dependencies"))
         {
             foreach(var depVar in setup["dependencies"].AsGodotArray())
@@ -417,7 +459,6 @@ public partial class SequenceManager : Node
                 
                 if (partsDict.TryGetValue(target, out BasePart bp) && bp is Fastener targetFastener)
                 {
-                    // То, без чего нельзя установить
                     if (dep.ContainsKey("requires"))
                     {
                         foreach(var reqVar in dep["requires"].AsGodotArray())
@@ -426,7 +467,6 @@ public partial class SequenceManager : Node
                                 targetFastener.RequiredParts.Add(reqFastener);
                         }
                     }
-                    // То, что мешает снять
                     if (dep.ContainsKey("blocks"))
                     {
                         foreach(var blkVar in dep["blocks"].AsGodotArray())
@@ -439,7 +479,30 @@ public partial class SequenceManager : Node
             }
         }
 
-        // 3. Включение минимальных подсказок для экзамена/тренировки из JSON
+        if (setup.ContainsKey("lifecycle"))
+        {
+            foreach(var lcVar in setup["lifecycle"].AsGodotArray())
+            {
+                var lc = lcVar.AsGodotDictionary();
+                string target = lc["target"].AsString();
+                
+                if (partsDict.TryGetValue(target, out BasePart bp) && bp is Fastener f)
+                {
+                    if (lc.ContainsKey("leave_ghost")) f.LeaveGhostOnRemoval = lc["leave_ghost"].AsBool();
+                    if (lc.ContainsKey("give_item")) f.GiveItemOnRemoval = lc["give_item"].AsBool();
+                    if (lc.ContainsKey("is_ghost_hidden")) f.IsGhostHidden = lc["is_ghost_hidden"].AsBool();
+                    if (lc.ContainsKey("starts_as_ghost")) f.StartsAsGhost = lc["starts_as_ghost"].AsBool();
+                    
+                    f.UpdateVisuals(); 
+                }
+            }
+        }
+
+        foreach (var bp in partsDict.Values)
+        {
+            if (bp is Fastener f) f.UpdateVisuals();
+        }
+
         if (setup.ContainsKey("exam_prompts"))
         {
             foreach (var idVar in setup["exam_prompts"].AsGodotArray())

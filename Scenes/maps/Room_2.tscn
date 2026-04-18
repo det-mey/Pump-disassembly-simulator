@@ -1,0 +1,381 @@
+[gd_scene format=3 uid="uid://ekspgcwdpvi1"]
+
+[ext_resource type="Texture2D" uid="uid://corn3iew2sfgl" path="res://Assets/Texture/sky.jpg" id="1_4gtbp"]
+[ext_resource type="Texture2D" uid="uid://bt3eulaa45nxs" path="res://Assets/Texture/Трава.jpg" id="2_cdi4u"]
+[ext_resource type="PackedScene" uid="uid://cfqrp5rwfl6jx" path="res://Scenes/Player/Player.tscn" id="3_aysn1"]
+[ext_resource type="PackedScene" uid="uid://bqnhxees1whpp" path="res://Scenes/Tools/Ключ_рожковый_24мм.tscn" id="4_7o7bf"]
+[ext_resource type="Resource" uid="uid://8qdmsxp6hlwf" path="res://Resources/Tools/Ключ_рожковый_24мм.tres" id="5_i8guv"]
+[ext_resource type="PackedScene" uid="uid://0ql3817l78om" path="res://Scenes/Tools/WD40.tscn" id="6_3d8rs"]
+[ext_resource type="Resource" uid="uid://d2k6xulstgujr" path="res://Resources/Tools/WD40.tres" id="7_qghfw"]
+[ext_resource type="PackedScene" uid="uid://dy0edrubwv0rt" path="res://Scenes/Tools/Screwdriver_1.tscn" id="8_a4byg"]
+[ext_resource type="Resource" uid="uid://cj6h4yfmylbk2" path="res://Resources/Tools/Screwdriver_1.tres" id="9_4tv2q"]
+[ext_resource type="PackedScene" uid="uid://qxarp00vxnm4" path="res://Scenes/Tools/Drill_1.tscn" id="10_icslu"]
+[ext_resource type="Resource" uid="uid://b6yr4r75joq81" path="res://Resources/Tools/Drill_1.tres" id="11_g1i2n"]
+[ext_resource type="PackedScene" uid="uid://cgnfclynkgghw" path="res://Scenes/Machines/Console_pump.tscn" id="12_dyy3u"]
+[ext_resource type="PackedScene" uid="uid://cub6x4sa4tdjw" path="res://Scenes/Tools/Ключ_шестигранный_8мм.tscn" id="13_c66kx"]
+[ext_resource type="Resource" uid="uid://bfnokmfi20j1h" path="res://Resources/Tools/Ключ_шестигранный_8мм.tres" id="14_5km25"]
+[ext_resource type="PackedScene" uid="uid://dwmtod7s7jrtc" path="res://Scenes/Tools/Ключ_шестигранный_10мм.tscn" id="15_uflu7"]
+[ext_resource type="Resource" uid="uid://cd2ukkrt81xdj" path="res://Resources/Tools/Ключ_шестигранный_10мм.tres" id="16_w3n4f"]
+[ext_resource type="PackedScene" uid="uid://b6wwi3qjm1gka" path="res://Scenes/Tools/Ключ_шестигранный_14мм.tscn" id="17_nqjni"]
+[ext_resource type="Resource" uid="uid://fj212ab6bor1" path="res://Resources/Tools/Ключ_шестигранный_14мм.tres" id="18_uuv0s"]
+[ext_resource type="PackedScene" uid="uid://cxnob3hdwdul8" path="res://Scenes/Tools/Монтировка.tscn" id="19_31fx8"]
+[ext_resource type="Resource" uid="uid://bnwbsyw48ks3" path="res://Resources/Tools/Монтировка.tres" id="20_7b82u"]
+[ext_resource type="PackedScene" uid="uid://bbw3234dvegfu" path="res://Scenes/Tools/Промышленный_Гайковерт_8мм.tscn" id="21_wmi33"]
+[ext_resource type="Resource" uid="uid://css4on0cgfu8t" path="res://Resources/Tools/Промышленный_Гайковерт_8мм.tres" id="22_uwdyw"]
+[ext_resource type="PackedScene" uid="uid://drjntx5cyxdfn" path="res://Scenes/Tools/Промышленный_Гайковерт_10мм.tscn" id="23_b8uxg"]
+[ext_resource type="Resource" uid="uid://drwyel5hegiui" path="res://Resources/Tools/Промышленный_Гайковерт_10мм.tres" id="24_a8aus"]
+[ext_resource type="PackedScene" uid="uid://da6670neayh1k" path="res://Scenes/Tools/Электронный_Микрометр.tscn" id="25_au0kb"]
+[ext_resource type="Resource" uid="uid://n46qajbrhx5b" path="res://Resources/Tools/Электронный_Микрометр.tres" id="26_ppjxq"]
+[ext_resource type="PackedScene" uid="uid://cihbn1n3dseah" path="res://Scenes/Map details/Комната.tscn" id="27_qt0kt"]
+[ext_resource type="PackedScene" uid="uid://cbew8kc5cxmju" path="res://Scenes/Map details/стол.tscn" id="28_os12j"]
+[ext_resource type="Texture2D" uid="uid://bc8qxokqakv0a" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_COL_2K.jpg" id="29_5yost"]
+[ext_resource type="Texture2D" uid="uid://byyopo37v17i5" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_REFL_2K_jpg-CityStreetAsphaltGenericClean001_GLOSS_2K_jpg.png" id="30_f5o81"]
+[ext_resource type="Texture2D" uid="uid://c6i5x1ih1jwjy" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_NRM_2K.jpg" id="31_0at1k"]
+[ext_resource type="PackedScene" uid="uid://cmeff3whlrd6j" path="res://Scenes/Details pickup/Водоотбойное_кольцо_Дефлектор_предмет.tscn" id="32_0at1k"]
+[ext_resource type="Resource" uid="uid://dw2h1ferfutvp" path="res://Resources/Details/Водоотбойное_кольцо_Дефлектор.tres" id="33_yaxtj"]
+[ext_resource type="PackedScene" uid="uid://b75thby5ige32" path="res://Scenes/Details pickup/Главный_вал_предмет.tscn" id="34_d4pww"]
+[ext_resource type="Resource" uid="uid://cwd8vrgxwh2ba" path="res://Resources/Details/Главный_вал.tres" id="35_rel1x"]
+[ext_resource type="PackedScene" uid="uid://c10rpjlyrlqwt" path="res://Scenes/Details pickup/Задняя_стенка_корпуса_предмет.tscn" id="36_46wi1"]
+[ext_resource type="Resource" uid="uid://dhn84oq3w4pes" path="res://Resources/Details/Задняя_стенка_корпуса.tres" id="37_paj02"]
+[ext_resource type="PackedScene" uid="uid://m0m1bjo11gwv" path="res://Scenes/Details pickup/Имбусовый_Болт_М10_предмет.tscn" id="38_c0nbc"]
+[ext_resource type="Resource" uid="uid://b2libhtako5et" path="res://Resources/Details/Имбусовый_Болт_М10.tres" id="39_b26vh"]
+[ext_resource type="PackedScene" uid="uid://bxhxko66uvtpi" path="res://Scenes/Details pickup/Имбусовый_Болт_М12_предмет.tscn" id="40_hq6uf"]
+[ext_resource type="Resource" uid="uid://conj06jjrwerg" path="res://Resources/Details/Имбусовый_Болт_М12.tres" id="41_a161b"]
+[ext_resource type="PackedScene" uid="uid://jn7jt1epflkp" path="res://Scenes/Details pickup/Крышка_корпуса_насоса_предмет.tscn" id="42_68mn4"]
+[ext_resource type="Resource" uid="uid://dbb2dmynrkgmt" path="res://Resources/Details/Крышка_корпуса_насоса.tres" id="43_pjomf"]
+[ext_resource type="PackedScene" uid="uid://45x7vlcg6ch1" path="res://Scenes/Details pickup/Крышка_подшипникового_узла_предмет.tscn" id="44_owqqi"]
+[ext_resource type="Resource" uid="uid://c0qjsq7bk1kal" path="res://Resources/Details/Крышка_подшипникового_узла.tres" id="45_i3bbt"]
+[ext_resource type="PackedScene" uid="uid://txho5af252ds" path="res://Scenes/Details pickup/Крышка_сальника_Фланец_предмет.tscn" id="46_dj4s7"]
+[ext_resource type="Resource" uid="uid://baejm50fi2d4x" path="res://Resources/Details/Крышка_сальника_Фланец.tres" id="47_ia6u1"]
+[ext_resource type="PackedScene" uid="uid://bgi0gwxhfpddy" path="res://Scenes/Details pickup/Ножка_крышки_насоса_предмет.tscn" id="48_3jj2s"]
+[ext_resource type="Resource" uid="uid://bf78oix0avrat" path="res://Resources/Details/Ножка_крышки_насоса.tres" id="49_xe1ea"]
+[ext_resource type="PackedScene" uid="uid://b5ciwe4pwgutb" path="res://Scenes/Details pickup/Рабочее_колесо_Крыльчатка_предмет.tscn" id="50_h6axg"]
+[ext_resource type="Resource" uid="uid://tqahfcok40v5" path="res://Resources/Details/Рабочее_колесо_Крыльчатка.tres" id="51_wtt0h"]
+[ext_resource type="PackedScene" uid="uid://caaqxqy26hbfs" path="res://Scenes/Details pickup/Распорная_втулка_вала_предмет.tscn" id="52_1axim"]
+[ext_resource type="Resource" uid="uid://bfgxd224t1uug" path="res://Resources/Details/Распорная_втулка_вала.tres" id="53_tidm6"]
+[ext_resource type="PackedScene" uid="uid://bucxs8arku6mx" path="res://Scenes/Details pickup/Спиральный_корпус_Улитка_предмет.tscn" id="54_jqbk3"]
+[ext_resource type="Resource" uid="uid://dydfc87cm5aux" path="res://Resources/Details/Спиральный_корпус_Улитка.tres" id="55_pxkxt"]
+[ext_resource type="PackedScene" uid="uid://d2s731ni0drf3" path="res://Scenes/Details pickup/Стяжной_Винт_М16_корпуса_предмет.tscn" id="56_i1os2"]
+[ext_resource type="Resource" uid="uid://c8q5chxeeo02g" path="res://Resources/Details/Стяжной_Винт_М16_корпуса.tres" id="57_oiaqp"]
+[ext_resource type="PackedScene" uid="uid://cjo0su4bdps7g" path="res://Scenes/Details pickup/Стяжной_Винт_М16_улитки_предмет.tscn" id="58_5j41x"]
+[ext_resource type="Resource" uid="uid://gcg5nwmiwi5s" path="res://Resources/Details/Стяжной_Винт_М16_улитки.tres" id="59_l8lsv"]
+[ext_resource type="PackedScene" uid="uid://c4425wxjuyexm" path="res://Scenes/Details pickup/Шестигранная_Гайка_М16_предмет.tscn" id="60_r0wrs"]
+[ext_resource type="Resource" uid="uid://c7dmv4o4dun4" path="res://Resources/Details/Шестигранная_Гайка_М16.tres" id="61_wlvcq"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cj56a"]
+sky_horizon_color = Color(0.005005935, 0.0051382263, 0.005408868, 1)
+sky_curve = 2.4161183e-05
+sky_energy_multiplier = 0.6
+sky_cover = ExtResource("1_4gtbp")
+ground_bottom_color = Color(0.3607935, 0.4586606, 0.4863214, 1)
+
+[sub_resource type="Sky" id="Sky_q52xq"]
+sky_material = SubResource("ProceduralSkyMaterial_cj56a")
+
+[sub_resource type="Environment" id="Environment_dgkld"]
+background_mode = 2
+sky = SubResource("Sky_q52xq")
+tonemap_mode = 2
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_q7agd"]
+cull_mode = 2
+albedo_texture = ExtResource("2_cdi4u")
+uv1_scale = Vector3(60, 60, 60)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xyvo3"]
+resource_name = "CityStreetAsphaltGenericClean001_2K"
+cull_mode = 2
+albedo_texture = ExtResource("29_5yost")
+metallic = 1.0
+metallic_texture = ExtResource("30_f5o81")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("30_f5o81")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.5
+normal_texture = ExtResource("31_0at1k")
+uv1_scale = Vector3(0.5, 0.5, 0.5)
+stencil_flags = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_ovwyc"]
+material = SubResource("StandardMaterial3D_xyvo3")
+size = Vector3(0.8, 0.5, 0.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3354g"]
+size = Vector3(0.8, 0.5, 0.6)
+
+[node name="MainSimulator" type="Node3D" unique_id=369453358]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1080398589]
+environment = SubResource("Environment_dgkld")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=120462989]
+transform = Transform3D(-0.6742845, -0.30876294, 0.67082477, 0.3725061, 0.64214635, 0.66999054, -0.6376358, 0.70165056, -0.31797332, 10.941481, 3.1962984, -2.546711)
+shadow_enabled = true
+
+[node name="Floor" type="CSGBox3D" parent="." unique_id=385445125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.4709473, 0)
+material_override = SubResource("StandardMaterial3D_q7agd")
+use_collision = true
+collision_layer = 3
+size = Vector3(581.83496, 0.05810547, 1023.1846)
+
+[node name="Player" parent="." unique_id=1330768253 instance=ExtResource("3_aysn1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4039322, 1.318)
+
+[node name="Ключ_рожковый_24мм" parent="." unique_id=1828159176 instance=ExtResource("4_7o7bf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6125117, -0.48073432, -2.9253037)
+ItemResource = ExtResource("5_i8guv")
+
+[node name="WD40" parent="." unique_id=458046737 instance=ExtResource("6_3d8rs")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.5747874, -0.4298812, -3.1232455)
+ItemResource = ExtResource("7_qghfw")
+
+[node name="Screwdriver_1" parent="." unique_id=1530035773 instance=ExtResource("8_a4byg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24070966, -0.51317656, -2.8929446)
+ItemResource = ExtResource("9_4tv2q")
+
+[node name="Drill_1" parent="." unique_id=2022278888 instance=ExtResource("10_icslu")]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -2.9972394, -0.49275187, -2.8948886)
+ItemResource = ExtResource("11_g1i2n")
+
+[node name="BMB" parent="." unique_id=307814687 instance=ExtResource("12_dyy3u")]
+transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -1.4885876, -0.81121415, 0.055698633)
+
+[node name="Ключ_шестигранный_8мм" parent="." unique_id=1726792624 instance=ExtResource("13_c66kx")]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.10351437, -0.51076555, -2.7517152)
+ItemResource = ExtResource("14_5km25")
+
+[node name="Ключ_шестигранный_10мм" parent="." unique_id=2069185414 instance=ExtResource("15_uflu7")]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.21973586, -0.5131767, -2.8440094)
+ItemResource = ExtResource("16_w3n4f")
+
+[node name="Ключ_шестигранный_14мм" parent="." unique_id=1581108248 instance=ExtResource("17_nqjni")]
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.35859257, -0.51317656, -2.9491978)
+ItemResource = ExtResource("18_uuv0s")
+
+[node name="Монтировка" parent="." unique_id=989579083 instance=ExtResource("19_31fx8")]
+transform = Transform3D(1.9106853e-15, -4.371139e-08, 1, -0.99999994, -4.371139e-08, 0, 4.3711385e-08, -1, -4.371139e-08, -0.88754416, -0.51317656, -2.8451607)
+ItemResource = ExtResource("20_7b82u")
+
+[node name="Промышленный_Гайковерт_8мм" parent="." unique_id=2020131499 instance=ExtResource("21_wmi33")]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -2.496723, -0.49275187, -2.8948886)
+ItemResource = ExtResource("22_uwdyw")
+
+[node name="Промышленный_Гайковерт_10мм" parent="." unique_id=952343988 instance=ExtResource("23_b8uxg")]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, -2.1033046, -0.49275184, -2.8948886)
+ItemResource = ExtResource("24_a8aus")
+
+[node name="Электронный_Микрометр" parent="." unique_id=1635620638 instance=ExtResource("25_au0kb")]
+transform = Transform3D(-4.371139e-08, -0.8597899, 0.51064795, 1, -3.758261e-08, 2.2321132e-08, 0, 0.51064795, 0.8597899, -1.6759673, -0.49275184, -2.78555)
+ItemResource = ExtResource("26_ppjxq")
+
+[node name="Комната" parent="." unique_id=1311189745 instance=ExtResource("27_qt0kt")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, -1.376004, 0)
+
+[node name="Стол" parent="." unique_id=744458440 instance=ExtResource("28_os12j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3771915, -1.3682402, -2.9314258)
+
+[node name="Стол2" parent="." unique_id=119037595 instance=ExtResource("28_os12j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14374638, -1.3682402, -2.9305713)
+
+[node name="Стол3" parent="." unique_id=1905142055 instance=ExtResource("28_os12j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.3771915, -1.3682402, 2.6475272)
+
+[node name="Стол4" parent="." unique_id=444301857 instance=ExtResource("28_os12j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1080241, -1.3682402, 2.6483817)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1719750490]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=1160085515]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0845687, -1.3208612, 0.05584061)
+mesh = SubResource("BoxMesh_ovwyc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1783815253]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0845687, -1.3208612, 0.05584061)
+shape = SubResource("BoxShape3D_3354g")
+
+[node name="Водоотбойное_кольцо_Дефлектор_предмет" parent="." unique_id=147654622 instance=ExtResource("32_0at1k")]
+transform = Transform3D(-4.371139e-08, 1, -4.371139e-08, 0, -4.371139e-08, -1, -1, -4.371139e-08, 1.9106855e-15, -1.6439376, -0.52856517, 2.4373012)
+ItemResource = ExtResource("33_yaxtj")
+
+[node name="Главный_вал" parent="." unique_id=762545670 instance=ExtResource("34_d4pww")]
+transform = Transform3D(-3.491481e-15, -6.982962e-15, -1, 0, -1, 6.982962e-15, -1, 2.438088e-29, 3.491481e-15, -1.8520327, -0.5335651, 2.5950954)
+ItemResource = ExtResource("35_rel1x")
+
+[node name="Задняя_стенка_корпуса" parent="." unique_id=1699695863 instance=ExtResource("36_46wi1")]
+transform = Transform3D(1, 0, 0, 0, -3.491481e-15, -1, 0, 1, -3.491481e-15, -2.2823946, -0.37618256, 2.5441175)
+ItemResource = ExtResource("37_paj02")
+
+[node name="Имбусовый_Болт_М10_предмет" parent="." unique_id=1832825588 instance=ExtResource("38_c0nbc")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.280108, -0.54634005, 2.3639688)
+ItemResource = ExtResource("39_b26vh")
+
+[node name="Имбусовый_Болт_М10_предмет2" parent="." unique_id=699412155 instance=ExtResource("38_c0nbc")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.2019157, -0.5463401, 2.3746433)
+ItemResource = ExtResource("39_b26vh")
+
+[node name="Имбусовый_Болт_М10_предмет3" parent="." unique_id=915406962 instance=ExtResource("38_c0nbc")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.3455615, -0.5463401, 2.388882)
+ItemResource = ExtResource("39_b26vh")
+
+[node name="Имбусовый_Болт_М10_предмет4" parent="." unique_id=1207744573 instance=ExtResource("38_c0nbc")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.4615743, -0.5463401, 2.404763)
+ItemResource = ExtResource("39_b26vh")
+
+[node name="Имбусовый_Болт_М12_предмет" parent="." unique_id=430291362 instance=ExtResource("40_hq6uf")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.0019855, -0.53681505, 2.311794)
+ItemResource = ExtResource("41_a161b")
+
+[node name="Имбусовый_Болт_М12_предмет2" parent="." unique_id=821652898 instance=ExtResource("40_hq6uf")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.1017225, -0.53681505, 2.3017626)
+ItemResource = ExtResource("41_a161b")
+
+[node name="Имбусовый_Болт_М12_предмет15" parent="." unique_id=1456152992 instance=ExtResource("40_hq6uf")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.1017225, -0.53681505, 2.3602962)
+ItemResource = ExtResource("41_a161b")
+
+[node name="Имбусовый_Болт_М12_предмет3" parent="." unique_id=1101727389 instance=ExtResource("40_hq6uf")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -1.958668, -0.53681505, 2.403084)
+ItemResource = ExtResource("41_a161b")
+
+[node name="Имбусовый_Болт_М12_предмет4" parent="." unique_id=469419247 instance=ExtResource("40_hq6uf")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.0442626, -0.5368151, 2.4200816)
+ItemResource = ExtResource("41_a161b")
+
+[node name="Имбусовый_Болт_М12_предмет5" parent="." unique_id=575429279 instance=ExtResource("40_hq6uf")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -2.058919, -0.5368151, 2.564913)
+ItemResource = ExtResource("41_a161b")
+
+[node name="Имбусовый_Болт_М12_предмет6" parent="." unique_id=103006323 instance=ExtResource("40_hq6uf")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -1.9395138, -0.53681517, 2.5567043)
+ItemResource = ExtResource("41_a161b")
+
+[node name="Крышка_корпуса_насоса" parent="." unique_id=1288480689 instance=ExtResource("42_68mn4")]
+transform = Transform3D(-3.491481e-15, 0, 1, 0, 1, 0, -1, 0, -3.491481e-15, -1.634548, -0.37646198, 2.7838917)
+ItemResource = ExtResource("43_pjomf")
+
+[node name="Крышка_подшипникового_узла" parent="." unique_id=1920891459 instance=ExtResource("44_owqqi")]
+transform = Transform3D(1.047444e-14, 0, -1, 0, 1, 0, 1, 0, 1.047444e-14, -2.6951864, -0.49356514, 2.4196334)
+ItemResource = ExtResource("45_i3bbt")
+
+[node name="Крышка_подшипникового_узла2" parent="." unique_id=86115496 instance=ExtResource("44_owqqi")]
+transform = Transform3D(1.047444e-14, 0, -1, 0, 1, 0, 1, 0, 1.047444e-14, -2.6951864, -0.49356514, 2.579985)
+ItemResource = ExtResource("45_i3bbt")
+
+[node name="Крышка_сальника_Фланец_предмет" parent="." unique_id=855518130 instance=ExtResource("46_dj4s7")]
+transform = Transform3D(1, 0, 0, 0, 1.047444e-14, 1, 0, -1, 1.047444e-14, -2.9276, -0.5186497, 2.3528254)
+ItemResource = ExtResource("47_ia6u1")
+
+[node name="Ножка_крышки_насоса" parent="." unique_id=1489708182 instance=ExtResource("48_3jj2s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6184146, -0.5685651, 2.766005)
+ItemResource = ExtResource("49_xe1ea")
+
+[node name="Рабочее_колесо_Крыльчатка" parent="." unique_id=649024508 instance=ExtResource("50_h6axg")]
+transform = Transform3D(5.721189e-18, 0.2554217, -0.9668298, 2.060474e-27, 0.9668298, 0.2554217, 1, -1.461316e-18, 5.531415e-18, -3.055261, -0.4157837, 2.5919945)
+ItemResource = ExtResource("51_wtt0h")
+
+[node name="Распорная_втулка_вала_предмет" parent="." unique_id=659113722 instance=ExtResource("52_1axim")]
+transform = Transform3D(-5.721189e-18, -7.4891e-31, 1, 6.310887e-30, 1, 6.409919e-31, -1, -3.155444e-30, 2.163234e-16, 1.4624112, -0.54057837, 2.515258)
+ItemResource = ExtResource("53_tidm6")
+
+[node name="Спиральный_корпус_Улитка" parent="." unique_id=76255598 instance=ExtResource("54_jqbk3")]
+transform = Transform3D(-0.013403773, 0.9999102, 0, 3.4911674e-15, 4.6798994e-17, -1, -0.9999102, -0.013403773, -3.491481e-15, 1.9030255, -0.33856505, 2.5631952)
+ItemResource = ExtResource("55_pxkxt")
+
+[node name="Стяжной_Винт_М16_улитки" parent="." unique_id=806134309 instance=ExtResource("56_i1os2")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.2508812, -0.5605992, 2.3683844)
+ItemResource = ExtResource("57_oiaqp")
+
+[node name="Стяжной_Винт_М16_улитки2" parent="." unique_id=971395933 instance=ExtResource("56_i1os2")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.329829, -0.5605992, 2.3638434)
+ItemResource = ExtResource("57_oiaqp")
+
+[node name="Стяжной_Винт_М16_улитки3" parent="." unique_id=691100212 instance=ExtResource("56_i1os2")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.4113042, -0.5605992, 2.3681452)
+ItemResource = ExtResource("57_oiaqp")
+
+[node name="Стяжной_Винт_М16_улитки4" parent="." unique_id=181282457 instance=ExtResource("56_i1os2")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.497277, -0.56059927, 2.3939137)
+ItemResource = ExtResource("57_oiaqp")
+
+[node name="Стяжной_Винт_М16_улитки5" parent="." unique_id=1381973743 instance=ExtResource("56_i1os2")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.5828369, -0.5605992, 2.4016604)
+ItemResource = ExtResource("57_oiaqp")
+
+[node name="Стяжной_Винт_М16_улитки6" parent="." unique_id=593509537 instance=ExtResource("56_i1os2")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.6732533, -0.5605992, 2.399849)
+ItemResource = ExtResource("57_oiaqp")
+
+[node name="Стяжной_Винт_М16_улитки7" parent="." unique_id=247887882 instance=ExtResource("56_i1os2")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.7624183, -0.5605992, 2.3948917)
+ItemResource = ExtResource("57_oiaqp")
+
+[node name="Стяжной_Винт_М16_улитки8" parent="." unique_id=818732194 instance=ExtResource("56_i1os2")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.8654726, -0.5605992, 2.392827)
+ItemResource = ExtResource("57_oiaqp")
+
+[node name="Стяжной_Винт_М16_улитки9" parent="." unique_id=1270246809 instance=ExtResource("58_5j41x")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.863363, -0.5542776, 2.7632313)
+ItemResource = ExtResource("59_l8lsv")
+
+[node name="Стяжной_Винт_М16_улитки15" parent="." unique_id=1989848524 instance=ExtResource("58_5j41x")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.950413, -0.5542776, 2.7632313)
+ItemResource = ExtResource("59_l8lsv")
+
+[node name="Стяжной_Винт_М16_улитки16" parent="." unique_id=1343076156 instance=ExtResource("58_5j41x")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.1882274, -0.5542776, 2.7632313)
+ItemResource = ExtResource("59_l8lsv")
+
+[node name="Стяжной_Винт_М16_улитки10" parent="." unique_id=1760794485 instance=ExtResource("58_5j41x")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.7335513, -0.55427766, 2.776188)
+ItemResource = ExtResource("59_l8lsv")
+
+[node name="Стяжной_Винт_М16_улитки11" parent="." unique_id=1315916121 instance=ExtResource("58_5j41x")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.5716918, -0.5542776, 2.7813005)
+ItemResource = ExtResource("59_l8lsv")
+
+[node name="Стяжной_Винт_М16_улитки12" parent="." unique_id=1592324735 instance=ExtResource("58_5j41x")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.4145288, -0.55427766, 2.7757885)
+ItemResource = ExtResource("59_l8lsv")
+
+[node name="Стяжной_Винт_М16_улитки13" parent="." unique_id=596122692 instance=ExtResource("58_5j41x")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.284452, -0.5542776, 2.7516878)
+ItemResource = ExtResource("59_l8lsv")
+
+[node name="Стяжной_Винт_М16_улитки14" parent="." unique_id=460232594 instance=ExtResource("58_5j41x")]
+transform = Transform3D(6.123234e-17, 3.491481e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.491481e-15, 6.123234e-17, 2.653593, -0.5542776, 2.782926)
+ItemResource = ExtResource("59_l8lsv")
+
+[node name="Имбусовый_Болт_М12_предмет7" parent="." unique_id=914966147 instance=ExtResource("60_r0wrs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8699415, -0.5438111, 2.6922882)
+ItemResource = ExtResource("61_wlvcq")
+
+[node name="Имбусовый_Болт_М12_предмет8" parent="." unique_id=2115810425 instance=ExtResource("60_r0wrs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7524948, -0.54381114, 2.7003758)
+ItemResource = ExtResource("61_wlvcq")
+
+[node name="Имбусовый_Болт_М12_предмет9" parent="." unique_id=87781694 instance=ExtResource("60_r0wrs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6426966, -0.5438111, 2.6873093)
+ItemResource = ExtResource("61_wlvcq")
+
+[node name="Имбусовый_Болт_М12_предмет10" parent="." unique_id=1370002439 instance=ExtResource("60_r0wrs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5322764, -0.54381114, 2.6902883)
+ItemResource = ExtResource("61_wlvcq")
+
+[node name="Имбусовый_Болт_М12_предмет11" parent="." unique_id=2056702327 instance=ExtResource("60_r0wrs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4184775, -0.543811, 2.6814485)
+ItemResource = ExtResource("61_wlvcq")
+
+[node name="Имбусовый_Болт_М12_предмет12" parent="." unique_id=152994256 instance=ExtResource("60_r0wrs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3173497, -0.5438111, 2.6668556)
+ItemResource = ExtResource("61_wlvcq")
+
+[node name="Имбусовый_Болт_М12_предмет13" parent="." unique_id=278871240 instance=ExtResource("60_r0wrs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.20646, -0.5438111, 2.663281)
+ItemResource = ExtResource("61_wlvcq")
+
+[node name="Имбусовый_Болт_М12_предмет14" parent="." unique_id=1937079130 instance=ExtResource("60_r0wrs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9702256, -0.543811, 2.6985233)
+ItemResource = ExtResource("61_wlvcq")

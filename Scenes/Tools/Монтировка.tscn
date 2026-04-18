@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://cxnob3hdwdul8"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_m0uyw"]
+[ext_resource type="PackedScene" uid="uid://f54wnno6qnn5" path="res://Assets/Models/crowbar.glb" id="2_m0uyw"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_shlw8"]
+size = Vector3(0.023779297, 0.671255, 0.15189958)
+
+[node name="Монтировка" type="RigidBody3D" unique_id=1828159176]
+collision_layer = 3
+collision_mask = 2
+script = ExtResource("1_m0uyw")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1036491239]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.003361689, 0.05623094, -0.0044330508)
+shape = SubResource("BoxShape3D_shlw8")
+
+[node name="Sketchfab_Scene" parent="." unique_id=1265317282 instance=ExtResource("2_m0uyw")]
+transform = Transform3D(-0.8, 0, -6.9938224e-08, 0, 0.8, 0, 6.9938224e-08, 0, -0.8, 3.2528316e-09, 0.053620905, 0.03720805)

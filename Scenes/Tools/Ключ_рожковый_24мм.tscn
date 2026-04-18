@@ -16,4 +16,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.012669429, 0)
 shape = SubResource("BoxShape3D_shlw8")
 
 [node name="Sketchfab_Scene" parent="." unique_id=2090644221 instance=ExtResource("2_nfmct")]
-transform = Transform3D(2.5, 0, -1.09278474e-07, -1.09278474e-07, 4.7767136e-15, -2.5, 0, 2.5, 4.7767136e-15, 0, 0, 0)
+transform = Transform3D(2.5, 2.0879678e-22, -9.126797e-30, 0, -1.09278474e-07, -2.5, -2.0879678e-22, 2.5, -1.09278474e-07, 0, 0, 0)

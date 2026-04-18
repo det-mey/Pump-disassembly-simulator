@@ -8,7 +8,7 @@
 [resource]
 script = ExtResource("4_u12jd")
 Size = 14.0
-RequiredTorque = 150.0
+RequiredTorque = 50.0
 ItemName = "Стяжной винт М16"
 Description = "Длинный винт DIN 912. Соединяет секции корпуса насоса."
 Icon = ExtResource("2_0ls0g")

@@ -208,7 +208,7 @@ public partial class SettingsUI : CanvasLayer
         return btn;
     }
 
-    public void ToggleSettings(bool show)
+    public async void ToggleSettings(bool show)
     {
         if (show)
         {
@@ -228,18 +228,37 @@ public partial class SettingsUI : CanvasLayer
             if (_screenOption != null) _screenOption.Select(_tempScreen);
             if (_vsyncCheck != null) _vsyncCheck.ButtonPressed = _tempVSync;
             if (_fpsCheck != null) _fpsCheck.ButtonPressed = _tempShowFPS;
-            
+
             if (_resOption != null) {
                 int resIdx = _resolutions.IndexOf(_tempRes);
                 if (resIdx >= 0) _resOption.Select(resIdx);
             }
-            
+
             if (_msaaOption != null) _msaaOption.Select(_tempMsaa);
             if (_scaleSlider != null) _scaleSlider.Value = _tempScale;
             if (_volSlider != null) _volSlider.Value = _tempVol;
             if (_sensSlider != null) _sensSlider.Value = _tempSens;
+
+            // Показываем с анимацией
+            Visible = true;
+            _bgPanel.Modulate = new Color(1, 1, 1, 0);
+            _bgPanel.Scale = new Vector2(0.9f, 0.9f);
+
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            _bgPanel.PivotOffset = _bgPanel.Size / 2;
+
+            var tween = CreateTween().SetParallel(true).SetPauseMode(Tween.TweenPauseMode.Process);
+            tween.TweenProperty(_bgPanel, "modulate", Colors.White, 0.3f).SetTrans(Tween.TransitionType.Cubic);
+            tween.TweenProperty(_bgPanel, "scale", Vector2.One, 0.3f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
         }
-        Visible = show;
+        else
+        {
+            // Скрываем с анимацией
+            var tween = CreateTween().SetParallel(true).SetPauseMode(Tween.TweenPauseMode.Process);
+            tween.TweenProperty(_bgPanel, "modulate:a", 0.0f, 0.2f).SetTrans(Tween.TransitionType.Cubic);
+            tween.TweenProperty(_bgPanel, "scale", new Vector2(0.95f, 0.95f), 0.2f).SetTrans(Tween.TransitionType.Cubic);
+            tween.TweenCallback(Callable.From(() => Visible = false));
+        }
     }
 
     private void BindAudioToButton(BaseButton btn)

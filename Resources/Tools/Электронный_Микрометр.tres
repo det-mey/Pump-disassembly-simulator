@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ToolData" format=3 uid="uid://n46qajbrhx5b"]
+
+[ext_resource type="Texture2D" uid="uid://bb4j4kfvmo7k7" path="res://Assets/Icons/Tools/Micrometer.png" id="1_ld1wu"]
+[ext_resource type="PackedScene" uid="uid://da6670neayh1k" path="res://Scenes/Tools/Электронный_Микрометр.tscn" id="1_oshew"]
+[ext_resource type="Script" uid="uid://w36tayqkc2x7" path="res://Scripts/Mechanics/ToolData.cs" id="3_5gw0a"]
+
+[resource]
+script = ExtResource("3_5gw0a")
+Category = 7
+Size = 0.0
+ItemName = "Электронный микрометр"
+Description = "Электронный микрометр для точных замеров."
+Icon = ExtResource("1_ld1wu")
+WorldPrefab = ExtResource("1_oshew")
+HandPrefab = ExtResource("1_oshew")
+AnimPosOffset = Vector3(-0.1, 0, 0)
+metadata/_custom_type_script = "uid://w36tayqkc2x7"

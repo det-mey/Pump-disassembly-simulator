@@ -4,7 +4,7 @@
 [ext_resource type="Material" path="res://Assets/Materials/metall_shader.material" id="1_8bwpr"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_8bwpr"]
-size = Vector3(0.17694092, 0.022026062, 0.10107422)
+size = Vector3(0.17694092, 0.053297043, 0.10107422)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_or8cy"]
 resource_name = "polished steel"
@@ -51,6 +51,7 @@ shadow_mesh = SubResource("ArrayMesh_5ibsq")
 
 [node name="Крышка_сальника_Фланец" type="StaticBody3D" unique_id=1893306765]
 transform = Transform3D(1, 0, 0, 0, 1.047444e-14, 1, 0, -1, 1.047444e-14, 0, 0, 0)
+collision_layer = 3
 script = ExtResource("1_7qna7")
 Type = 1
 Size = 0.0
@@ -61,7 +62,7 @@ PartName = "Крышка сальника (Фланец)"
 PartDescription = "Нажимной элемент сальникового уплотнения. Служит для регулировки степени сжатия набивки. Снимается вдоль оси вала после откручивания крепежных гаек."
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=662408097]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00045776367, 0.010051727, 0.0014648438)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00045776367, 0.013554573, 0.0014648438)
 shape = SubResource("BoxShape3D_8bwpr")
 
 [node name="VisualsRoot" type="Node3D" parent="." unique_id=759215268]

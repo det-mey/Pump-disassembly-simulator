@@ -1,0 +1,258 @@
+[gd_scene format=3 uid="uid://cgnfclynkgghw"]
+
+[ext_resource type="PackedScene" uid="uid://dgnb8ukc718jl" path="res://Scenes/Details/Спиральный_корпус_Улитка.tscn" id="1_888ko"]
+[ext_resource type="Resource" uid="uid://dydfc87cm5aux" path="res://Resources/Details/Спиральный_корпус_Улитка.tres" id="2_3rkjn"]
+[ext_resource type="PackedScene" uid="uid://bdkn6skbw5611" path="res://Scenes/Details/Крышка_корпуса_насоса.tscn" id="2_h2ory"]
+[ext_resource type="Resource" uid="uid://dbb2dmynrkgmt" path="res://Resources/Details/Крышка_корпуса_насоса.tres" id="3_so521"]
+[ext_resource type="PackedScene" uid="uid://botpmchsq7wk1" path="res://Scenes/Details/Шестигранная_Гайка_М16.tscn" id="5_4dnlm"]
+[ext_resource type="PackedScene" uid="uid://bvoub8e7ql0ss" path="res://Scenes/Details/Рабочее_колесо_Крыльчатка.tscn" id="5_u44vb"]
+[ext_resource type="Resource" uid="uid://c7dmv4o4dun4" path="res://Resources/Details/Шестигранная_Гайка_М16.tres" id="6_coitn"]
+[ext_resource type="PackedScene" uid="uid://dasbcvq2nrohi" path="res://Scenes/Details/Стяжной_Винт_М16_улитки.tscn" id="6_so521"]
+[ext_resource type="Resource" uid="uid://tqahfcok40v5" path="res://Resources/Details/Рабочее_колесо_Крыльчатка.tres" id="6_swyht"]
+[ext_resource type="PackedScene" uid="uid://bm0waoci7b6o0" path="res://Scenes/Details/Имбусовый_Болт_М10.tscn" id="6_w202g"]
+[ext_resource type="Resource" uid="uid://b2libhtako5et" path="res://Resources/Details/Имбусовый_Болт_М10.tres" id="7_3l4o7"]
+[ext_resource type="PackedScene" uid="uid://clapufys3cvsm" path="res://Scenes/Details/Имбусовый_Болт_М12.tscn" id="7_3uybr"]
+[ext_resource type="PackedScene" uid="uid://dxafqmxqaoqw6" path="res://Scenes/Details/Задняя_стенка_корпуса.tscn" id="7_77yjp"]
+[ext_resource type="PackedScene" uid="uid://dkeebyfe3yp2i" path="res://Scenes/Details/Главный_вал.tscn" id="8_u44vb"]
+[ext_resource type="Resource" uid="uid://dhn84oq3w4pes" path="res://Resources/Details/Задняя_стенка_корпуса.tres" id="8_wag1u"]
+[ext_resource type="PackedScene" uid="uid://sfdgskbcdsr4" path="res://Scenes/Details/Стяжной_Винт_М16_корпуса.tscn" id="9_3l4o7"]
+[ext_resource type="Resource" uid="uid://cwd8vrgxwh2ba" path="res://Resources/Details/Главный_вал.tres" id="9_swyht"]
+[ext_resource type="Resource" uid="uid://c8q5chxeeo02g" path="res://Resources/Details/Стяжной_Винт_М16_корпуса.tres" id="10_cdpxs"]
+[ext_resource type="Resource" uid="uid://gcg5nwmiwi5s" path="res://Resources/Details/Стяжной_Винт_М16_улитки.tres" id="10_kh7s0"]
+[ext_resource type="PackedScene" uid="uid://dph5mj026xivf" path="res://Scenes/Details/Крышка_подшипникового_узла.tscn" id="10_qkwvk"]
+[ext_resource type="Resource" uid="uid://conj06jjrwerg" path="res://Resources/Details/Имбусовый_Болт_М12.tres" id="10_uoqcx"]
+[ext_resource type="Resource" uid="uid://c0qjsq7bk1kal" path="res://Resources/Details/Крышка_подшипникового_узла.tres" id="11_76j35"]
+[ext_resource type="PackedScene" uid="uid://bilya824n8ls4" path="res://Scenes/Details/Ножка_крышки_насоса.tscn" id="13_grhv3"]
+[ext_resource type="PackedScene" uid="uid://0dhn7p3d8dam" path="res://Scenes/Details/Распорная_втулка_вала.tscn" id="14_es6nd"]
+[ext_resource type="Resource" uid="uid://bf78oix0avrat" path="res://Resources/Details/Ножка_крышки_насоса.tres" id="14_r3wox"]
+[ext_resource type="Resource" uid="uid://bfgxd224t1uug" path="res://Resources/Details/Распорная_втулка_вала.tres" id="15_0mrtk"]
+[ext_resource type="PackedScene" uid="uid://kkt2xgxg1jfq" path="res://Scenes/Details/Водоотбойное_кольцо_Дефлектор.tscn" id="16_wag1u"]
+[ext_resource type="Resource" uid="uid://dw2h1ferfutvp" path="res://Resources/Details/Водоотбойное_кольцо_Дефлектор.tres" id="17_es6nd"]
+[ext_resource type="PackedScene" uid="uid://cwvfimywhpx4t" path="res://Scenes/Details/Крышка_сальника_Фланец.tscn" id="18_0mrtk"]
+[ext_resource type="Resource" uid="uid://baejm50fi2d4x" path="res://Resources/Details/Крышка_сальника_Фланец.tres" id="20_x1rtg"]
+
+[node name="BMB" type="Node3D" unique_id=307814687]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0, 0)
+
+[node name="Спиральный_корпус_Улитка" parent="." unique_id=1794535002 instance=ExtResource("1_888ko")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, -4.78333e-16, 0.137)
+PartItemResource = ExtResource("2_3rkjn")
+
+[node name="Крышка_корпуса_насоса" parent="." unique_id=214085091 instance=ExtResource("2_h2ory")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 1.487371e-15, -5.253865e-17, 0.426)
+PartItemResource = ExtResource("3_so521")
+
+[node name="Рабочее_колесо_Крыльчатка" parent="." unique_id=2037019161 instance=ExtResource("5_u44vb")]
+transform = Transform3D(-4.371139e-08, 0.2554217, -0.9668297, 2.0604739e-27, 0.9668297, 0.2554217, 1, 1.1164837e-08, -4.226147e-08, -2.658012e-17, -8.526136e-17, 0.138)
+collision_layer = 3
+PartItemResource = ExtResource("6_swyht")
+
+[node name="Задняя_стенка_корпуса" parent="." unique_id=751961335 instance=ExtResource("7_77yjp")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -1.158587e-19, -5.621285e-16, 0.161)
+PartItemResource = ExtResource("8_wag1u")
+
+[node name="Главный_вал" parent="." unique_id=1454005309 instance=ExtResource("8_u44vb")]
+transform = Transform3D(4.3711385e-08, -1.0804333e-14, -0.99999994, -8.742277e-08, -0.99999994, 6.9829616e-15, -0.99999994, 8.742277e-08, -4.3711385e-08, 6.424883e-05, 4.7184185e-17, 0.40190142)
+PartItemResource = ExtResource("9_swyht")
+
+[node name="Крышка_подшипникового_узла_внешняя" parent="." unique_id=891962873 instance=ExtResource("10_qkwvk")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.007094e-15, 1.066158e-16, 0.5735)
+collision_layer = 3
+PartItemResource = ExtResource("11_76j35")
+PartId = "Крышка_подшипникового_узла_внешняя"
+
+[node name="Ножка_крышки_насоса" parent="." unique_id=374106033 instance=ExtResource("13_grhv3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0034035926, -0.22, 0.556)
+collision_layer = 3
+PartItemResource = ExtResource("14_r3wox")
+
+[node name="Распорная_втулка_вала" parent="." unique_id=1744524277 instance=ExtResource("14_es6nd")]
+transform = Transform3D(-4.371139e-08, -7.489097e-31, 1, 6.310887e-30, 1, 7.4891e-31, -1, 6.310887e-30, -4.371139e-08, -2.612242e-17, -8.526136e-17, 0.218)
+collision_layer = 3
+PartItemResource = ExtResource("15_0mrtk")
+
+[node name="Водоотбойное_кольцо_Дефлектор" parent="." unique_id=132343744 instance=ExtResource("16_wag1u")]
+transform = Transform3D(-4.371139e-08, 1, -4.371139e-08, 0, -4.371139e-08, -1, -1, -4.371139e-08, 1.9106855e-15, 7.3312e-16, 7.159789e-32, 0.21)
+collision_layer = 3
+PartItemResource = ExtResource("17_es6nd")
+
+[node name="Крышка_подшипникового_узла_внутреняя" parent="." unique_id=675904540 instance=ExtResource("10_qkwvk")]
+transform = Transform3D(-1.745741e-14, 0, 1, 0, 1, 0, -1, 0, -1.745741e-14, 6.433054e-15, -6.897203e-17, 0.3685)
+collision_layer = 3
+PartItemResource = ExtResource("11_76j35")
+PartId = "Крышка_подшипникового_узла_внутреняя"
+
+[node name="Крышка_сальника_Фланец" parent="." unique_id=1313621141 instance=ExtResource("18_0mrtk")]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, -2.73383e-15, 0.261)
+PartItemResource = ExtResource("20_x1rtg")
+
+[node name="Имбусовый_Болт_М10_крышки_1" parent="." unique_id=1595094799 instance=ExtResource("6_w202g")]
+transform = Transform3D(-1.037486e-14, 1.83697e-16, 1, -1.83697e-16, 1, -1.83697e-16, -1, -1.83697e-16, -1.037486e-14, 0.04419417, 0.04419417, 0.5896125)
+PartItemResource = ExtResource("7_3l4o7")
+PartId = "Имбусовый_Болт_М10_крышки_1"
+
+[node name="Имбусовый_Болт_М10_крышки_2" parent="." unique_id=2068367044 instance=ExtResource("6_w202g")]
+transform = Transform3D(-1.037486e-14, 1.83697e-16, 1, -1.83697e-16, 1, -1.83697e-16, -1, -1.83697e-16, -1.037486e-14, 0.04419417, -0.04419417, 0.5896125)
+PartItemResource = ExtResource("7_3l4o7")
+PartId = "Имбусовый_Болт_М10_крышки_2"
+
+[node name="Имбусовый_Болт_М10_крышки_3" parent="." unique_id=1678424073 instance=ExtResource("6_w202g")]
+transform = Transform3D(-1.037486e-14, 1.83697e-16, 1, -1.83697e-16, 1, -1.83697e-16, -1, -1.83697e-16, -1.037486e-14, -0.04419417, -0.04419417, 0.5896125)
+PartItemResource = ExtResource("7_3l4o7")
+PartId = "Имбусовый_Болт_М10_крышки_3"
+
+[node name="Имбусовый_Болт_М10_крышки_4" parent="." unique_id=914107090 instance=ExtResource("6_w202g")]
+transform = Transform3D(-1.037486e-14, 1.83697e-16, 1, -1.83697e-16, 1, -1.83697e-16, -1, -1.83697e-16, -1.037486e-14, -0.04419417, 0.04419417, 0.5896125)
+PartItemResource = ExtResource("7_3l4o7")
+PartId = "Имбусовый_Болт_М10_крышки_4"
+
+[node name="Стяжной_Винт_М16_корпуса_1" parent="." unique_id=1000881466 instance=ExtResource("9_3l4o7")]
+transform = Transform3D(1.738071e-14, 1.83697e-16, -1, -1.83697e-16, 1, 1.83697e-16, 1, 1.83697e-16, 1.738071e-14, -0.04419417, 0.04419417, 0.3535)
+PartItemResource = ExtResource("10_cdpxs")
+PartId = "Стяжной_Винт_М16_корпуса_1"
+
+[node name="Стяжной_Винт_М16_корпуса_2" parent="." unique_id=1223770183 instance=ExtResource("9_3l4o7")]
+transform = Transform3D(1.738071e-14, 1.83697e-16, -1, -1.83697e-16, 1, 1.83697e-16, 1, 1.83697e-16, 1.738071e-14, -0.04419417, -0.04419417, 0.3535)
+PartItemResource = ExtResource("10_cdpxs")
+PartId = "Стяжной_Винт_М16_корпуса_2"
+
+[node name="Стяжной_Винт_М16_корпуса_3" parent="." unique_id=1869638524 instance=ExtResource("9_3l4o7")]
+transform = Transform3D(1.738071e-14, 1.83697e-16, -1, -1.83697e-16, 1, 1.83697e-16, 1, 1.83697e-16, 1.738071e-14, 0.04419417, -0.04419417, 0.3535)
+PartItemResource = ExtResource("10_cdpxs")
+PartId = "Стяжной_Винт_М16_корпуса_3"
+
+[node name="Стяжной_Винт_М16_корпуса_4" parent="." unique_id=1867485876 instance=ExtResource("9_3l4o7")]
+transform = Transform3D(1.738071e-14, 1.83697e-16, -1, -1.83697e-16, 1, 1.83697e-16, 1, 1.83697e-16, 1.738071e-14, 0.04419417, 0.04419417, 0.3535)
+PartItemResource = ExtResource("10_cdpxs")
+PartId = "Стяжной_Винт_М16_корпуса_4"
+
+[node name="Стяжной_Винт_М16_улитки_1" parent="." unique_id=1073636614 instance=ExtResource("6_so521")]
+transform = Transform3D(-4.371139e-08, 3.4914808e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.4914812e-15, -4.371139e-08, -0.1524401, -0.06314277, 0.18195)
+PartItemResource = ExtResource("10_kh7s0")
+PartId = "Стяжной_Винт_М16_улитки_1"
+
+[node name="Стяжной_Винт_М16_улитки_2" parent="." unique_id=884812952 instance=ExtResource("6_so521")]
+transform = Transform3D(-4.371139e-08, 3.4914808e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.4914812e-15, -4.371139e-08, -0.06314277, -0.1524401, 0.18195)
+PartItemResource = ExtResource("10_kh7s0")
+PartId = "Стяжной_Винт_М16_улитки_2"
+
+[node name="Стяжной_Винт_М16_улитки_3" parent="." unique_id=1877515693 instance=ExtResource("6_so521")]
+transform = Transform3D(-4.371139e-08, 3.4914808e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.4914812e-15, -4.371139e-08, 0.06314277, -0.1524401, 0.18195)
+PartItemResource = ExtResource("10_kh7s0")
+PartId = "Стяжной_Винт_М16_улитки_3"
+
+[node name="Стяжной_Винт_М16_улитки_4" parent="." unique_id=1520701165 instance=ExtResource("6_so521")]
+transform = Transform3D(-4.371139e-08, 3.4914808e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.4914812e-15, -4.371139e-08, 0.1524401, -0.06314277, 0.18195)
+PartItemResource = ExtResource("10_kh7s0")
+PartId = "Стяжной_Винт_М16_улитки_4"
+
+[node name="Стяжной_Винт_М16_улитки_5" parent="." unique_id=1346487611 instance=ExtResource("6_so521")]
+transform = Transform3D(-4.371139e-08, 3.4914808e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.4914812e-15, -4.371139e-08, 0.1524401, 0.06314277, 0.18195)
+PartItemResource = ExtResource("10_kh7s0")
+PartId = "Стяжной_Винт_М16_улитки_5"
+
+[node name="Стяжной_Винт_М16_улитки_6" parent="." unique_id=1083537002 instance=ExtResource("6_so521")]
+transform = Transform3D(-4.371139e-08, 3.4914808e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.4914812e-15, -4.371139e-08, 0.06314277, 0.1524401, 0.18195)
+PartItemResource = ExtResource("10_kh7s0")
+PartId = "Стяжной_Винт_М16_улитки_6"
+
+[node name="Стяжной_Винт_М16_улитки_7" parent="." unique_id=1242154566 instance=ExtResource("6_so521")]
+transform = Transform3D(-4.371139e-08, 3.4914808e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.4914812e-15, -4.371139e-08, -0.06314277, 0.1524401, 0.18195)
+PartItemResource = ExtResource("10_kh7s0")
+PartId = "Стяжной_Винт_М16_улитки_7"
+
+[node name="Стяжной_Винт_М16_улитки_8" parent="." unique_id=963902485 instance=ExtResource("6_so521")]
+transform = Transform3D(-4.371139e-08, 3.4914808e-15, -1, -3.491481e-15, 1, 3.491481e-15, 1, 3.4914812e-15, -4.371139e-08, -0.1524401, 0.06314277, 0.18195)
+PartItemResource = ExtResource("10_kh7s0")
+PartId = "Стяжной_Винт_М16_улитки_8"
+
+[node name="Шестигранная_Гайка_М16_корпуса_1" parent="." unique_id=1464927892 instance=ExtResource("5_4dnlm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1524401, -0.06314277, 0.337162)
+PartItemResource = ExtResource("6_coitn")
+PartId = "Шестигранная_Гайка_М16_корпуса_1"
+PartName = "Гайка М16"
+PartDescription = "Великолепная гайка на 16 прямо с завода."
+
+[node name="Шестигранная_Гайка_М16_корпуса_2" parent="." unique_id=17072062 instance=ExtResource("5_4dnlm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06314277, -0.1524401, 0.337162)
+PartItemResource = ExtResource("6_coitn")
+PartId = "Шестигранная_Гайка_М16_корпуса_2"
+PartName = "Гайка М16"
+PartDescription = "Великолепная гайка на 16 прямо с завода."
+
+[node name="Шестигранная_Гайка_М16_корпуса_3" parent="." unique_id=1685104354 instance=ExtResource("5_4dnlm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06314277, -0.1524401, 0.337162)
+PartItemResource = ExtResource("6_coitn")
+PartId = "Шестигранная_Гайка_М16_корпуса_3"
+PartName = "Гайка М16"
+PartDescription = "Великолепная гайка на 16 прямо с завода."
+
+[node name="Шестигранная_Гайка_М16_корпуса_4" parent="." unique_id=789577880 instance=ExtResource("5_4dnlm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1524401, -0.06314277, 0.337162)
+PartItemResource = ExtResource("6_coitn")
+PartId = "Шестигранная_Гайка_М16_корпуса_4"
+PartName = "Гайка М16"
+PartDescription = "Великолепная гайка на 16 прямо с завода."
+
+[node name="Шестигранная_Гайка_М16_корпуса_5" parent="." unique_id=2097645268 instance=ExtResource("5_4dnlm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1524401, 0.06314277, 0.337162)
+PartItemResource = ExtResource("6_coitn")
+PartId = "Шестигранная_Гайка_М16_корпуса_5"
+PartName = "Гайка М16"
+PartDescription = "Великолепная гайка на 16 прямо с завода."
+
+[node name="Шестигранная_Гайка_М16_корпуса_6" parent="." unique_id=1640770366 instance=ExtResource("5_4dnlm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06314277, 0.1524401, 0.337162)
+PartItemResource = ExtResource("6_coitn")
+PartId = "Шестигранная_Гайка_М16_корпуса_6"
+PartName = "Гайка М16"
+PartDescription = "Великолепная гайка на 16 прямо с завода."
+
+[node name="Шестигранная_Гайка_М16_корпуса_7" parent="." unique_id=428572812 instance=ExtResource("5_4dnlm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06314277, 0.1524401, 0.337162)
+PartItemResource = ExtResource("6_coitn")
+PartId = "Шестигранная_Гайка_М16_корпуса_7"
+PartName = "Гайка М16"
+PartDescription = "Великолепная гайка на 16 прямо с завода."
+
+[node name="Шестигранная_Гайка_М16_корпуса_8" parent="." unique_id=1205971451 instance=ExtResource("5_4dnlm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1524401, 0.06314277, 0.337162)
+PartItemResource = ExtResource("6_coitn")
+PartId = "Шестигранная_Гайка_М16_корпуса_8"
+PartName = "Гайка М16"
+PartDescription = "Великолепная гайка на 16 прямо с завода."
+
+[node name="Имбусовый_Болт_М12_ножки" parent="." unique_id=1243348756 instance=ExtResource("7_3uybr")]
+transform = Transform3D(-4.3711385e-08, 0.99999994, 0, 4.3711385e-08, 1.9106853e-15, -0.99999994, -0.99999994, -4.3711385e-08, -4.3711385e-08, 0.0023010867, -0.11838007, 0.58187675)
+PartItemResource = ExtResource("10_uoqcx")
+PartId = "Имбусовый_Болт_М12_ножки"
+
+[node name="Имбусовый_Болт_М12_напольный_ножки_1" parent="." unique_id=1018750271 instance=ExtResource("7_3uybr")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -0.046172295, -0.194, 0.58986425)
+PartItemResource = ExtResource("10_uoqcx")
+PartId = "Имбусовый_Болт_М12_напольный_ножки_1"
+
+[node name="Имбусовый_Болт_М12_напольный_ножки_2" parent="." unique_id=1649486029 instance=ExtResource("7_3uybr")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, 0.053168137, -0.194, 0.59)
+PartItemResource = ExtResource("10_uoqcx")
+PartId = "Имбусовый_Болт_М12_напольный_ножки_2"
+
+[node name="Имбусовый_Болт_М12_напольный_улитки_1" parent="." unique_id=290690816 instance=ExtResource("7_3uybr")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, 0.15555128, -0.19292222, 0.18201111)
+PartItemResource = ExtResource("10_uoqcx")
+PartId = "Имбусовый_Болт_М12_напольный_улитки_1"
+
+[node name="Имбусовый_Болт_М12_напольный_улитки_2" parent="." unique_id=2054299063 instance=ExtResource("7_3uybr")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, 0.15555128, -0.19292222, 0.09180799)
+PartItemResource = ExtResource("10_uoqcx")
+PartId = "Имбусовый_Болт_М12_напольный_улитки_2"
+
+[node name="Имбусовый_Болт_М12_напольный_улитки_3" parent="." unique_id=1117646003 instance=ExtResource("7_3uybr")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -0.15486221, -0.19292222, 0.18201111)
+PartItemResource = ExtResource("10_uoqcx")
+PartId = "Имбусовый_Болт_М12_напольный_улитки_3"
+
+[node name="Имбусовый_Болт_М12_напольный_улитки_4" parent="." unique_id=487171083 instance=ExtResource("7_3uybr")]
+transform = Transform3D(6.123234e-17, 1, 0, -1, 6.123234e-17, 0, 0, 0, 1, -0.15486221, -0.19292222, 0.09180799)
+PartItemResource = ExtResource("10_uoqcx")
+PartId = "Имбусовый_Болт_М12_напольный_улитки_4"

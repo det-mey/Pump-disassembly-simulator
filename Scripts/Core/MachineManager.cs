@@ -2,11 +2,16 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// УСТАРЕВШИЙ МЕНЕДЖЕР: Функционал полностью перенесён в SequenceManager.
+/// Оставлен для обратной совместимости — не регистрируйте его как autoload.
+/// </summary>
+[Obsolete("Используйте SequenceManager и GameManager.CurrentMode")]
 public partial class MachineManager : Node
 {
 	public static MachineManager Instance { get; private set; }
-	
-	[Export] public SimulatorState CurrentState { get; set; } = SimulatorState.Learning;
+
+	[Export] public SimulatorMode CurrentMode { get; set; } = SimulatorMode.Learning;
 	private Queue<string> _assemblySteps = new Queue<string>();
 
 	public override void _EnterTree()
@@ -31,11 +36,11 @@ public partial class MachineManager : Node
 		if (_assemblySteps.Count > 0 && _assemblySteps.Peek() == stepName)
 		{
 			_assemblySteps.Dequeue();
-			AssessmentManager.Instance.RegisterSuccess($"Правильный шаг: {stepName}");
+			GD.Print($"[MachineManager] Правильный шаг: {stepName}");
 		}
-		else if (CurrentState == SimulatorState.Exam)
+		else if (CurrentMode == SimulatorMode.Exam)
 		{
-			AssessmentManager.Instance.RegisterError($"Нарушение последовательности. Ожидалось: {_assemblySteps.Peek()}");
+			GD.PrintErr($"[MachineManager] Нарушение последовательности. Ожидалось: {_assemblySteps.Peek()}");
 		}
 	}
 }

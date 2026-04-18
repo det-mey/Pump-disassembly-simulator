@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://bbfwn2b74nwcj"
 path.s3tc="res://.godot/imported/î«ñÑ½∞ ¡áß«ßá ¡á»α∩¼πε ¿º ß«½¿ñá_0.png-6914597077a0527a322816f93e60c66a.s3tc.ctex"
+path.etc2="res://.godot/imported/î«ñÑ½∞ ¡áß«ßá ¡á»α∩¼πε ¿º ß«½¿ñá_0.png-6914597077a0527a322816f93e60c66a.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://Assets/Models/Console_pump/î«ñÑ½∞ ¡áß«ßá ¡á»α∩¼πε ¿º ß«½¿ñá_0.png"
-dest_files=["res://.godot/imported/î«ñÑ½∞ ¡áß«ßá ¡á»α∩¼πε ¿º ß«½¿ñá_0.png-6914597077a0527a322816f93e60c66a.s3tc.ctex"]
+dest_files=["res://.godot/imported/î«ñÑ½∞ ¡áß«ßá ¡á»α∩¼πε ¿º ß«½¿ñá_0.png-6914597077a0527a322816f93e60c66a.s3tc.ctex", "res://.godot/imported/î«ñÑ½∞ ¡áß«ßá ¡á»α∩¼πε ¿º ß«½¿ñá_0.png-6914597077a0527a322816f93e60c66a.etc2.ctex"]
 
 [params]
 

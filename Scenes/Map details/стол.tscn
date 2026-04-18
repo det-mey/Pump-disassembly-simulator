@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cbew8kc5cxmju"]
+
+[ext_resource type="PackedScene" uid="uid://c0qm1r4vkk1xe" path="res://Assets/Models/industrial_steel_table.glb" id="1_f2fgd"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7k5sk"]
+size = Vector3(81.50583, 80.9939, 200.38867)
+
+[node name="Стол" type="StaticBody3D" unique_id=744458440]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=670602613]
+transform = Transform3D(-4.3711387e-10, 0, 0.01, 0, 0.01, 0, -0.01, 0, -4.3711387e-10, 0, 0.3947057, 0)
+shape = SubResource("BoxShape3D_7k5sk")
+
+[node name="Sketchfab_Scene" parent="." unique_id=1706687003 instance=ExtResource("1_f2fgd")]
+transform = Transform3D(-4.3711387e-10, 0, 0.01, 0, 0.01, 0, -0.01, 0, -4.3711387e-10, 0, 0, 0)

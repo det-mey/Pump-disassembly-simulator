@@ -206,10 +206,12 @@ public partial class MainMenu : CanvasLayer
 
 		_buttonsGrid.AddChild(CreateMenuButton("Запустить", _iconStart, StartGame, true));
 
-		_buttonsGrid.AddChild(CreateMenuButton("Результаты работ", _iconResults, () => { }));
+		_buttonsGrid.AddChild(CreateMenuButton("Результаты работ", _iconResults, () => ResultsHistoryUI.Instance?.ShowScreen()));
 		_buttonsGrid.AddChild(CreateMenuButton("Настройки", _iconSettings, () => SettingsUI.Instance?.ToggleSettings(true)));
 
-		_buttonsGrid.AddChild(CreateMenuButton("Сетевая работа", _iconNetwork, () => { }));
+		// TODO: Сетевая работа — временно скрыто до реализации
+		// _buttonsGrid.AddChild(CreateMenuButton("Сетевая работа", _iconNetwork, () => { }));
+
 		_buttonsGrid.AddChild(CreateMenuButton("Выход", _iconExit, () => GetTree().Quit(), false, true));
 	}
 
@@ -263,27 +265,24 @@ public partial class MainMenu : CanvasLayer
 	// --- ЗАПУСК ИГРЫ ---
     private void StartGame()
     {
+        if (VRManager.Instance != null && !VRManager.Instance.IsVRMode)
+        {
+            VRManager.Instance.SetVRMode(true);
+        }
+
         if (Scenarios.Count == 0 || _selectedScenarioIndex < 0) return;
         var scenario = Scenarios[_selectedScenarioIndex];
         
-        // 1. ЖЕСТКАЯ ПРОВЕРКА ДО АНИМАЦИИ
-        // Если в JSON есть ошибки, ValidateScenarioConfig сам откроет консоль и вернет false.
+        // Жесткая проверка JSON перед стартом
         if (!GameManager.Instance.ValidateScenarioConfig(scenario))
         {
-            return; // Прерываем запуск игры! Экран не темнеет, мы остаемся в Главном Меню!
+            return; 
         }
 
-		// ЧИТАЕМ ВЫБРАННЫЙ РЕЖИМ
         _currentMode = _modeSelector != null ? (SimulatorMode)_modeSelector.GetSelectedId() : SimulatorMode.Learning;
         
-        // 2. ЕСЛИ ОШИБОК НЕТ - ДЕЛАЕМ КРАСИВОЕ ЗАТУХАНИЕ
-        var fade = new ColorRect { Color = Colors.Black, Modulate = new Color(1, 1, 1, 0), ZIndex = 100 };
-        fade.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        AddChild(fade);
-
-        var tween = CreateTween();
-        tween.TweenProperty(fade, "modulate:a", 1.0f, 0.4f);
-        tween.TweenCallback(Callable.From(() => GameManager.Instance.LoadScenario(scenario, _currentMode)));
+        // --- ИСПРАВЛЕНИЕ: Вызываем загрузку напрямую. Экран загрузки сам сделает красивый переход ---
+        GameManager.Instance.LoadScenario(scenario, _currentMode);
     }
 
 	// --- ДВИЖОК АНИМАЦИЙ UI ---

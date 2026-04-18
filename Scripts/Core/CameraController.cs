@@ -8,21 +8,39 @@ public partial class CameraController : Node3D
     [Export] public float BobAmplitude = 0.06f;
 
     private Camera3D _camera;
+    private Camera3D _xrCamera;
     private Node3D _head;
     private float _originalHeadY;
     private float _headbobTime = 0.0f;
     private float _cameraTilt = 0.0f;
+    private float _verticalRotation = 0f;
 
-    // Ссылки для получения данных от игрока
     private Player _player;
 
     public override void _Ready()
     {
-        _camera = GetNode<Camera3D>("Camera3D");
+        _camera = GetNode<Camera3D>("XROrigin3D/XRCamera3D/Camera3D");
+        _xrCamera = GetNode<Camera3D>("XROrigin3D/XRCamera3D");
         _head = GetParent<Node3D>();
         _player = GetTree().GetFirstNodeInGroup("Player") as Player;
 
+        if (_camera == null)
+        {
+            GD.PrintErr("[CameraController] Camera3D не найден");
+            return;
+        }
+        if (_xrCamera == null)
+        {
+            GD.PrintErr("[CameraController] XRCamera3D не найден");
+            return;
+        }
+
         _originalHeadY = _head.Position.Y;
+
+        // В 2D-режиме Camera3D активна, XRCamera3D нет
+        // В VR-режиме — наоборот
+        _camera.Current = true;
+        _xrCamera.Current = false;
 
         Input.MouseMode = Input.MouseModeEnum.Captured;
     }
@@ -32,16 +50,22 @@ public partial class CameraController : Node3D
     /// </summary>
     public void ProcessCameraRotation(InputEventMouseMotion mouseMotion)
     {
-        // Поворот тела по горизонтали (Y)
+        // Поворот тела по горизонтали (Y) — через Head
         _head.RotateY(-mouseMotion.Relative.X * MouseSensitivity);
-        
-        // Поворот камеры по вертикали (X)
-        float xRotation = _camera.Rotation.X - mouseMotion.Relative.Y * MouseSensitivity;
-        
-        // Жесткий замок, чтобы не перевернуться через голову (Gimbal Lock)
-        xRotation = Mathf.Clamp(xRotation, Mathf.DegToRad(-89f), Mathf.DegToRad(89f));
 
-        _camera.Rotation = new Vector3(xRotation, _camera.Rotation.Y, 0);
+        // Поворот по вертикали (X) — через XRCamera3D
+        _verticalRotation -= mouseMotion.Relative.Y * MouseSensitivity;
+        // Жесткий замок, чтобы не перевернуться через голову (Gimbal Lock)
+        _verticalRotation = Mathf.Clamp(_verticalRotation, Mathf.DegToRad(-89f), Mathf.DegToRad(89f));
+
+        // Применяем вращение к XRCamera3D (в 2D-режиме)
+        if (!_camera.Current)
+        {
+            // В VR-режиме XRCamera3D управляется трекингом
+            return;
+        }
+
+        _xrCamera.Rotation = new Vector3(_verticalRotation, 0, 0);
     }
 
     /// <summary>

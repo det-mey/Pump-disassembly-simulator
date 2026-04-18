@@ -13,6 +13,7 @@ public class ActionEntry
     public string TargetPart;
     public int PointsChange;
     public string TechnicalDetails;
+    public string StateCode;
 
     public override string ToString()
     {
@@ -32,6 +33,9 @@ public partial class ActionLogger : Node
     public int Score { get; private set; } = 0;
     public int PenaltyPoints { get; private set; } = 0;
     public float SessionStartTime { get; private set; }
+
+    /// <summary>Время, прошедшее с начала сессии, в секундах.</summary>
+    public float ElapsedSeconds => (Time.GetTicksMsec() - SessionStartTime) / 1000f;
     public int TotalAttempts { get; private set; } = 0; // Каждое взаимодействие (даже ошибочное)
     public int SuccessfulActions { get; private set; } = 0;
     
@@ -71,7 +75,7 @@ public partial class ActionLogger : Node
     }
 
     // Основной метод для записи ЛЮБОГО действия
-    public void LogEvent(LogType type, string message, string tool = "Руки", string target = "Нет", int points = 0, string tech = "")
+    public void LogEvent(LogType type, string message, string tool = "Руки", string target = "Нет", int points = 0, string tech = "", string stateCode = "")
     {
         if (type == LogType.Action || type == LogType.Warning || type == LogType.Error)
             TotalAttempts++;
@@ -81,7 +85,8 @@ public partial class ActionLogger : Node
 
         var entry = new ActionEntry {
             Timestamp = (float)Time.GetTicksMsec() - SessionStartTime,
-            Type = type, Message = message, ToolUsed = tool, TargetPart = target, PointsChange = points, TechnicalDetails = tech
+            Type = type, Message = message, ToolUsed = tool, TargetPart = target, PointsChange = points, TechnicalDetails = tech,
+            StateCode = stateCode 
         };
 
         FullSessionHistory.Add(entry);
@@ -98,10 +103,9 @@ public partial class ActionLogger : Node
         if (string.IsNullOrEmpty(partId)) return;
         PartStates[partId] = state;
         
-        // Автоматически уведомляем менеджер последовательностей
+        // ВАЖНО: Физическое изменение состояния может триггерить прогресс
         SequenceManager.Instance?.EvaluateCurrentStep();
     }
-
     public string GetState(string partId)
     {
         return PartStates.ContainsKey(partId) ? PartStates[partId] : "Initial";
@@ -226,11 +230,29 @@ public partial class ActionLogger : Node
 
     public void LogAction(string partId, string state, string details = "")
     {
-        // Вызываем новый системный метод обновления состояния
-        UpdatePartState(partId, state, partId);
-        
-        // Записываем это как действие в историю
-        LogEvent(LogType.Action, $"Действие с деталью: {state}", target: partId, tech: details);
+        // Красивый русский текст для отчета
+        string actionRu = state switch {
+            "Installed" => "Деталь установлена",
+            "Removed" => "Деталь демонтирована",
+            "Torqued" => "Затянута до упора",
+            "Loosened" => "Полностью откручена",
+            "Measured" => "Проведен инструментальный замер",
+            _ => $"Изменение статуса: {state}"
+        };
+
+        // 1. СНАЧАЛА ЗАПИСЫВАЕМ ФАКТ В ИСТОРИЮ ЛОГОВ!
+        LogEvent(LogType.Action, actionRu, target: partId, tech: details, stateCode: state);
+
+        // 2. И ТОЛЬКО ПОТОМ ОПОВЕЩАЕМ СИСТЕМУ СЦЕНАРИЕВ
+        if (state != "Measured")
+        {
+            UpdatePartState(partId, state, partId); // Внутри себя вызовет EvaluateCurrentStep
+        }
+        else
+        {
+            // Для замера физика не меняется, поэтому вызываем проверку вручную
+            SequenceManager.Instance?.EvaluateCurrentStep(); 
+        }
     }
 
     private string GetRussianType(LogType type) => type switch {
@@ -291,5 +313,37 @@ public partial class ActionLogger : Node
             sb.Append("</p></body></html>");
         }
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Краткая превью-сводка протокола для карточки истории (первые 3-4 ключевых события).
+    /// </summary>
+    public string GetProtocolPreview()
+    {
+        var preview = new System.Text.StringBuilder();
+        int stepCount = 0;
+        int errorCount = 0;
+
+        foreach (var entry in FullSessionHistory)
+        {
+            if (entry.Type == LogType.StepComplete) stepCount++;
+            if (entry.Type == LogType.Error) errorCount++;
+        }
+
+        preview.Append($"Шагов: {stepCount}");
+        if (errorCount > 0) preview.Append($" | Ошибок: {errorCount}");
+        if (PenaltyPoints > 0) preview.Append($" | Штрафы: {PenaltyPoints}");
+
+        return preview.ToString();
+    }
+
+    public bool HasActionOccurred(string partId, string stateCode)
+    {
+        foreach (var entry in FullSessionHistory)
+        {
+            if (entry.TargetPart == partId && entry.StateCode == stateCode)
+                return true;
+        }
+        return false;
     }
 }

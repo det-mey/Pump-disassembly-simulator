@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://6xeva4leesyi"
 path.s3tc="res://.godot/imported/everytexture.com-stock-metal-texture-00139-normal-2048.jpg-2c5038145f31c7b3bcd25b9e578ab25d.s3tc.ctex"
+path.etc2="res://.godot/imported/everytexture.com-stock-metal-texture-00139-normal-2048.jpg-2c5038145f31c7b3bcd25b9e578ab25d.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://Assets/Models/Console_pump/everytexture.com-stock-metal-texture-00139-normal-2048.jpg"
-dest_files=["res://.godot/imported/everytexture.com-stock-metal-texture-00139-normal-2048.jpg-2c5038145f31c7b3bcd25b9e578ab25d.s3tc.ctex"]
+dest_files=["res://.godot/imported/everytexture.com-stock-metal-texture-00139-normal-2048.jpg-2c5038145f31c7b3bcd25b9e578ab25d.s3tc.ctex", "res://.godot/imported/everytexture.com-stock-metal-texture-00139-normal-2048.jpg-2c5038145f31c7b3bcd25b9e578ab25d.etc2.ctex"]
 
 [params]
 

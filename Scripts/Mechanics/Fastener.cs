@@ -3,17 +3,23 @@ using Godot.Collections;
 
 public enum ContinuousAnimType { None, RotateX, RotateY, RotateZ }
 
-[Tool]
-[GlobalClass]
+[Tool][GlobalClass]
 public partial class Fastener : BasePart
 {
     // --- ДАННЫЕ И НАСТРОЙКИ ---
     [ExportGroup("Логика Инструментов")]
     [Export] public Array<InteractionRule> ValidTools { get; set; } = new Array<InteractionRule>();
     [Export] public InteractionType Type { get; set; } = InteractionType.Continuous;
-    [Export] public PartItemData PartItemResource { get; set; }[ExportGroup("Жизненный Цикл (Lifecycle)")]
+    [Export] public PartItemData PartItemResource { get; set; }
+    [ExportGroup("Жизненный Цикл (Lifecycle)")]
     [Export] public bool GiveItemOnRemoval { get; set; } = true;
     [Export] public bool LeaveGhostOnRemoval { get; set; } = true;
+    private bool _isGhostHidden = false;
+    [Export] public bool IsGhostHidden 
+    { 
+        get => _isGhostHidden; 
+        set { _isGhostHidden = value; UpdateVisuals(); } 
+    }
     
     private bool _startsAsGhost = false;
     [Export] public bool StartsAsGhost 
@@ -21,32 +27,33 @@ public partial class Fastener : BasePart
         get => _startsAsGhost; 
         set { _startsAsGhost = value; if (value) IsInstalled = false; UpdateVisuals(); } 
     }[ExportGroup("Параметры")]
-    [Export] public float Size { get; set; } = 16.0f; 
-    [Export] public float MaxTorque { get; set; } = 120.0f;
+    [Export] public float Size { get; set; } = 16.0f;[Export] public float MaxTorque { get; set; } = 120.0f;
     [Export] public float CurrentTorque { get; set; } = 120.0f;
     
     [ExportGroup("Состояние")]
-    private bool _isInstalled = true;
-    [Export] public bool IsInstalled 
+    private bool _isInstalled = true;[Export] public bool IsInstalled 
     { 
         get => _isInstalled; 
         set { _isInstalled = value; UpdateVisuals(); } 
     }[ExportGroup("Зависимости сборки/разборки")]
     [Export] public Array<Fastener> BlockingParts { get; set; } = new Array<Fastener>();
-    [Export] public Array<Fastener> RequiredParts { get; set; } = new Array<Fastener>();[ExportGroup("Опасности (Hazards)")]
+    [Export] public Array<Fastener> RequiredParts { get; set; } = new Array<Fastener>();
+
+    /// <summary>
+    /// Детали, которые полностью СКРЫВАЮТСЯ (не призрак, а исчезают),
+    /// когда эта деталь НЕ установлена. Полезно для разборки: снял крышку —
+    /// внутренние детали становятся видимыми и интерактивными.
+    /// </summary>
+    [Export] public Array<Node3D> HidesParts { get; set; } = new Array<Node3D>();[ExportGroup("Опасности (Hazards)")]
     [Export] public bool IsUnderPressure { get; set; } = false;
     [Export] public string ReliefValveId { get; set; } = "";[ExportGroup("Дефектовка и Износ")]
     [Export] public bool IsDefective { get; set; } = false;
-    [Export] public bool IsMeasurable { get; set; } = false;
-    [Export] public float CurrentWear { get; set; } = 44.8f;
+    [Export] public bool IsMeasurable { get; set; } = false;[Export] public float CurrentWear { get; set; } = 44.8f;
     [Export] public float NominalWear { get; set; } = 45.0f;[ExportGroup("Визуальные Эффекты")]
-    [Export] public Array<PartVisualEffect> VisualEffects { get; set; } = new Array<PartVisualEffect>();
-    
-    [ExportGroup("Анимация процесса (Continuous)")]
+    [Export] public Array<PartVisualEffect> VisualEffects { get; set; } = new Array<PartVisualEffect>();[ExportGroup("Анимация процесса (Continuous)")]
     [Export] public bool EnableProgressAnim { get; set; } = true;[ExportSubgroup("Вращение")]
     [Export] public Vector3 RotateAxis { get; set; } = new Vector3(0, 1, 0);
-    [Export] public float MaxRotationDegrees { get; set; } = 1080.0f;
-    [ExportSubgroup("Вкручивание (Смещение)")]
+    [Export] public float MaxRotationDegrees { get; set; } = 1080.0f;[ExportSubgroup("Вкручивание (Смещение)")]
     [Export] public Vector3 TranslateAxis { get; set; } = new Vector3(0, -1, 0);
     [Export] public float MaxTranslateDistance { get; set; } = 0.0f;
 
@@ -64,7 +71,7 @@ public partial class Fastener : BasePart
     {
         if (node is MeshInstance3D mesh)
         {
-            _originalMaterials[mesh] = mesh.MaterialOverride;
+            _originalMaterials[mesh] = mesh.GetActiveMaterial(0);
         }
         foreach (Node child in node.GetChildren())
         {
@@ -97,6 +104,7 @@ public partial class Fastener : BasePart
         _isTighteningTarget = CurrentTorque < MaxTorque;
 
         UpdateVisuals();
+        ApplyHidesParts(); // Применяем скрытие при старте
         UpdateContinuousAnimation();
     }
 
@@ -133,9 +141,12 @@ public partial class Fastener : BasePart
     public void UpdateVisuals()
     {
         var collider = GetNodeOrNull<CollisionShape3D>("CollisionShape3D");
-        
+
         // Включаем коллизию по умолчанию, чтобы не "терять" объект
         if (collider != null) collider.SetDeferred("disabled", false);
+
+        // Применяем полное скрытие зависимых деталей
+        ApplyHidesParts();
 
         if (IsInstalled)
         {
@@ -155,7 +166,17 @@ public partial class Fastener : BasePart
                 SetMeshesState(this, false, null); 
                 CollisionLayer = 0; 
                 CollisionMask = 0;
-                if (collider != null) collider.SetDeferred("disabled", true);
+                collider?.SetDeferred("disabled", true);
+                return; 
+            }
+
+            // --- Полное скрытие призрака (включая коллизию) по тумблеру ---
+            if (_isGhostHidden)
+            {
+                SetMeshesState(this, false, null); 
+                CollisionLayer = 0; // Луч проходит насквозь!
+                CollisionMask = 0;
+                collider?.SetDeferred("disabled", true);
                 return; 
             }
 
@@ -169,24 +190,77 @@ public partial class Fastener : BasePart
             }
 
             // В РЕДАКТОРЕ призраки видны ВСЕГДА, если IsInstalled = false
-            bool finalShow = Engine.IsEditorHint() ? true : showGhostsInGame;
-
-            Material ghostMat;
-            if (Engine.IsEditorHint())
-            {
-                ghostMat = CreateEditorGhostMaterial();
-            }
-            else
-            {
-                ghostMat = GameManager.Instance?.GhostMaterial;
-            }
+            bool finalShow = Engine.IsEditorHint() || showGhostsInGame;
+            Material ghostMat = Engine.IsEditorHint() ? CreateEditorGhostMaterial() : GameManager.Instance?.GhostMaterial;
 
             SetMeshesState(this, finalShow, finalShow ? ghostMat : null); 
             
             // Коллизия остается на слое 2, чтобы можно было нащупать место установки
-            CollisionLayer = 2; 
+            CollisionLayer = 2;
             CollisionMask = 0;
         }
+    }
+
+    /// <summary>
+    /// Применяет полное скрытие для деталей из списка HidesParts.
+    /// Когда эта деталь НЕ установлена — зависимые детали полностью исчезают
+    /// (Visible=false, CollisionLayer=0, ProcessMode=Disabled).
+    /// Когда установлена — появляются обратно.
+    /// </summary>
+    private void ApplyHidesParts()
+    {
+        if (HidesParts == null) return;
+
+        foreach (var hiddenPart in HidesParts)
+        {
+            if (hiddenPart == null || !IsInstanceValid(hiddenPart)) continue;
+
+            if (IsInstalled)
+            {
+                // Крышка УСТАНОВЛЕНА — внутренние детали СКРЫВАЮТСЯ
+                hiddenPart.Visible = false;
+                hiddenPart.ProcessMode = ProcessModeEnum.Disabled;
+                
+                // ИСПРАВЛЕНИЕ: Безопасное отключение коллизии для внутренних деталей
+                if (hiddenPart is Fastener f)
+                {
+                    f.CollisionLayer = 0;
+                    var col = f.GetNodeOrNull<CollisionShape3D>("CollisionShape3D");
+                    if (col != null) col.SetDeferred("disabled", true);
+                }
+                else SetCollisionLayerRecursive(hiddenPart, 0u);
+            }
+            else
+            {
+                // Крышка СНЯТА — внутренние детали ПОЯВЛЯЮТСЯ
+                hiddenPart.Visible = true;
+                hiddenPart.ProcessMode = ProcessModeEnum.Inherit;
+                
+                // ИСПРАВЛЕНИЕ: Позволяем внутренней детали самой решить, твердая она или призрак
+                if (hiddenPart is Fastener f)
+                {
+                    f.UpdateVisuals(); 
+                }
+                else SetCollisionLayerRecursive(hiddenPart, 3u);
+            }
+        }
+    }
+
+    private static void SetCollisionLayerRecursive(Node node, uint layer)
+    {
+        if (node is CollisionShape3D cs)
+        {
+            if (node.GetParent() is PhysicsBody3D body)
+            {
+                body.CollisionLayer = layer;
+            }
+        }
+        if (node is PhysicsBody3D body2)
+        {
+            body2.CollisionLayer = layer;
+        }
+        foreach (Node child in node.GetChildren())
+            SetCollisionLayerRecursive(child, layer);
     }
 
     // Вспомогательный метод для создания материала в редакторе
@@ -249,48 +323,66 @@ public partial class Fastener : BasePart
         foreach (Node child in node.GetChildren()) TweenMeshesTransparency(tween, child, targetAlpha, duration);
     }
 
+    // --- АНИМАЦИЯ ДЕТАЛИ ---
     private void AnimateVisuals(bool isInstalling)
     {
         var visuals = GetNodeOrNull<Node3D>("VisualsRoot") ?? GetNodeOrNull<MeshInstance3D>("MeshInstance3D");
         var cam = GetViewport().GetCamera3D();
         
-        if (visuals == null || cam == null) { UpdateVisuals(); return; }
+        if (visuals == null || cam == null) 
+        { 
+            _isTweening = false;
+            UpdateVisuals(); 
+            return; 
+        }
 
         _isTweening = true; 
+        
+        // Вектор к лицу игрока
         Vector3 directionToPlayer = (cam.GlobalPosition - GlobalPosition).Normalized();
-        Vector3 pullOffset = visuals.ToLocal(GlobalPosition + directionToPlayer * 0.2f);
+        
+        // Вычисляем точные глобальные координаты для анимации
+        Vector3 originalGlobalPos = GlobalTransform * _originalVisualsPos; // Где деталь должна стоять в мире
+        Vector3 pulledGlobalPos = originalGlobalPos + directionToPlayer * 0.25f; // Оттянутая позиция "в воздухе"
 
         var tween = CreateTween();
         tween.SetParallel(true); 
 
         if (isInstalling)
         {
-            visuals.Position = pullOffset;
+            // 1. Ставим деталь "в воздух"
+            visuals.GlobalPosition = pulledGlobalPos;
             UpdateVisuals(); 
-            SetMeshesTransparency(visuals, 1.0f); 
+            SetMeshesTransparency(visuals, 1.0f); // Полностью прозрачная
             
-            tween.TweenProperty(visuals, "position", Vector3.Zero, 0.3f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
-            TweenMeshesTransparency(tween, visuals, 0.0f, 0.3f); 
+            // 2. Летим на место
+            tween.TweenProperty(visuals, "global_position", originalGlobalPos, 0.3f)
+                 .SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+            TweenMeshesTransparency(tween, visuals, 0.0f, 0.3f); // Плавно проявляемся
             
-            // Завершение установки
+            // 3. Жесткий сброс после полета
             tween.Chain().TweenCallback(Callable.From(() => {
                 _isTweening = false;
+                visuals.Position = _originalVisualsPos; // ЖЕСТКИЙ ВОЗВРАТ В ЛОКАЛЬНЫЕ НУЛИ
                 UpdateContinuousAnimation(); 
             }));
         }
         else
         {
-            visuals.Position = Vector3.Zero;
+            // 1. Стартуем с родного места
+            visuals.Position = _originalVisualsPos;
             
-            tween.TweenProperty(visuals, "position", pullOffset, 0.2f).SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.Out);
-            TweenMeshesTransparency(tween, visuals, 1.0f, 0.2f); 
+            // 2. Летим в воздух
+            tween.TweenProperty(visuals, "global_position", pulledGlobalPos, 0.2f)
+                 .SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.Out);
+            TweenMeshesTransparency(tween, visuals, 1.0f, 0.2f); // Плавно растворяемся
             
-            // Завершение снятия
+            // 3. Превращаемся в призрака
             tween.Chain().TweenCallback(Callable.From(() => {
                 _isTweening = false;
-                visuals.Position = Vector3.Zero; 
-                SetMeshesTransparency(visuals, 0.0f); 
-                UpdateVisuals();
+                visuals.Position = _originalVisualsPos; // ЖЕСТКИЙ ВОЗВРАТ В ЛОКАЛЬНЫЕ НУЛИ
+                SetMeshesTransparency(visuals, 0.0f);   // Сброс прозрачности, чтобы призрак не был невидимым
+                UpdateVisuals(); // Команда отрисует призрака
             }));
         }
     }
@@ -377,15 +469,7 @@ public partial class Fastener : BasePart
             tool: toolName, target: PartName);
 
         // --- 2. ЗАМЕРЫ И ДЕФЕКТОВКА ---
-        if (currentItem is ToolData measureTool && measureTool.Category == ToolCategory.Measurement && IsMeasurable)
-        {
-            ActionLogger.Instance?.LogEvent(LogType.Action, $"Замер детали: {PartName}", tool: toolName, target: PartName);
-            
-            string verdict = (Mathf.Abs(CurrentWear - NominalWear) > 0.5f) ? "ТРЕБУЕТ ЗАМЕНЫ" : "В НОРМЕ";
-            // Результат замера на приборе показываем ВСЕГДА (это не подсказка, а данные с инструмента)
-            UIManager.Instance?.UpdatePrompt($"Замер [{PartName}]: {CurrentWear} мм (Номинал: {NominalWear} мм) | {verdict}");
-            return; 
-        }
+        if (HandleMeasurement(currentItem)) return;
 
         // --- 3. ЛОГИКА УСТАНОВКИ (Если на месте призрака) ---
         if (!IsInstalled)
@@ -408,6 +492,9 @@ public partial class Fastener : BasePart
                     IsDefective = !part.IsNewConsumable; // Если поставили старую деталь, помечаем износ
                     _hasBeenRemoved = false; 
                     CurrentTorque = (Type == InteractionType.Instant) ? MaxTorque : 0; 
+                    
+                    // --- ИСПРАВЛЕНИЕ: ЖЕСТКИЙ СБРОС В РЕЖИМ ЗАКРУЧИВАНИЯ ---
+                    _isTighteningTarget = true; 
                     
                     InventoryManager.Instance.RemoveActiveItem();
                     
@@ -440,6 +527,30 @@ public partial class Fastener : BasePart
         // --- 5. СНЯТИЕ БЫСТРОСЪЕМНЫХ ДЕТАЛЕЙ (Instant) ---
         if (Type == InteractionType.Instant)
         {
+            // --- ЛОГИКА ПРИКИПЕВШЕЙ ДЕТАЛИ (ЛОМ) ---
+            if (HasState(PartState.Stuck))
+            {
+                if (currentItem is ToolData crowbar && crowbar.Category == ToolCategory.Crowbar)
+                {
+                    RemoveState(PartState.Stuck);
+                    ActionLogger.Instance?.LogEvent(LogType.Action, $"Сорвано ломом: {PartName}", crowbar.ItemName, PartName);
+                    UIManager.Instance?.UpdatePrompt($"[УСПЕХ] {PartName} сорвана с места!", false);
+                    
+                    // Звук тяжелого удара/отрыва металла
+                    if (PartItemResource?.RemoveSound != null) 
+                        AudioManager.Instance?.PlayStream3D(PartItemResource.RemoveSound, GlobalPosition, 5f, 0.8f);
+                    
+                    return; // Деталь сорвана, но еще не снята в инвентарь (нужен второй клик)
+                }
+                else
+                {
+                    ActionLogger.Instance?.LogEvent(LogType.Warning, $"Попытка снять прикипевшую деталь без лома: {PartName}", toolName, PartName);
+                    if (GameManager.Instance.CurrentMode == SimulatorMode.Learning)
+                        UIManager.Instance?.UpdatePrompt("ПРИКИПЕЛО! Требуется лом (монтировка).", true);
+                    return;
+                }
+            }
+
             if (HasState(PartState.Rusted)) 
             { 
                 ActionLogger.Instance?.LogEvent(LogType.Warning, "Попытка снять заржавевшую деталь", toolName, PartName);
@@ -466,6 +577,13 @@ public partial class Fastener : BasePart
     {
         if (currentItem is ToolData measureTool && measureTool.Category == ToolCategory.Measurement && IsMeasurable)
         {
+            // --- Защита от повторного замера ---
+            if (ActionLogger.Instance != null && ActionLogger.Instance.HasActionOccurred(PartId, "Measured"))
+            {
+                UIManager.Instance?.UpdatePrompt("Замер уже был проведен.", true);
+                return true; 
+            }
+
             ActionLogger.Instance?.LogAction(PartId, "Measured");
             string verdict = (Mathf.Abs(CurrentWear - NominalWear) > 0.5f) ? "ТРЕБУЕТ ЗАМЕНЫ" : "В НОРМЕ";
             UIManager.Instance?.UpdatePrompt($"Замер [{PartName}]: {CurrentWear} мм (Номинал: {NominalWear} мм) | {verdict}");
@@ -488,13 +606,17 @@ public partial class Fastener : BasePart
             {
                 if (!CheckDependencies(true)) return;
 
-				if (PartItemResource != null && PartItemResource.InstallSound != null)
+                if (PartItemResource != null && PartItemResource.InstallSound != null)
                     AudioManager.Instance?.PlayStream3D(PartItemResource.InstallSound, GlobalPosition, 0f, (float)GD.RandRange(0.9, 1.1));
 
                 IsInstalled = true;
                 IsDefective = !part.IsNewConsumable; 
                 _hasBeenRemoved = false; 
                 CurrentTorque = (Type == InteractionType.Instant) ? MaxTorque : 0; 
+                
+                // --- ИСПРАВЛЕНИЕ: ЖЕСТКИЙ СБРОС В РЕЖИМ ЗАКРУЧИВАНИЯ ---
+                _isTighteningTarget = true; 
+                
                 InventoryManager.Instance.RemoveActiveItem();
                 
                 AnimateVisuals(true);
@@ -668,12 +790,14 @@ public partial class Fastener : BasePart
             // Запускаем 3D анимацию отлета (AnimateVisuals сама вызовет UpdateVisuals в конце)
             AnimateVisuals(false);
 
-            // Запускаем анимацию иконки в UI с задержкой (эффект "попадания в карман")
-            if (GiveItemOnRemoval)
+            if (GiveItemOnRemoval && PartItemResource?.Icon != null)
             {
                 GetTree().CreateTimer(0.15f).Timeout += () => {
-                    if (PartItemResource != null && PartItemResource.Icon != null)
-                        UIManager.Instance?.AnimateItemPickup(PartItemResource.Icon);
+                    // --- КРИТИЧЕСКИЙ ФИКС: Проверяем, жив ли UIManager и сама деталь ---
+                    if (IsInstanceValid(this) && UIManager.Instance != null && IsInstanceValid(UIManager.Instance))
+                    {
+                        UIManager.Instance.AnimateItemPickup(PartItemResource.Icon);
+                    }
                 };
             }
         }
@@ -713,6 +837,9 @@ public partial class Fastener : BasePart
         foreach (var part in BlockingParts)
             if (part != null && part.IsInstalled) return mode == SimulatorMode.Learning ? $"[ЗАКРЫТО] Мешает: {part.PartName}" : "";
 
+        if (HasState(PartState.Stuck)) 
+            return mode == SimulatorMode.Learning ? $"[!] ПРИКИПЕЛО (Нужен лом)" : "Требуется инструмент";
+
         // Текст состояний
         if (HasState(PartState.Rusted) || HasState(PartState.Painted)) 
             return mode == SimulatorMode.Learning ? "[!] ТРЕБУЕТСЯ ОБРАБОТКА ДЕТАЛИ" : "Требуется обработка";
@@ -735,7 +862,12 @@ public partial class Fastener : BasePart
     {
         if (!IsInstalled) return item is PartItemData part && Mathf.Abs(part.Size - Size) < 0.1f;
         if (item is ChemicalData) return true;
-        if (item is ToolData tool) return IsToolValid(tool, out _);
+        if (item is ToolData tool)
+        {
+            // --- ИСПРАВЛЕНИЕ: Разрешаем применять микрометр, если деталь можно замерять ---
+            if (tool.Category == ToolCategory.Measurement && IsMeasurable) return true;
+            return IsToolValid(tool, out _);
+        }
         return false;
     }
 }
