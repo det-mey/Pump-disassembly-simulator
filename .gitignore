@@ -48,3 +48,10 @@ packages/
 
 # Config
 Config/game_settings.json
+
+# Disp
+disp/
+
+# Other
+Other/
+.directory

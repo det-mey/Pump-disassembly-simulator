@@ -1,0 +1,79 @@
+[gd_scene format=3 uid="uid://d2sl0ddjoh1ee"]
+
+[ext_resource type="Script" uid="uid://cr57i4e5sn6td" path="res://Scripts/Mechanics/PickableItem.cs" id="1_trxvo"]
+[ext_resource type="PackedScene" uid="uid://ds4hc0gqfoutv" path="res://Assets/Models/two-_arm_parallel_puller.glb" id="2_q3rup"]
+[ext_resource type="Texture2D" uid="uid://c1us0mo4e1wnv" path="res://Assets/Models/Ключик_0.png" id="3_ql7ub"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e2sd7"]
+size = Vector3(0.18019104, 0.32982635, 0.04019165)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cf4ka"]
+albedo_color = Color(0.796243, 0.796243, 0.796243, 1)
+metallic = 1.0
+metallic_texture = ExtResource("3_ql7ub")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jrgar"]
+albedo_color = Color(0.7411765, 0, 0, 1)
+metallic = 1.0
+metallic_texture = ExtResource("3_ql7ub")
+
+[node name="Винтовой съемник" type="RigidBody3D" unique_id=1482186759]
+script = ExtResource("1_trxvo")
+metadata/_custom_type_script = "uid://cr57i4e5sn6td"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=749834040]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.014305115, 0.031505585, -0.00288032)
+shape = SubResource("BoxShape3D_e2sd7")
+
+[node name="Sketchfab_Scene" parent="." unique_id=2051014878 instance=ExtResource("2_q3rup")]
+transform = Transform3D(0.02, 0, 0, 0, 0.02, 0, 0, 0, 0.02, 0, 0, 0)
+
+[node name="Object_2" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="0" unique_id=2045801557]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_3" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="1" unique_id=668406383]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_4" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="2" unique_id=1148787802]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_5" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="3" unique_id=1734916500]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_6" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="4" unique_id=1217560402]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_7" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="5" unique_id=1118266909]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_8" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="6" unique_id=223583364]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_9" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="7" unique_id=1284229689]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_10" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="8" unique_id=1681304271]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_11" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="9" unique_id=1593201252]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_12" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="10" unique_id=188181076]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_13" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="11" unique_id=1300481656]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_14" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="12" unique_id=1629468653]
+surface_material_override/0 = SubResource("StandardMaterial3D_jrgar")
+
+[node name="Object_15" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="13" unique_id=182148516]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_16" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="14" unique_id=1508059706]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[node name="Object_17" parent="Sketchfab_Scene/Sketchfab_model/Two-Arm Parallel Puller_stl_cleaner_materialmerger_gles" parent_id_path=PackedInt32Array(2051014878, 1158944694) index="15" unique_id=121699892]
+surface_material_override/0 = SubResource("StandardMaterial3D_cf4ka")
+
+[editable path="Sketchfab_Scene"]

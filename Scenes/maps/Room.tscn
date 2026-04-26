@@ -31,6 +31,8 @@
 [ext_resource type="Texture2D" uid="uid://bc8qxokqakv0a" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_COL_2K.jpg" id="29_e47cb"]
 [ext_resource type="Texture2D" uid="uid://byyopo37v17i5" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_REFL_2K_jpg-CityStreetAsphaltGenericClean001_GLOSS_2K_jpg.png" id="30_rw41v"]
 [ext_resource type="Texture2D" uid="uid://c6i5x1ih1jwjy" path="res://Assets/Models/Комната_текстурированная_CityStreetAsphaltGenericClean001_NRM_2K.jpg" id="31_vnyn1"]
+[ext_resource type="PackedScene" uid="uid://d2sl0ddjoh1ee" path="res://Scenes/Tools/Винтовой_съемник.tscn" id="32_rw41v"]
+[ext_resource type="Resource" uid="uid://duxs67i7f6sad" path="res://Resources/Tools/Винтовой_съемник.tres" id="33_vnyn1"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cj56a"]
 sky_horizon_color = Color(0.005005935, 0.0051382263, 0.005408868, 1)
@@ -103,7 +105,7 @@ transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.5
 ItemResource = ExtResource("6_e47cb")
 
 [node name="Screwdriver_1" parent="." unique_id=1530035773 instance=ExtResource("7_rw41v")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24070966, -0.51317656, -2.8929446)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09343058, -0.51317656, -2.8929446)
 ItemResource = ExtResource("8_vnyn1")
 
 [node name="Drill_1" parent="." unique_id=2022278888 instance=ExtResource("9_xyvo3")]
@@ -114,15 +116,15 @@ ItemResource = ExtResource("10_ovwyc")
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -1.4885876, -0.81121415, 0.055698633)
 
 [node name="Ключ_шестигранный_8мм" parent="." unique_id=1726792624 instance=ExtResource("13_qe3qs")]
-transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.10351437, -0.51076555, -2.7517152)
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.33788672, -0.51076555, -2.7517152)
 ItemResource = ExtResource("14_qk1n4")
 
 [node name="Ключ_шестигранный_10мм" parent="." unique_id=2069185414 instance=ExtResource("15_is7aj")]
-transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.21973586, -0.5131767, -2.8440094)
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.4541082, -0.5131767, -2.8440094)
 ItemResource = ExtResource("16_ylcob")
 
 [node name="Ключ_шестигранный_14мм" parent="." unique_id=1581108248 instance=ExtResource("17_g83hi")]
-transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.35859257, -0.51317656, -2.9491978)
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.5929649, -0.51317656, -2.9491978)
 ItemResource = ExtResource("18_4lje5")
 
 [node name="Монтировка" parent="." unique_id=989579083 instance=ExtResource("19_q17ji")]
@@ -162,3 +164,7 @@ mesh = SubResource("BoxMesh_ovwyc")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1783815253]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0845687, -1.3208612, 0.05584061)
 shape = SubResource("BoxShape3D_3354g")
+
+[node name="Винтовой съемник" parent="." unique_id=1482186759 instance=ExtResource("32_rw41v")]
+transform = Transform3D(1, 0, 0, 0, -0.0335738, 0.99943626, 0, -0.99943626, -0.0335738, 0.24143022, -0.38156506, -2.7642164)
+ItemResource = ExtResource("33_vnyn1")

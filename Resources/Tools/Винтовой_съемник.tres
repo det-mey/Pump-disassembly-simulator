@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ToolData" format=3 uid="uid://duxs67i7f6sad"]
+
+[ext_resource type="Texture2D" uid="uid://b4rlivm7sid4i" path="res://Assets/Icons/Tools/WheelPuller.png" id="1_7phkv"]
+[ext_resource type="PackedScene" uid="uid://d2sl0ddjoh1ee" path="res://Scenes/Tools/Винтовой_съемник.tscn" id="1_e5e6y"]
+[ext_resource type="Script" uid="uid://w36tayqkc2x7" path="res://Scripts/Mechanics/ToolData.cs" id="3_b02cl"]
+
+[resource]
+script = ExtResource("3_b02cl")
+Category = 5
+Size = 0.0
+ItemName = "Винтовой съемник"
+Description = "Сложный интрумент для демонтажа рабочего колеса (турбины) с вала."
+Icon = ExtResource("1_7phkv")
+WorldPrefab = ExtResource("1_e5e6y")
+HandPrefab = ExtResource("1_e5e6y")
+AnimPosOffset = Vector3(-0.1, 0, 0)
+metadata/_custom_type_script = "uid://w36tayqkc2x7"

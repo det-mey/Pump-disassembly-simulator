@@ -53,6 +53,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_y28xr")
 
 [node name="Ножка_крышки_насоса" type="RigidBody3D" unique_id=1489708182]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_4p0s3")
 metadata/_custom_type_script = "uid://cr57i4e5sn6td"

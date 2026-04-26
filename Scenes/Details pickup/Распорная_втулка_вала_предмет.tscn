@@ -51,7 +51,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_mhua6")
 
 [node name="Распорная_втулка_вала_предмет" type="RigidBody3D" unique_id=659113722]
-transform = Transform3D(-5.721189e-18, -7.4891e-31, 1, 6.310887e-30, 1, 6.409919e-31, -1, -3.155444e-30, 2.163234e-16, 0, 0, 0)
+transform = Transform3D(-1.3113416e-07, -2.2467291e-30, 3, 1.893266e-29, 3, 2.24673e-30, -3, 1.893266e-29, -1.3113416e-07, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_5ym3n")
 metadata/_custom_type_script = "uid://cr57i4e5sn6td"

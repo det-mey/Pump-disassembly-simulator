@@ -51,7 +51,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_8p4x1")
 
 [node name="Главный_вал" type="RigidBody3D" unique_id=762545670]
-transform = Transform3D(-3.491481e-15, -6.982962e-15, -1, 0, -1, 6.982962e-15, -1, 2.438088e-29, 3.491481e-15, 0, 0, 0)
+transform = Transform3D(8.742278e-08, -2.1608666e-14, -2, -1.7484555e-07, -2, 1.3965924e-14, -2, 1.7484555e-07, -8.742278e-08, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_dcsle")
 metadata/_custom_type_script = "uid://cr57i4e5sn6td"

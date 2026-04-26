@@ -181,7 +181,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_02eqa")
 
 [node name="Рабочее_колесо_Крыльчатка" type="RigidBody3D" unique_id=649024508]
-transform = Transform3D(5.721189e-18, 0.2554217, -0.9668298, 2.060474e-27, 0.9668298, 0.2554217, 1, -1.461316e-18, 5.531415e-18, 0, 0, 0)
+transform = Transform3D(-8.742278e-08, 0.5108434, -1.9336594, 4.1209477e-27, 1.9336594, 0.5108434, 2, 2.2329674e-08, -8.452294e-08, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_6sua7")
 metadata/_custom_type_script = "uid://cr57i4e5sn6td"

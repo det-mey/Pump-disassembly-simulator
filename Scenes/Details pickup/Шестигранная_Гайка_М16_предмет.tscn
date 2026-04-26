@@ -51,6 +51,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_gcm00")
 
 [node name="Имбусовый_Болт_М12_предмет" type="RigidBody3D" unique_id=914966147]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_8s43m")
 metadata/_custom_type_script = "uid://cr57i4e5sn6td"

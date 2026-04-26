@@ -185,7 +185,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_843xs")
 
 [node name="Спиральный_корпус_Улитка" type="StaticBody3D" unique_id=1609031219]
-transform = Transform3D(1, 0, 0, 0, -3.491481e-15, -1, 0, 1, -3.491481e-15, 0, 0, 0)
+transform = Transform3D(2, 0, 0, 0, -8.742278e-08, -2, 0, 2, -8.742278e-08, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_rbpen")
 Type = 1

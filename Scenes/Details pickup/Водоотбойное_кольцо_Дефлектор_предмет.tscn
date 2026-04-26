@@ -51,7 +51,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_r2e8p")
 
 [node name="Водоотбойное_кольцо_Дефлектор_предмет" type="RigidBody3D" unique_id=147654622]
-transform = Transform3D(-4.371139e-08, 1, -4.371139e-08, 0, -4.371139e-08, -1, -1, -4.371139e-08, 1.9106855e-15, 0, 0, 0)
+transform = Transform3D(-1.3113416e-07, 3, -1.3113416e-07, 0, -1.3113416e-07, -3, -3, -1.3113416e-07, 5.7320566e-15, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_kg2en")
 metadata/_custom_type_script = "uid://cr57i4e5sn6td"

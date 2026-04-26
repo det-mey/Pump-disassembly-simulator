@@ -1,8 +1,13 @@
 [gd_scene format=4 uid="uid://bvoub8e7ql0ss"]
 
-[ext_resource type="Material" uid="uid://caxb0ph8vvswi" path="res://Assets/Materials/metall_shader_nut.material" id="1_cxitc"]
 [ext_resource type="Script" uid="uid://cibmj5gsvofqt" path="res://Scripts/Mechanics/Fastener.cs" id="1_jown7"]
-[ext_resource type="Material" path="res://Assets/Materials/metall_shader.material" id="2_jown7"]
+[ext_resource type="Script" uid="uid://cat5dhp5lnxdp" path="res://Scripts/Mechanics/InteractionRule.cs" id="2_cxitc"]
+
+[sub_resource type="Resource" id="Resource_jown7"]
+script = ExtResource("2_cxitc")
+AllowedTool = 5
+RequiredSize = 0.0
+metadata/_custom_type_script = "uid://cat5dhp5lnxdp"
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_vbd5t"]
 height = 0.07
@@ -182,7 +187,9 @@ shadow_mesh = SubResource("ArrayMesh_02eqa")
 
 [node name="Рабочее_колесо_Крыльчатка" type="StaticBody3D" unique_id=1423912503]
 transform = Transform3D(5.721189e-18, 0.2554217, -0.9668298, 2.060474e-27, 0.9668298, 0.2554217, 1, -1.461316e-18, 5.531415e-18, 0, 0, 0)
+collision_layer = 3
 script = ExtResource("1_jown7")
+ValidTools = Array[ExtResource("2_cxitc")]([SubResource("Resource_jown7")])
 Type = 1
 Size = 0.0
 MaxTorque = 0.0
@@ -200,20 +207,20 @@ shape = SubResource("CylinderShape3D_vbd5t")
 
 [node name="Revoluc1" type="MeshInstance3D" parent="VisualsRoot" unique_id=1469394080]
 transform = Transform3D(1, 2.0679515e-25, -8.271806e-25, 0, 1, -8.0831444e-36, 0, -8.0831466e-36, 1, 0, 0, 0)
-material_override = ExtResource("1_cxitc")
+material_override = SubResource("StandardMaterial3D_xfais")
 mesh = SubResource("ArrayMesh_bwbyo")
 
 [node name="Revoluc2" type="MeshInstance3D" parent="VisualsRoot" unique_id=1085338871]
 transform = Transform3D(1, 2.0679515e-25, -8.271806e-25, 0, 1, -8.0831444e-36, 0, -8.0831466e-36, 1, 0, 0, 0)
-material_override = ExtResource("2_jown7")
+material_override = SubResource("StandardMaterial3D_e0nmj")
 mesh = SubResource("ArrayMesh_0qrsu")
 
 [node name="Revoluc3" type="MeshInstance3D" parent="VisualsRoot" unique_id=1045541444]
 transform = Transform3D(1, 2.0679515e-25, -8.271806e-25, 0, 1, -8.0831444e-36, 0, -8.0831466e-36, 1, 0, 0, 0)
-material_override = ExtResource("2_jown7")
+material_override = SubResource("StandardMaterial3D_5a8kd")
 mesh = SubResource("ArrayMesh_rc0mq")
 
 [node name="Combinar1" type="MeshInstance3D" parent="VisualsRoot" unique_id=579722822]
 transform = Transform3D(1, 2.0679515e-25, -8.271806e-25, 0, 1, -8.0831444e-36, 0, -8.0831466e-36, 1, 0, 0, 0)
-material_override = ExtResource("2_jown7")
+material_override = SubResource("StandardMaterial3D_pymo4")
 mesh = SubResource("ArrayMesh_omeub")

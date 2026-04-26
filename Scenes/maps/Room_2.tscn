@@ -61,6 +61,8 @@
 [ext_resource type="Resource" uid="uid://gcg5nwmiwi5s" path="res://Resources/Details/Стяжной_Винт_М16_улитки.tres" id="59_l8lsv"]
 [ext_resource type="PackedScene" uid="uid://c4425wxjuyexm" path="res://Scenes/Details pickup/Шестигранная_Гайка_М16_предмет.tscn" id="60_r0wrs"]
 [ext_resource type="Resource" uid="uid://c7dmv4o4dun4" path="res://Resources/Details/Шестигранная_Гайка_М16.tres" id="61_wlvcq"]
+[ext_resource type="PackedScene" uid="uid://d2sl0ddjoh1ee" path="res://Scenes/Tools/Винтовой_съемник.tscn" id="62_yaxtj"]
+[ext_resource type="Resource" uid="uid://duxs67i7f6sad" path="res://Resources/Tools/Винтовой_съемник.tres" id="63_d4pww"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cj56a"]
 sky_horizon_color = Color(0.005005935, 0.0051382263, 0.005408868, 1)
@@ -133,7 +135,7 @@ transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.5
 ItemResource = ExtResource("7_qghfw")
 
 [node name="Screwdriver_1" parent="." unique_id=1530035773 instance=ExtResource("8_a4byg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24070966, -0.51317656, -2.8929446)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05454603, -0.51317656, -2.8929446)
 ItemResource = ExtResource("9_4tv2q")
 
 [node name="Drill_1" parent="." unique_id=2022278888 instance=ExtResource("10_icslu")]
@@ -144,15 +146,15 @@ ItemResource = ExtResource("11_g1i2n")
 transform = Transform3D(-5.2453668e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.2453668e-08, -1.4885876, -0.81121415, 0.055698633)
 
 [node name="Ключ_шестигранный_8мм" parent="." unique_id=1726792624 instance=ExtResource("13_c66kx")]
-transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.10351437, -0.51076555, -2.7517152)
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.36446416, -0.51076555, -2.7517152)
 ItemResource = ExtResource("14_5km25")
 
 [node name="Ключ_шестигранный_10мм" parent="." unique_id=2069185414 instance=ExtResource("15_uflu7")]
-transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.21973586, -0.5131767, -2.8440094)
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.48068565, -0.5131767, -2.8440094)
 ItemResource = ExtResource("16_w3n4f")
 
 [node name="Ключ_шестигранный_14мм" parent="." unique_id=1581108248 instance=ExtResource("17_nqjni")]
-transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.35859257, -0.51317656, -2.9491978)
+transform = Transform3D(1.9106855e-15, -4.371139e-08, 1, -1, -4.371139e-08, 0, 4.371139e-08, -1, -4.371139e-08, -0.61954236, -0.51317656, -2.9491978)
 ItemResource = ExtResource("18_uuv0s")
 
 [node name="Монтировка" parent="." unique_id=989579083 instance=ExtResource("19_31fx8")]
@@ -379,3 +381,7 @@ ItemResource = ExtResource("61_wlvcq")
 [node name="Имбусовый_Болт_М12_предмет14" parent="." unique_id=1937079130 instance=ExtResource("60_r0wrs")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9702256, -0.543811, 2.6985233)
 ItemResource = ExtResource("61_wlvcq")
+
+[node name="Винтовой съемник" parent="." unique_id=1482186759 instance=ExtResource("62_yaxtj")]
+transform = Transform3D(1, 0, 0, 0, -0.0335738, 0.99943626, 0, -0.99943626, -0.0335738, 0.24143022, -0.38156506, -2.7642164)
+ItemResource = ExtResource("63_d4pww")

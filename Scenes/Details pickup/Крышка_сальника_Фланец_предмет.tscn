@@ -50,7 +50,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_5ibsq")
 
 [node name="Крышка_сальника_Фланец_предмет" type="RigidBody3D" unique_id=855518130]
-transform = Transform3D(1, 0, 0, 0, 1.047444e-14, 1, 0, -1, 1.047444e-14, 0, 0, 0)
+transform = Transform3D(2, 0, 0, 0, -8.742278e-08, 2, 0, -2, -8.742278e-08, 0, 0, 0)
 collision_layer = 3
 script = ExtResource("1_e7fso")
 metadata/_custom_type_script = "uid://cr57i4e5sn6td"
