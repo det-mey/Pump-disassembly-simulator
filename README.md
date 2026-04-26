@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Godot-4.x-478CBF?logo=godotengine&logoColor=white" alt="Godot 4.x"/>
   <img src="https://img.shields.io/badge/C%23-.NET-239120?logo=csharp&logoColor=white" alt="C#"/>
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"/>
-  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue" alt="Platform"/>
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-black" alt="Platform"/>
 </p>
 
 ---
